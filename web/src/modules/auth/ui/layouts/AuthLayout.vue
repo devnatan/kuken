@@ -1,20 +1,22 @@
 <template>
   <div class="root">
-    <div class="left_side">
-      <TheLogo
-        black
+    <div class="form">
+      <img
+        src="/img/icon-color.svg"
         class="logo"
-      />
+        alt="Icon"
+      >
       <div class="content">
         <slot />
       </div>
     </div>
-    <div class="right_side" />
+    <div class="background" />
   </div>
 </template>
 <script setup lang="ts">
 import TheLogo from "@/modules/platform/ui/components/TheLogo.vue"
 </script>
+
 <style lang="scss" scoped>
 // TODO remove it from here
 @import "@/assets/styles/abstracts/variables";
@@ -31,17 +33,23 @@ import TheLogo from "@/modules/platform/ui/components/TheLogo.vue"
 	height: 100%;
 }
 
-.left_side {
-	align-items: normal;
-	z-index: 1;
-	background: var(--kt-background-body);
-	position: relative;
-	left: 0;
-	height: 100%;
-	width: 30%;
-	max-width: 30%;
-	box-shadow: RGB(0 0 0 / 24%) 4px 0 8px 0;
-	padding: 4.8rem 7.2rem;
+.form {
+    align-items: normal;
+    z-index: 1;
+    background: #fff;
+    position: relative;
+    left: 0;
+    height: 100%;
+    margin: 0 2.4% 128px 10%;
+    width: 25%;
+    max-width: 30%;
+    padding: 0 7.2rem 0 7.2rem;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: rgba(0, 0, 0, .08) 3px 3px 2px 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
 	@media (max-width: map-get($breakpoints, "medium")) {
 		& {
@@ -52,9 +60,10 @@ import TheLogo from "@/modules/platform/ui/components/TheLogo.vue"
 	}
 
 	.logo {
-		max-width: 64px;
 		position: relative;
-		border-radius: 8px;
+        height: auto;
+        max-width: 128px;
+        left: -32px;
 	}
 
 	.content {
@@ -62,29 +71,15 @@ import TheLogo from "@/modules/platform/ui/components/TheLogo.vue"
 	}
 }
 
-.right_side {
-	position: relative;
-	flex: 1;
-	display: flex;
-	height: 100%;
-	flex-direction: row;
-	align-items: flex-end;
-	overflow: hidden;
-	background-size: cover;
-	background-repeat: no-repeat;
-	background-position: center;
-	background-image: url("@/assets/media/illustrations/2601286834.jpg");
-	padding: 24px 48px;
-
-	&:hover .game_name,
-	&:hover .version_info {
-		opacity: 1;
-	}
-
-	@media (max-width: map-get($breakpoints, "medium")) {
-		& {
-			display: none;
-		}
-	}
+.background {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    mask-size: 40px;
+    mask-repeat: repeat;
+    background-color: rgba(255,101,35, 0.12);
+    mask-image: url('/img/icon-color.svg');
 }
 </style>

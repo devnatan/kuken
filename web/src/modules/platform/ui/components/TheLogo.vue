@@ -1,6 +1,6 @@
 <template>
   <img
-    alt="Katan"
+    alt="Kuken Logo"
     aria-label="Logo"
     :src="src"
   >
@@ -8,6 +8,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
 
-const props = defineProps<{ black?: boolean }>()
-const src = computed(() => `/img/${props.black ? "logo-black" : "logo"}.svg`)
+const props = defineProps<{ color?: boolean, grayscale?: boolean }>()
+const src = computed(() => `/img/${props.color ? "logo-color" : props.grayscale ? "logo-grayscale" : "logo"}.svg`)
 </script>

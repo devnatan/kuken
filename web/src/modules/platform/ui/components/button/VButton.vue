@@ -36,6 +36,7 @@ type Props = {
   outlined?: true
   flat?: true
   block?: true
+    // eslint-disable-next-line vue/require-default-prop
   to?: RouteLocationRaw
 }
 

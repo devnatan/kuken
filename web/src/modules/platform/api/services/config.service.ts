@@ -1,7 +1,7 @@
 import { isUndefined } from "@/utils"
 
 class ConfigService {
-    public readonly appName = "Katan"
+    public readonly appName = "Kuken"
     public readonly appVersion = import.meta.env.VITE_APP_VERSION
     public readonly appWebsite = this.value("$VITE_KATAN_WEBSITE")
     public readonly apiUrl = this.value("$VITE_KATAN_API")

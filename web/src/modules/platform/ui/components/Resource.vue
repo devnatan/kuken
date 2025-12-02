@@ -12,7 +12,9 @@
       v-if="includeRefreshButton"
       :class="$style.button"
       @click="load"
-    >empty-state.refresh</VButton>
+    >
+      empty-state.refresh
+    </VButton>
   </EmptyState>
   <slot
     v-else

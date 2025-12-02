@@ -3,13 +3,17 @@
   -webkit-appearance: none;
   outline: none;
   padding: 0 8px;
-  height: 37px;
+  height: 42px;
   font-weight: 500;
   font-size: 14px;
   width: 100%;
   border-radius: 8px;
   letter-spacing: 0.25px;
-  background-color: var(--kt-background-surface);
+  border: 1px solid var(--kt-content-neutral);
+
+  &:hover {
+    border-color: var(--kt-content-neutral-low);
+  }
 
   &[readonly] {
     user-select: none;
@@ -50,5 +54,9 @@
 
   &[disabled] {
     background-color: var(--kt-background-surface-high);
+  }
+
+  label > input {
+    margin-top: 0.4rem;
   }
 }

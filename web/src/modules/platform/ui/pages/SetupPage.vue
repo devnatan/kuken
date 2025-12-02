@@ -24,7 +24,9 @@
     <VContainer>
       <h2
         class="title"
-      >setup.title'</h2>
+      >
+        setup.title'
+      </h2>
       <h4>Let's get you up and running!</h4>
     </VContainer>
   </div>

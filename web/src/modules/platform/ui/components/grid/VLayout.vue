@@ -11,7 +11,7 @@ import type { CSSProperties } from "vue"
 
 type Gap = "none" | "xs" | "sm" | "md" | "lg"
 type Props = {
-  direction: "vertical" | "horizontal"
+  direction?: "vertical" | "horizontal"
   gap?: Gap
 }
 
