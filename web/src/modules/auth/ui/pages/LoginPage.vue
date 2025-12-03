@@ -4,24 +4,13 @@
     <p :class="$style.subtitle">
       Enter your credentials to access your account.
     </p>
-    <VAlert
-      v-if="errorTranslationText"
-      :class="$style.alert"
-      variant="error"
-    >
-      <template #description>
-        Deu ruim (errorTranslationText)
-      </template>
-    </VAlert>
-    <VForm
-      @submit.prevent="performLogin"
-    >
+    <VForm @submit.prevent="performLogin">
       <VFieldSet>
         <VLabel>
           Email
           <VInput
             v-model="credentials.email"
-            type="text"
+            type="email"
             required="true"
             autocomplete="email"
           />
@@ -36,6 +25,11 @@
           />
         </VLabel>
       </VFieldSet>
+      <p
+        v-if="errorTranslationText"
+        :class="$style.error"
+        v-text="errorTranslationText"
+      />
       <VLayout gap="sm">
         <VButton
           type="submit"
@@ -47,12 +41,12 @@
           Log In
         </VButton>
         <VButton
-          v-if="currentAccountName"
+          v-if="currentAccount"
           variant="default"
           block
           @click="navigateToIndex"
         >
-          Continue as Natan
+          Continue as {{ currentAccount }}
         </VButton>
       </VLayout>
     </VForm>
@@ -63,7 +57,6 @@ import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 import VForm from "@/modules/platform/ui/components/form/VForm.vue"
 import VLabel from "@/modules/platform/ui/components/form/VLabel.vue"
 import VFieldSet from "@/modules/platform/ui/components/form/VFieldSet.vue"
-import VAlert from "@/modules/platform/ui/components/alert/VAlert.vue"
 import AuthLayout from "@/modules/auth/ui/layouts/AuthLayout.vue"
 import VInput from "@/modules/platform/ui/components/form/VInput.vue"
 import { reactive, ref } from "vue"
@@ -79,14 +72,14 @@ const router = useRouter()
 const credentials = reactive({ email: "", password: "" })
 const errorTranslationText = ref<string | null>(null)
 const loginBeingPerformed = ref<boolean>(false)
-const currentAccountName = useAccountsStore().account?.username
+const currentAccount = useAccountsStore().account?.email
 
 // Functions
 function performLogin() {
-    if (loginBeingPerformed.value) return;
+    if (loginBeingPerformed.value) return
 
-    loginBeingPerformed.value = true;
-    errorTranslationText.value = null;
+    loginBeingPerformed.value = true
+    errorTranslationText.value = null
 
     authService
         .login(credentials.email, credentials.password)
@@ -94,12 +87,12 @@ function performLogin() {
         .catch((error: HttpError) => {
             errorTranslationText.value =
                 error.code === "ERR_NETWORK"
-                    ? "auth.login.network-error"
-                    : `error.${error.code}`;
+                    ? "Unable to connect to the authentication server."
+                    : `error.${error.code}`
         })
         .finally(() => {
-            loginBeingPerformed.value = false;
-        });
+            loginBeingPerformed.value = false
+        })
 }
 
 function navigateToIndex() {
@@ -117,11 +110,11 @@ form {
 }
 
 .loginButton {
-	margin-top: var(--space-lg);
+    margin-top: var(--space-lg);
 }
 
 .alert {
-	margin-bottom: 2.4rem !important;
+    margin-bottom: 2.4rem !important;
 }
 
 .subtitle {
@@ -131,4 +124,8 @@ form {
     user-select: none;
 }
 
+.error {
+    color: var(--kt-content-negative);
+    margin-top: -0.8rem;
+}
 </style>

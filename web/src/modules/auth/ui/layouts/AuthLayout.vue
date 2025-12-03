@@ -13,10 +13,6 @@
     <div class="background" />
   </div>
 </template>
-<script setup lang="ts">
-import TheLogo from "@/modules/platform/ui/components/TheLogo.vue"
-</script>
-
 <style lang="scss" scoped>
 // TODO remove it from here
 @import "@/assets/styles/abstracts/variables";
@@ -41,7 +37,7 @@ import TheLogo from "@/modules/platform/ui/components/TheLogo.vue"
     left: 0;
     height: 100%;
     margin: 0 2.4% 128px 10%;
-    width: 25%;
+    min-width: 30%;
     max-width: 30%;
     padding: 0 7.2rem 0 7.2rem;
     border-bottom-left-radius: 20px;

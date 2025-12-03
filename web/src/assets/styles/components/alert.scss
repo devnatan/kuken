@@ -38,7 +38,7 @@ $shadow: 1.5px;
 	font-weight: 400;
 	padding: $base-padding $base-padding $base-padding 0;
 	user-select: none;
-	color: var(--kt-content-neutral-high);
+	color: #fff;
 }
 
 .alert__title + .alert__description {
@@ -46,11 +46,11 @@ $shadow: 1.5px;
 }
 
 .alert--error {
-	background-color: var(--kt-content-negative-overlay);
+	background-color: var(--kt-content-negative);
 	border-color: var(--kt-content-negative-overlay);
 
 	.alert__icon {
-		color: var(--kt-content-negative);
+		color: #fff;
 	}
 }
 
