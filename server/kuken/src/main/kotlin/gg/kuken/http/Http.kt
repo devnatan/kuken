@@ -45,10 +45,16 @@ internal object Http : KoinComponent {
         }
     }
 
-    private fun Application.registerHttpModules() {
+    private fun Application.configureAPIDocs() {
         routing {
-            openAPI(path="openapi", swaggerFile = "openapi/generated.json")
+            openAPI(path = "openapi", swaggerFile = "openapi/generated.json")
             swaggerUI(path = "swagger", swaggerFile = "openapi/generated.json")
+        }
+    }
+
+    private fun Application.registerHttpModules() {
+        if (appConfig.devMode) {
+            configureAPIDocs()
         }
 
         for (module in createHttpModules().sortedByDescending(HttpModule::priority)) {
