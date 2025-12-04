@@ -1,8 +1,8 @@
 package gg.kuken.http
 
 import gg.kuken.KukenConfig
-import gg.kuken.features.account.http.AccountHttpModule
-import gg.kuken.features.auth.http.AuthHttpModule
+import gg.kuken.feature.account.http.AccountHttpModule
+import gg.kuken.feature.auth.http.AuthHttpModule
 import gg.kuken.http.websocket.WebSocketManager
 import io.ktor.server.application.Application
 import io.ktor.server.cio.CIO

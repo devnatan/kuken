@@ -2,14 +2,13 @@ package gg.kuken
 
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.ConfigParseOptions
-import com.typesafe.config.ConfigParseable
 import gg.kuken.core.EventDispatcher
 import gg.kuken.core.EventDispatcherImpl
 import gg.kuken.core.security.BcryptHash
 import gg.kuken.core.security.Hash
-import gg.kuken.features.account.AccountDI
-import gg.kuken.features.auth.AuthDI
-import gg.kuken.features.identity.IdentityGeneratorService
+import gg.kuken.feature.account.AccountDI
+import gg.kuken.feature.auth.AuthDI
+import gg.kuken.feature.identity.IdentityGeneratorService
 import gg.kuken.http.Http
 import jakarta.validation.Validation
 import jakarta.validation.Validator
@@ -22,8 +21,6 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.Slf4jSqlDebugLogger
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.vendors.DatabaseDialect
-import org.jetbrains.exposed.sql.vendors.currentDialect
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import java.io.File
