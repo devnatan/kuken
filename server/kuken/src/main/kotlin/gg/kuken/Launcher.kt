@@ -8,7 +8,7 @@ import gg.kuken.core.security.BcryptHash
 import gg.kuken.core.security.Hash
 import gg.kuken.feature.account.AccountDI
 import gg.kuken.feature.auth.AuthDI
-import gg.kuken.feature.identity.IdentityGeneratorService
+import gg.kuken.feature.account.IdentityGeneratorService
 import gg.kuken.http.Http
 import jakarta.validation.Validation
 import jakarta.validation.Validator

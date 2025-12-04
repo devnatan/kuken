@@ -8,7 +8,7 @@ import gg.kuken.feature.account.entity.toDomain
 import kotlinx.datetime.Clock
 import gg.kuken.feature.account.model.Account
 import gg.kuken.feature.account.repository.AccountRepository
-import gg.kuken.feature.identity.IdentityGeneratorService
+import gg.kuken.feature.account.IdentityGeneratorService
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
