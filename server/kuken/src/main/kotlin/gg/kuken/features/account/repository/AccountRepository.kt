@@ -13,13 +13,13 @@ internal interface AccountRepository {
 
     suspend fun findById(id: Uuid): AccountEntity?
 
-    suspend fun findByUsername(username: String): AccountEntity?
+    suspend fun findByEmail(email: String): AccountEntity?
 
-    suspend fun findHashByUsername(username: String): String?
+    suspend fun findHashByEmail(email: String): String?
 
     suspend fun addAccount(account: Account, hash: String)
 
     suspend fun deleteAccount(id: Uuid)
 
-    suspend fun existsByUsername(username: String): Boolean
+    suspend fun existsByEmail(email: String): Boolean
 }

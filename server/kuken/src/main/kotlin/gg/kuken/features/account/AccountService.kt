@@ -18,11 +18,11 @@ interface AccountService {
 
     suspend fun getAccount(id: Uuid): Account?
 
-    suspend fun getAccountByUsername(username: String): Account?
+    suspend fun getAccountByEmail(email: String): Account?
 
-    suspend fun getAccountAndHash(username: String): Pair<Account, String>?
+    suspend fun getAccountAndHash(email: String): Pair<Account, String>?
 
-    suspend fun createAccount(username: String, displayName: String?, email: String, password: String): Account
+    suspend fun createAccount(email: String, password: String): Account
 
     suspend fun deleteAccount(id: Uuid)
 }
@@ -42,38 +42,35 @@ internal class AccountServiceImpl(
         return accountsRepository.findById(id)?.toDomain()
     }
 
-    override suspend fun getAccountByUsername(username: String): Account? {
-        return accountsRepository.findByUsername(username)?.toDomain()
+    override suspend fun getAccountByEmail(email: String): Account? {
+        return accountsRepository.findByEmail(email)?.toDomain()
     }
 
-    override suspend fun getAccountAndHash(username: String): Pair<Account, String>? {
+    override suspend fun getAccountAndHash(email: String): Pair<Account, String>? {
         // TODO optimize it
-        val account = accountsRepository.findByUsername(username)?.toDomain() ?: return null
-        val hash = accountsRepository.findHashByUsername(username) ?: return null
+        val account = accountsRepository.findByEmail(email)?.toDomain() ?: return null
+        val hash = accountsRepository.findHashByEmail(email) ?: return null
 
         return account to hash
     }
 
     override suspend fun createAccount(
-        username: String,
-        displayName: String?,
         email: String,
         password: String
     ): Account {
-        if (accountsRepository.existsByUsername(username)) {
+        if (accountsRepository.existsByEmail(email)) {
             error("Conflict") // TODO Conflict exception
         }
 
         val now = Clock.System.now()
         val account = Account(
             id = identityGeneratorService.generate(),
-            displayName = displayName,
-            username = username,
+            displayName = null,
             email = email,
             createdAt = now,
             updatedAt = now,
             lastLoggedInAt = null,
-            avatar = null
+            avatar = null,
         )
 
         val hash = hashAlgorithm.hash(password.toCharArray())

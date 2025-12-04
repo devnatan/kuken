@@ -15,7 +15,6 @@ import kotlin.uuid.toKotlinUuid
 internal class AccountEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     internal companion object : UUIDEntityClass<AccountEntity>(AccountTable)
 
-    var username by AccountTable.username
     var email by AccountTable.email
     var displayName by AccountTable.displayName
     var hash by AccountTable.hash
@@ -27,7 +26,6 @@ internal class AccountEntity(id: EntityID<UUID>) : UUIDEntity(id) {
 
 internal object AccountTable : UUIDTable("accounts") {
 
-    val username = varchar("username", length = 255)
     val email = varchar("email", length = 255)
     val displayName = varchar("display_name", length = 255).nullable()
     val hash = varchar("hash", length = 255)
@@ -41,7 +39,6 @@ internal fun AccountEntity.toDomain(): Account = Account(
     id = id.value.toKotlinUuid(),
     email = email,
     displayName = displayName,
-    username = username,
     createdAt = createdAt,
     updatedAt = updatedAt,
     lastLoggedInAt = lastLoggedInAt,

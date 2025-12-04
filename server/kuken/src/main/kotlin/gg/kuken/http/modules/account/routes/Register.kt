@@ -17,8 +17,6 @@ fun Route.register() {
     post<AccountRoutes.Register> {
         val payload = call.receiveValidating<RegisterRequest>(validator)
         val account = accountService.createAccount(
-            username = payload.username,
-            displayName = payload.displayName,
             email = payload.email,
             password = payload.password
         )

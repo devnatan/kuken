@@ -11,7 +11,6 @@ import kotlin.uuid.ExperimentalUuidApi
 @Serializable
 internal data class AccountResponse(
     @SerialName("accountId") val id: String,
-    @SerialName("username") val username: String,
     @SerialName("displayName") val displayName: String?,
     @SerialName("email") val email: String,
     @SerialName("createdAt") val createdAt: Instant,
@@ -20,7 +19,6 @@ internal data class AccountResponse(
 
     constructor(account: Account) : this(
         id = account.id.toString(),
-        username = account.username,
         displayName = account.displayName,
         email = account.email,
         createdAt = account.createdAt,

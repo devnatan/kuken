@@ -8,22 +8,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class RegisterRequest(
-    @field:NotBlank(message = "Username cannot be blank")
-    @field:Size(
-        min = 2,
-        max = 32,
-        message = "Username must have a minimum length of {min} and at least {max} characters"
-    )
-    val username: String = "",
-
-    @SerialName("display-name")
-    @field:Size(
-        min = 2,
-        max = 32,
-        message = "Display name must have a minimum length of {min} and at least {max} characters"
-    )
-    val displayName: String? = null,
-
     @field:NotBlank(message = "Email cannot be blank")
     @field:Email
     val email: String = "",

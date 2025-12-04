@@ -29,16 +29,16 @@ internal class AccountsRepositoryImpl(private val database: Database) : AccountR
         AccountEntity.findById(id.toJavaUuid())
     }
 
-    override suspend fun findByUsername(username: String): AccountEntity? =
+    override suspend fun findByEmail(email: String): AccountEntity? =
         newSuspendedTransaction(db = database) {
             AccountEntity.find {
-                AccountTable.username eq username
+                AccountTable.email eq email
             }.firstOrNull()
         }
 
-    override suspend fun findHashByUsername(username: String): String? = newSuspendedTransaction(db = database) {
+    override suspend fun findHashByEmail(email: String): String? = newSuspendedTransaction(db = database) {
         AccountEntity.find {
-            AccountTable.username eq username
+            AccountTable.email eq email
         }.firstOrNull()?.hash
     }
 
@@ -46,7 +46,6 @@ internal class AccountsRepositoryImpl(private val database: Database) : AccountR
     override suspend fun addAccount(account: Account, hash: String) {
         newSuspendedTransaction(db = database) {
             AccountEntity.new(account.id.toJavaUuid()) {
-                this.username = account.username
                 this.email = account.email
                 this.hash = hash
                 this.createdAt = account.createdAt
@@ -62,8 +61,8 @@ internal class AccountsRepositoryImpl(private val database: Database) : AccountR
         }
     }
 
-    override suspend fun existsByUsername(username: String): Boolean =
+    override suspend fun existsByEmail(email: String): Boolean =
         newSuspendedTransaction(db = database) {
-            !AccountEntity.find { AccountTable.username eq username }.empty()
+            !AccountEntity.find { AccountTable.email eq email }.empty()
         }
 }
