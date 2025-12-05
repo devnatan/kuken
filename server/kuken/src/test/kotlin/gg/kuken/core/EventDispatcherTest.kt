@@ -46,7 +46,7 @@ internal class EventsDispatcherTest {
     }
 
     @Test
-    fun `ignore publication of non-listened type`() = runTest {
+    fun `ignore publication of not listened type`() = runTest {
         val eventsDispatcher: EventDispatcher = EventDispatcherImpl()
         val received = mutableListOf<String>()
 
