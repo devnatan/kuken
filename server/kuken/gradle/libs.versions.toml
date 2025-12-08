@@ -14,7 +14,6 @@ postgresql = "42.7.7"
 javaJwt = "4.5.0"
 docker-kotlin = "0.6.0"
 bcprov = "1.81"
-jedis = "6.0.0"
 validator = "9.0.1.Final"
 expressly = "6.0.0"
 plugin-shadowjar = "8.3.6"
@@ -68,7 +67,6 @@ exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exp
 javaJwt = { module = "com.auth0:java-jwt", version.ref = "javaJwt" }
 dockerKotlin = { module = "me.devnatan:yoki", version.ref = "docker-kotlin" }
 bcprov = { module = "org.bouncycastle:bcprov-jdk15to18", version.ref = "bcprov" }
-jedis = { module = "redis.clients:jedis", version.ref = "jedis" }
 expressly = { module = "org.glassfish.expressly:expressly", version.ref = "expressly" }
 validator = { module = "org.hibernate.validator:hibernate-validator", version.ref = "validator" }
 validator-processor = { module = "org.hibernate.validator:hibernate-validator-annotation-processor", version.ref = "validator" }
