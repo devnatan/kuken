@@ -82,18 +82,11 @@ class DatabaseFactory(private val appConfig: KukenConfig) {
 
 private suspend fun checkDatabaseConnection(database: Database, appConfig: KukenConfig) {
     try {
-        newSuspendedTransaction(db = database) {
+        newSuspendedTransaction(db = database, readOnly = true) {
             database.connector()
         }
-    } catch (exception: SQLException) {
-        if (appConfig.devMode) {
-            error("Unable to establish database connection.")
-            exception.printStackTrace()
-        } else {
-            error("Unable to establish database connection: ${exception.message}")
-        }
-
-        exitProcess(0)
+    } catch (_: SQLException) {
+        error("Unable to establish database connection")
     }
 }
 
