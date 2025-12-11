@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalUuidApi::class)
-
 package gg.kuken.feature.account.repository
 
 import gg.kuken.feature.account.entity.AccountEntity

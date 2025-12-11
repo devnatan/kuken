@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalUuidApi::class)
+
 
 package gg.kuken.feature.instance.repository
 
@@ -12,7 +12,7 @@ interface InstanceRepository {
 
     suspend fun create(instance: Instance)
 
-    suspend fun delete(id: Uuid)
+    suspend fun delete(id: Uuid): InstanceEntity?
 
     suspend fun update(
         id: Uuid,

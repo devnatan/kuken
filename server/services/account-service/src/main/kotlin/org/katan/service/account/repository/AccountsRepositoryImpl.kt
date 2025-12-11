@@ -40,7 +40,7 @@ internal class AccountsRepositoryImpl(private val database: Database) : Accounts
 
     init {
         transaction(db = database) {
-            SchemaUtils.create(AccountsTable)
+            SchemaUtils.createMissingTablesAndColumns(AccountsTable)
         }
     }
 
