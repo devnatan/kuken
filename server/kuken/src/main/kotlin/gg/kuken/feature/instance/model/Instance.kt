@@ -1,11 +1,8 @@
-
-
 package gg.kuken.feature.instance.model
 
 import gg.kuken.feature.instance.InstanceUnreachableRuntimeException
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlin.uuid.ExperimentalUuidApi
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 @Serializable
@@ -16,7 +13,7 @@ class Instance(
     val updatePolicy: ImageUpdatePolicy,
     val connection: HostPort?,
     val runtime: InstanceRuntime?,
-    val blueprintId: UInt,
+    val blueprintId: Uuid,
     val createdAt: Instant,
     val nodeId: String,
 )

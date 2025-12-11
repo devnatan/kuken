@@ -1,27 +1,24 @@
-
-
 package gg.kuken.feature.instance.entity
 
 import gg.kuken.feature.instance.model.Instance
 import gg.kuken.feature.instance.repository.InstanceRepository
-import org.jetbrains.exposed.dao.UUIDEntity
-import org.jetbrains.exposed.dao.UUIDEntityClass
-import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
+import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
+import org.jetbrains.exposed.v1.dao.UUIDEntity
+import org.jetbrains.exposed.v1.dao.UUIDEntityClass
+import org.jetbrains.exposed.v1.datetime.timestamp
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.util.UUID
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
 object InstanceTable : UUIDTable("instances") {
     val imageUpdatePolicy = varchar("image_update_policy", length = 64)
     val containerId = varchar("cid", length = 255).nullable()
-    val blueprintId = uinteger("bid")
+    val blueprintId = uuid("bid")
     val host = varchar("host", length = 255).nullable()
     val port = short("port").nullable()
     val status = varchar("status", length = 255)
@@ -54,26 +51,26 @@ class InstanceRepositoryImpl(
     }
 
     override suspend fun findById(id: Uuid): InstanceEntity? =
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database) {
             InstanceEntity.findById(id.toJavaUuid())
         }
 
     override suspend fun create(instance: Instance) {
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database) {
             InstanceEntity.new(instance.id.toJavaUuid()) {
                 updatePolicy = instance.updatePolicy.id
                 containerId = instance.containerId
-                blueprintId = instance.blueprintId
+                blueprintId = instance.blueprintId.toJavaUuid()
                 host = instance.connection?.host
                 port = instance.connection?.port
-                status = instance.status.value
+                status = instance.status.label
                 nodeId = instance.nodeId
             }
         }
     }
 
     override suspend fun delete(id: Uuid): InstanceEntity? =
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database) {
             InstanceEntity.findById(id.toJavaUuid())?.also(InstanceEntity::delete)
         }
 
@@ -81,7 +78,7 @@ class InstanceRepositoryImpl(
         id: Uuid,
         update: InstanceEntity.() -> Unit,
     ): InstanceEntity? =
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database) {
             InstanceEntity.findById(id.toJavaUuid())?.apply(update)
         }
 }

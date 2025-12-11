@@ -4,25 +4,25 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class InstanceStatus(
-    val value: String,
+    val label: String,
 ) {
-    Created(value = "created"),
-    NetworkAssignmentFailed(value = "network-assignment-failed"),
-    Unavailable(value = "unavailable"),
-    Unknown(value = "unknown"),
-    ImagePullInProgress(value = "image-pull"),
-    ImagePullNeeded(value = "image-pull-needed"),
-    ImagePullFailed(value = "image-pull-failed"),
-    ImagePullCompleted(value = "image-pull-completed"),
-    Dead(value = "dead"),
-    Paused(value = "paused"),
-    Exited(value = "exited"),
-    Running(value = "running"),
-    Stopped(value = "stopped"),
-    Starting(value = "starting"),
-    Removing(value = "removing"),
-    Stopping(value = "stopping"),
-    Restarting(value = "restarting"),
+    Created(label = "created"),
+    NetworkAssignmentFailed(label = "network-assignment-failed"),
+    Unavailable(label = "unavailable"),
+    Unknown(label = "unknown"),
+    ImagePullInProgress(label = "image-pull"),
+    ImagePullNeeded(label = "image-pull-needed"),
+    ImagePullFailed(label = "image-pull-failed"),
+    ImagePullCompleted(label = "image-pull-completed"),
+    Dead(label = "dead"),
+    Paused(label = "paused"),
+    Exited(label = "exited"),
+    Running(label = "running"),
+    Stopped(label = "stopped"),
+    Starting(label = "starting"),
+    Removing(label = "removing"),
+    Stopping(label = "stopping"),
+    Restarting(label = "restarting"),
     ;
 
     val isInitialStatus: Boolean

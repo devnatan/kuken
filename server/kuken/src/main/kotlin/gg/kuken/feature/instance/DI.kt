@@ -14,6 +14,9 @@ val InstancesDI =
             DockerInstanceService(
                 dockerClient = get(),
                 instanceRepository = get(),
+                blueprintService = get(),
+                identityGeneratorService = get(),
+                kukenConfig = get(),
             )
         }
     }

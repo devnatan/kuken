@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class InstanceRuntimeMount(
     val type: String,
-    val target: String,
+    val source: String,
     val destination: String,
     val readonly: Boolean,
 )

@@ -1,7 +1,7 @@
 package gg.kuken.feature.instance.model
 
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 @Serializable
 data class InstanceRuntime(
