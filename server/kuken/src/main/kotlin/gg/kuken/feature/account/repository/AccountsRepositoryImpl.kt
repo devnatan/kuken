@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalUuidApi::class)
-
 package gg.kuken.feature.account.repository
 
 import gg.kuken.feature.account.entity.AccountEntity
@@ -18,7 +16,7 @@ class AccountsRepositoryImpl(
 ) : AccountRepository {
     init {
         transaction(db = database) {
-            SchemaUtils.create(AccountTable)
+            SchemaUtils.createMissingTablesAndColumns(AccountTable)
         }
     }
 

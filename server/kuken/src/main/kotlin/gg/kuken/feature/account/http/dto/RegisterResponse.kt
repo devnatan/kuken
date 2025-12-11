@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalUuidApi::class)
-
 package gg.kuken.feature.account.http.dto
 
 import gg.kuken.feature.account.model.Account
