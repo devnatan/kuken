@@ -30,6 +30,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import kotlin.code
 import kotlin.time.Duration.Companion.seconds
 
 fun Application.installDefaultFeatures(config: KukenConfig) {
@@ -51,6 +52,19 @@ fun Application.installDefaultFeatures(config: KukenConfig) {
     }
 
     install(StatusPages) {
+        exception<HttpException> { call, exception ->
+            if (config.devMode) call.application.log.error(exception)
+            call.respond(
+                status = exception.status,
+                message =
+                    HttpError(
+                        code = exception.code,
+                        message = exception.message.orEmpty(),
+                        details = exception.details,
+                    ),
+            )
+        }
+
         exception<ResourceException> { call, exception ->
             call.respond(
                 status = exception.code,
