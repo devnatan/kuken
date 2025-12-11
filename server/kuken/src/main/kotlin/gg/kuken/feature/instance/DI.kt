@@ -9,4 +9,11 @@ val InstancesDI =
         single<InstanceRepository>(createdAtStart = true) {
             InstanceRepositoryImpl(database = get())
         }
+
+        single<InstanceService> {
+            DockerInstanceService(
+                dockerClient = get(),
+                instanceRepository = get(),
+            )
+        }
     }

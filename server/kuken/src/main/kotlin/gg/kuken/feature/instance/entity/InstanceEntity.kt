@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalUuidApi::class)
+
 
 package gg.kuken.feature.instance.entity
 
@@ -26,6 +26,7 @@ object InstanceTable : UUIDTable("instances") {
     val port = short("port").nullable()
     val status = varchar("status", length = 255)
     val createdAt = timestamp("created_at")
+    val nodeId = varchar("node", length = 255)
 }
 
 class InstanceEntity(
@@ -40,6 +41,7 @@ class InstanceEntity(
     var port by InstanceTable.port
     var status by InstanceTable.status
     var createdAt by InstanceTable.createdAt
+    var nodeId by InstanceTable.nodeId
 }
 
 class InstanceRepositoryImpl(
@@ -47,7 +49,7 @@ class InstanceRepositoryImpl(
 ) : InstanceRepository {
     init {
         transaction(db = database) {
-            SchemaUtils.create(InstanceTable)
+            SchemaUtils.createMissingTablesAndColumns(InstanceTable)
         }
     }
 
@@ -65,15 +67,15 @@ class InstanceRepositoryImpl(
                 host = instance.connection?.host
                 port = instance.connection?.port
                 status = instance.status.value
+                nodeId = instance.nodeId
             }
         }
     }
 
-    override suspend fun delete(id: Uuid) {
+    override suspend fun delete(id: Uuid): InstanceEntity? =
         newSuspendedTransaction(db = database) {
-            InstanceEntity.findById(id.toJavaUuid())?.delete()
+            InstanceEntity.findById(id.toJavaUuid())?.also(InstanceEntity::delete)
         }
-    }
 
     override suspend fun update(
         id: Uuid,
