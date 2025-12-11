@@ -15,6 +15,7 @@ import io.lettuce.core.RedisClient
 import jakarta.validation.Validation
 import jakarta.validation.Validator
 import kotlinx.coroutines.runBlocking
+import me.devnatan.dockerkt.DockerClient
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator
 import org.jetbrains.exposed.sql.Database
 import org.koin.core.context.startKoin
@@ -26,12 +27,16 @@ internal fun main() {
         setupDevMode()
     }
 
-    val database = DatabaseFactory(config).create()
+    val database =
+        runBlocking {
+            DatabaseFactory(config).create().also { db -> checkDatabaseConnection(db) }
+        }
+
+    val docker = DockerClient()
     val redis = setupRedis(config.redis)
-    configureDI(config, database, redis)
+    configureDI(config, database, redis, docker)
 
     runBlocking {
-        checkDatabaseConnection(database)
         Http(config).start()
     }
 }
@@ -40,6 +45,7 @@ private fun configureDI(
     config: KukenConfig,
     db: Database,
     redis: RedisClient,
+    docker: DockerClient,
 ) {
     startKoin {
         val root =
@@ -47,6 +53,7 @@ private fun configureDI(
                 single(createdAtStart = true) { config }
                 single(createdAtStart = true) { db }
                 single(createdAtStart = true) { redis }
+                single(createdAtStart = true) { docker }
 
                 single<Hash> { BcryptHash() }
 
