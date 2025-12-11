@@ -9,6 +9,12 @@ plugins {
     alias(libs.plugins.kotlinter)
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
+    }
+}
+
 application {
     mainClass.set("gg.kuken.LauncherKt")
 }
