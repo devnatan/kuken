@@ -6,7 +6,7 @@ import org.koin.dsl.module
 
 val InstancesDI =
     module {
-        single<InstanceRepository> {
+        single<InstanceRepository>(createdAtStart = true) {
             InstanceRepositoryImpl(database = get())
         }
     }

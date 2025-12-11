@@ -6,7 +6,7 @@ import org.koin.dsl.module
 
 val AccountDI =
     module {
-        single<AccountRepository> {
+        single<AccountRepository>(createdAtStart = true) {
             AccountsRepositoryImpl(database = get())
         }
         single<AccountService> {
