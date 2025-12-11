@@ -38,9 +38,9 @@ value class RemoteBlueprintSpecSource(
 ) : BlueprintSpecSource
 
 class RemoteBlueprintSpecProvider(
-    val httpClient: HttpClient,
-    val parser: BlueprintParser,
+    private val parser: BlueprintParser,
 ) : BlueprintSpecProvider {
+    private val httpClient: HttpClient = HttpClient()
     override val providerId: String get() = "remote"
 
     override suspend fun provide(source: BlueprintSpecSource): BlueprintSpec {
@@ -51,7 +51,7 @@ class RemoteBlueprintSpecProvider(
         val response =
             try {
                 httpClient.get(source.url)
-            } catch (e: UnresolvedAddressException) {
+            } catch (_: UnresolvedAddressException) {
                 throw BlueprintSpecNotFound()
             }
 

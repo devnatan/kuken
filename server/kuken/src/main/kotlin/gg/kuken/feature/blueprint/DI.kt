@@ -23,7 +23,6 @@ val BlueprintDI =
             CombinedBlueprintSpecProvider(
                 listOf(
                     RemoteBlueprintSpecProvider(
-                        httpClient = get(),
                         parser = get(),
                     ),
                 ),
