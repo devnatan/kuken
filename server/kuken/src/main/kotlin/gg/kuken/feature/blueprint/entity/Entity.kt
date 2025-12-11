@@ -55,7 +55,7 @@ class BlueprintRepositoryImpl(
         id: Uuid,
         spec: ByteArray,
         createdAt: Instant,
-    ) {
+    ): BlueprintEntity =
         suspendTransaction(db = database) {
             BlueprintEntity.new(id.toJavaUuid()) {
                 content = ExposedBlob(spec)
@@ -63,7 +63,6 @@ class BlueprintRepositoryImpl(
                 this.updatedAt = createdAt
             }
         }
-    }
 
     override suspend fun delete(id: Uuid) {
         suspendTransaction(db = database) {

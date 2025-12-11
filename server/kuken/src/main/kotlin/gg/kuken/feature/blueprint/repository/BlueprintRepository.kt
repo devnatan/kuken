@@ -13,7 +13,7 @@ interface BlueprintRepository {
         id: Uuid,
         spec: ByteArray,
         createdAt: Instant,
-    )
+    ): BlueprintEntity
 
     suspend fun delete(id: Uuid)
 }

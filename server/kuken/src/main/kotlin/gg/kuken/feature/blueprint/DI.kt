@@ -15,6 +15,7 @@ val BlueprintDI =
             BlueprintService(
                 blueprintRepository = get(),
                 blueprintSpecProvider = get(),
+                identityGeneratorService = get(),
             )
         }
 
