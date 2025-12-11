@@ -1,18 +1,16 @@
 package gg.kuken.feature.account.model
 
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlin.uuid.ExperimentalUuidApi
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 @Serializable
-data class Account
-    constructor(
-        val id: Uuid,
-        val email: String,
-        val displayName: String?,
-        val createdAt: Instant,
-        val updatedAt: Instant,
-        val lastLoggedInAt: Instant?,
-        val avatar: String?,
-    )
+data class Account(
+    val id: Uuid,
+    val email: String,
+    val displayName: String?,
+    val createdAt: Instant,
+    val updatedAt: Instant,
+    val lastLoggedInAt: Instant?,
+    val avatar: String?,
+)

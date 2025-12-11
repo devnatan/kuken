@@ -18,11 +18,10 @@ import gg.kuken.feature.account.http.exception.AccountNotFoundException
 import gg.kuken.feature.account.model.Account
 import gg.kuken.feature.auth.AuthService
 import gg.kuken.feature.auth.http.exception.InvalidAccessTokenException
-import kotlinx.datetime.Clock
-import kotlinx.datetime.toJavaInstant
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
-import kotlin.uuid.ExperimentalUuidApi
+import kotlin.time.toJavaInstant
 import kotlin.uuid.Uuid
 
 class JWTAuthServiceImpl(

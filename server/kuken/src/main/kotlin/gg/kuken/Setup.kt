@@ -3,13 +3,12 @@ package gg.kuken
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.ConfigParseOptions
 import io.lettuce.core.RedisClient
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.hocon.Hocon
 import kotlinx.serialization.hocon.decodeFromConfig
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.DatabaseConfig
-import org.jetbrains.exposed.sql.Slf4jSqlDebugLogger
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.v1.core.DatabaseConfig
+import org.jetbrains.exposed.v1.core.Slf4jSqlDebugLogger
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import java.io.File
 import java.sql.SQLException
 
@@ -60,7 +59,7 @@ class DatabaseFactory(
 
 suspend fun checkDatabaseConnection(database: Database) {
     try {
-        newSuspendedTransaction(db = database, readOnly = true) {
+        suspendTransaction(db = database, readOnly = true) {
             database.connector()
         }
     } catch (_: SQLException) {

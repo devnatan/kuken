@@ -1,9 +1,9 @@
 package gg.kuken.feature.account.http.dto
 
 import gg.kuken.feature.account.model.Account
-import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 
 @Serializable

@@ -3,10 +3,11 @@ package gg.kuken.feature.account.repository
 import gg.kuken.feature.account.entity.AccountEntity
 import gg.kuken.feature.account.entity.AccountTable
 import gg.kuken.feature.account.model.Account
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
@@ -20,18 +21,15 @@ class AccountsRepositoryImpl(
         }
     }
 
-    override suspend fun findAll(): List<AccountEntity> =
-        newSuspendedTransaction(db = database) {
-            AccountEntity.all().notForUpdate().toList()
-        }
+    override suspend fun findAll(): List<AccountEntity> = AccountEntity.all().notForUpdate().toList()
 
     override suspend fun findById(id: Uuid): AccountEntity? =
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database, readOnly = true) {
             AccountEntity.findById(id.toJavaUuid())
         }
 
     override suspend fun findByEmail(email: String): AccountEntity? =
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database, readOnly = true) {
             AccountEntity
                 .find {
                     AccountTable.email eq email
@@ -39,7 +37,7 @@ class AccountsRepositoryImpl(
         }
 
     override suspend fun findHashByEmail(email: String): String? =
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database, readOnly = true) {
             AccountEntity
                 .find {
                     AccountTable.email eq email
@@ -52,7 +50,7 @@ class AccountsRepositoryImpl(
         account: Account,
         hash: String,
     ) {
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database) {
             AccountEntity.new(account.id.toJavaUuid()) {
                 this.email = account.email
                 this.hash = hash
@@ -64,13 +62,13 @@ class AccountsRepositoryImpl(
     }
 
     override suspend fun deleteAccount(id: Uuid) {
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database) {
             AccountEntity.findById(id.toJavaUuid())?.delete()
         }
     }
 
     override suspend fun existsByEmail(email: String): Boolean =
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database, readOnly = true) {
             !AccountEntity.find { AccountTable.email eq email }.empty()
         }
 }

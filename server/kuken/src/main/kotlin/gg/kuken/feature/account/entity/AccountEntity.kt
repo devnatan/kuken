@@ -1,13 +1,12 @@
 package gg.kuken.feature.account.entity
 
 import gg.kuken.feature.account.model.Account
-import org.jetbrains.exposed.dao.UUIDEntity
-import org.jetbrains.exposed.dao.UUIDEntityClass
-import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
+import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
+import org.jetbrains.exposed.v1.dao.UUIDEntity
+import org.jetbrains.exposed.v1.dao.UUIDEntityClass
+import org.jetbrains.exposed.v1.datetime.timestamp
 import java.util.*
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.toKotlinUuid
 
 class AccountEntity(

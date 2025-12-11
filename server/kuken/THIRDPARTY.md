@@ -4,7 +4,7 @@ This document contains a list of third-party libraries that Katan uses.
 * [Koin](https://github.com/InsertKoinIO/koin). Apache License 2.0.
 * [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization). Apache License 2.0.
 * [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines). Apache License 2.0.
-* [kotlinx.datetime](https://github.com/Kotlin/kotlinx-datetime). Apache License 2.0.
+* [kotlin.time](https://github.com/Kotlin/kotlinx-datetime). Apache License 2.0.
 * [kotlinx.atomicfu](https://github.com/Kotlin/kotlinx-atomicfu). Apache License 2.0.
 * [Apache Log4j 2](https://logging.apache.org/log4j/2.x/). Apache License 2.0.
 * [Exposed](https://github.com/JetBrains/Exposed/). Apache License 2.0.

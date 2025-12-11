@@ -17,7 +17,7 @@ import jakarta.validation.Validator
 import kotlinx.coroutines.runBlocking
 import me.devnatan.dockerkt.DockerClient
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator
-import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 

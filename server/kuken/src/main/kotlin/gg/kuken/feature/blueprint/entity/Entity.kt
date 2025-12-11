@@ -1,21 +1,18 @@
 package gg.kuken.feature.blueprint.entity
 
 import gg.kuken.feature.blueprint.repository.BlueprintRepository
-import kotlinx.datetime.Instant
-import org.jetbrains.exposed.dao.LongEntity
-import org.jetbrains.exposed.dao.LongEntityClass
-import org.jetbrains.exposed.dao.UUIDEntity
-import org.jetbrains.exposed.dao.UUIDEntityClass
-import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.LongIdTable
-import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
-import org.jetbrains.exposed.sql.statements.api.ExposedBlob
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
+import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
+import org.jetbrains.exposed.v1.core.statements.api.ExposedBlob
+import org.jetbrains.exposed.v1.dao.UUIDEntity
+import org.jetbrains.exposed.v1.dao.UUIDEntityClass
+import org.jetbrains.exposed.v1.datetime.timestamp
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.util.UUID
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
@@ -45,12 +42,12 @@ class BlueprintRepositoryImpl(
     }
 
     override suspend fun findAll(): List<BlueprintEntity> =
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database) {
             BlueprintEntity.all().notForUpdate().toList()
         }
 
     override suspend fun find(id: Uuid): BlueprintEntity? =
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database) {
             BlueprintEntity.findById(id.toJavaUuid())
         }
 
@@ -59,7 +56,7 @@ class BlueprintRepositoryImpl(
         spec: ByteArray,
         createdAt: Instant,
     ) {
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database) {
             BlueprintEntity.new(id.toJavaUuid()) {
                 content = ExposedBlob(spec)
                 this.createdAt = createdAt
@@ -69,7 +66,7 @@ class BlueprintRepositoryImpl(
     }
 
     override suspend fun delete(id: Uuid) {
-        newSuspendedTransaction(db = database) {
+        suspendTransaction(db = database) {
             BlueprintEntity.findById(id.toJavaUuid())?.delete()
         }
     }
