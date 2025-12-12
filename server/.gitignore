@@ -1,10 +1,6 @@
 # Compiled class file
 *.class
 
-# Intellij
-idea/
-.idea/
-
 # Log file
 *.log
 
@@ -29,9 +25,10 @@ hs_err_pid*
 # Gradle
 .gradle/
 
-# Katan
+# Project
 logs/
 build/
+docs/
 
 # Gradle
 buildSrc/build
