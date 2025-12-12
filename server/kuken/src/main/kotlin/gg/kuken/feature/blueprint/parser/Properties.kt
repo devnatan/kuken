@@ -21,7 +21,7 @@ internal object Properties {
     val Build =
         Property(
             qualifiedName = "build",
-            kind = Struct,
+            kind = Struct(allowUnknown = false),
         )
     val Entrypoint =
         Property(
@@ -34,10 +34,16 @@ internal object Properties {
             kind =
                 Mixed(
                     Literal,
-                    Multiple(Struct),
+                    Multiple(Struct(allowUnknown = false)),
                 ),
             constraints = listOf(RequiredPropertyConstraint),
         )
+
+    val Env = Property(
+            qualifiedName = "build.env",
+            kind = Struct(allowUnknown = true),
+        )
+
     val ImageReference =
         Property(
             qualifiedName = "build.image.ref",
@@ -53,7 +59,7 @@ internal object Properties {
     val Instance =
         Property(
             qualifiedName = "build.instance",
-            kind = Struct,
+            kind = Struct(allowUnknown = false),
         )
     val InstanceName =
         Property(
@@ -63,7 +69,7 @@ internal object Properties {
     val Options =
         Property(
             qualifiedName = "options",
-            kind = Struct,
+            kind = Struct(allowUnknown = false),
         )
     val OptionsId =
         Property(

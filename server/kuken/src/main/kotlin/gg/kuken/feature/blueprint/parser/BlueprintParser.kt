@@ -21,6 +21,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.reflect.KClass
 
 // TODO detailed error diagnostics
@@ -57,7 +58,7 @@ class BlueprintParser(
             // Iterate over supported properties because some root level properties have required
             // constraints. Unknown nodes are purposefully ignored.
             for ((path, node) in config.root().entries) {
-                val element = read(path, node) ?: continue
+                val element = read(fqName = path, node = node, allowUnknown = false) ?: continue
                 output[path] = element
             }
         } catch (exception: Throwable) {
@@ -88,7 +89,7 @@ class BlueprintParser(
                 val elements = mutableListOf<JsonElement>()
                 for (childNode in root) {
                     val childType = childNode.valueType()
-                    val childKind = kindFromNodeValueType(childType)
+                    val childKind = kindClassFromNodeValueType(childType)
                     if (!property.supports(childKind)) {
                         val multi = (property.kind as PropertyKind.Multiple)
                         val supportedName = multi.supports::class.java.simpleName
@@ -110,9 +111,11 @@ class BlueprintParser(
                 val elements = mutableMapOf<String, JsonElement>()
                 for ((childKey, childNode) in root.entries) {
                     val qName = property.qualifiedName + PROPERTY_NAME_SEPARATOR + childKey
-                    val el =
-                        read(qName, childNode)
-                            ?: continue
+                    val el = read(
+                        fqName = qName,
+                        node = childNode,
+                        allowUnknown = property.kind is PropertyKind.Struct && property.kind.allowUnknown
+                    ) ?: continue
 
                     elements[childKey] = el
                 }
@@ -122,23 +125,42 @@ class BlueprintParser(
 
             else -> {
                 val unwrappedValue = node.unwrapped()
-                val actualKind = kindFromNodeValueType(node.valueType())
+                val actualKind = kindClassFromNodeValueType(node.valueType())
                 validate(property, actualKind, unwrappedValue)
                 primitiveElement(unwrappedValue)
             }
         }
     }
 
-    fun read(
-        qualifiedName: String,
-        node: ConfigValue,
-    ): JsonElement? {
-        val property =
-            supportedProperties.firstOrNull { property ->
-                property.qualifiedName == qualifiedName
-            } ?: return null
+    fun read(fqName: String, node: ConfigValue, allowUnknown: Boolean): JsonElement? {
+        val property = supportedProperties.firstOrNull { property ->
+            property.qualifiedName == fqName
+        }
 
-        return read(property, node, true)
+        if (property != null)
+            return read(property, node, equalityCheck = true)
+
+        if (!allowUnknown) {
+            return null
+        }
+
+        val kind = when (node.valueType()) {
+            ConfigValueType.OBJECT -> PropertyKind.Struct(allowUnknown = false)
+            ConfigValueType.LIST -> PropertyKind.Multiple(PropertyKind.Mixed())
+            ConfigValueType.NUMBER -> PropertyKind.Numeric
+            ConfigValueType.BOOLEAN -> PropertyKind.TrueOrFalse
+            ConfigValueType.NULL -> PropertyKind.Null
+            ConfigValueType.STRING -> PropertyKind.Literal
+        }
+
+        return read(
+            property = Property(
+                qualifiedName = fqName,
+                kind = kind
+            ),
+            node = node,
+            equalityCheck = true,
+        )
     }
 
     fun parse(input: String): BlueprintSpec {
@@ -181,7 +203,7 @@ class BlueprintParser(
             else -> error("Unsupported property kind: $kind")
         }
 
-    private fun kindFromNodeValueType(type: ConfigValueType) =
+    private fun kindClassFromNodeValueType(type: ConfigValueType) =
         when (type) {
             ConfigValueType.STRING -> PropertyKind.Literal::class
             ConfigValueType.NUMBER -> PropertyKind.Numeric::class
@@ -209,7 +231,7 @@ class BlueprintParser(
         val anyMatchingKindAvailable = checkMultipleKinds(inputNodeType, kind.kinds)
         if (!anyMatchingKindAvailable) {
             val kinds = kind.kinds.map { childKind -> childKind::class.java.simpleName }
-            val actual = kindFromNodeValueType(inputNodeType).java.simpleName
+            val actual = kindClassFromNodeValueType(inputNodeType).java.simpleName
             throw NoMatchesForMixedProperty(
                 "No matching kinds for mixed property. Expected any of $kinds kinds. Actual: $actual",
                 property,
@@ -255,7 +277,9 @@ class BlueprintParser(
                     struct("build")?.let { build ->
                         BlueprintSpecBuild(
                             entrypoint = build.string("entrypoint"),
-                            env = emptyMap(),
+                            env = build.struct("env")?.mapValues { (_, value) ->
+                                value.jsonPrimitive.content
+                            }.orEmpty(),
                             image = build.getValue("image").let(::elementToImage),
                             instance =
                                 build.struct("instance")?.let { instance ->

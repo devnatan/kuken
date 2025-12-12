@@ -37,7 +37,7 @@ sealed class PropertyKind {
 
     object TrueOrFalse : PropertyKind()
 
-    object Struct : PropertyKind()
+    data class Struct(val allowUnknown: Boolean) : PropertyKind()
 
     data class Multiple(
         val supports: PropertyKind,
@@ -58,6 +58,7 @@ internal val AllSupportedProperties: List<Property> =
         Properties.Version,
         Properties.Build,
         Properties.Entrypoint,
+        Properties.Env,
         Properties.Image,
         Properties.ImageReference,
         Properties.ImageTag,
