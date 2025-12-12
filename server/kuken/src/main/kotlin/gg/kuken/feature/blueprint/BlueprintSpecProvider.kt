@@ -5,6 +5,7 @@ import gg.kuken.feature.blueprint.parser.BlueprintParser
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import java.io.File
 import java.nio.channels.UnresolvedAddressException
 
 interface BlueprintSpecProvider {
@@ -56,6 +57,27 @@ class RemoteBlueprintSpecProvider(
             }
 
         val contents: String = response.body()
+        return parser.parse(contents)
+    }
+}
+
+@JvmInline
+value class LocalBlueprintSpecSource(
+    val filePath: String,
+) : BlueprintSpecSource
+
+class LocalBlueprintSpecProvider(
+    private val parser: BlueprintParser,
+) : BlueprintSpecProvider {
+
+    override val providerId: String get() = "remote"
+
+    override suspend fun provide(source: BlueprintSpecSource): BlueprintSpec {
+        if (source !is LocalBlueprintSpecSource) {
+            throw UnsupportedBlueprintSpecSource()
+        }
+
+        val contents = File(source.filePath).readText()
         return parser.parse(contents)
     }
 }

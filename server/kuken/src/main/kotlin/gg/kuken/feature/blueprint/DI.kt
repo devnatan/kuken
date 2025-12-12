@@ -25,6 +25,9 @@ val BlueprintDI =
                     RemoteBlueprintSpecProvider(
                         parser = get(),
                     ),
+                    LocalBlueprintSpecProvider(
+                        parser = get(),
+                    )
                 ),
             )
         }
