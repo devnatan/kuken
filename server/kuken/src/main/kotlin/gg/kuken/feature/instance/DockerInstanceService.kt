@@ -19,6 +19,9 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import me.devnatan.dockerkt.DockerClient
+import me.devnatan.dockerkt.models.PortBinding
+import me.devnatan.dockerkt.models.container.hostConfig
+import me.devnatan.dockerkt.models.portBindings
 import me.devnatan.dockerkt.resource.container.create
 import me.devnatan.dockerkt.resource.container.remove
 import me.devnatan.dockerkt.resource.exec.create
@@ -47,7 +50,7 @@ class DockerInstanceService(
             status = instance.status.let(InstanceStatus::valueOf),
             containerId = instance.containerId,
             updatePolicy = instance.updatePolicy.let(ImageUpdatePolicy::getById),
-            connection = HostPort(instance.host!!, instance.port!!),
+            address = HostPort(instance.host!!, instance.port!!),
             runtime = null,
             blueprintId = instance.blueprintId.toKotlinUuid(),
             createdAt = instance.createdAt,
@@ -108,13 +111,14 @@ class DockerInstanceService(
         generatedName: String,
         blueprint: Blueprint,
     ): Instance {
+        val env = blueprint.spec.build?.env.orEmpty() + options.env
         val (containerId, address) =
             createAndConnectContainer(
                 instanceId = instanceId,
-                image = options.image,
+                options = options.copy(
+                    env = env
+                ),
                 name = generatedName,
-                host = options.host,
-                port = options.port,
             )
 
         val status =
@@ -137,32 +141,27 @@ class DockerInstanceService(
      * Creates a container for the specified instance and connects it to the configured network.
      *
      * @param instanceId The unique identifier of the instance for which the container is being created.
-     * @param image The image to be used for creating the container.
      * @param name The name to assign to the created container.
-     * @param host The optional hostname to use when connecting the container to the network.
-     * @param port The optional port to use when connecting the container to the network.
      * @return A pair containing the ID of the created container and the associated `HostPort` information,
      *         or null for `HostPort` if the connection to the network failed.
      */
     private suspend fun createAndConnectContainer(
         instanceId: Uuid,
-        image: String,
         name: String,
-        host: String?,
-        port: Int?,
+        options: CreateInstanceOptions,
     ): Pair<String, HostPort?> {
+        val address = dockerNetworkService.createAddress(options.host, options.port)
         val containerId =
             createContainer(
                 instanceId = instanceId,
-                image = image,
                 name = name,
+                options = options.copy(
+                    host = address.host,
+                    port = address.port,
+                ),
             )
-        val address =
-            connectInstance(
-                containerId = containerId,
-                host = host,
-                port = port,
-            )
+
+        connectInstance(containerId = containerId)
         return containerId to address
     }
 
@@ -202,16 +201,16 @@ class DockerInstanceService(
         val (container, address) =
             createAndConnectContainer(
                 instanceId = instanceId,
-                image = options.image,
                 name = instanceName,
-                host = options.host,
-                port = options.port,
+                options = options,
             )
 
         val imagePullStatus = job.await()
         val updatedInstance =
             instanceRepository.update(instanceId) {
                 this.containerId = container
+                this.host = address?.host
+                this.port = address?.port
                 this.status =
                     when {
                         address == null -> InstanceStatus.NetworkAssignmentFailed
@@ -225,48 +224,46 @@ class DockerInstanceService(
     private suspend fun toInstance(instance: InstanceEntity): Instance =
         Instance(
             id = instance.id.value.toKotlinUuid(),
-            status = InstanceStatus.valueOf(instance.status),
+            status = InstanceStatus.getByLabel(instance.status),
             updatePolicy = ImageUpdatePolicy.getById(instance.updatePolicy),
             containerId = instance.containerId,
-            connection = HostPort(host = instance.host!!, port = instance.port!!),
+            address = HostPort(host = instance.host, port = instance.port!!),
             runtime = buildRuntime(instance.containerId!!),
             blueprintId = instance.blueprintId.toKotlinUuid(),
             createdAt = instance.createdAt,
             nodeId = instance.nodeId,
         )
 
-    private suspend fun createContainer(
-        instanceId: Uuid,
-        image: String,
-        name: String,
-    ): String {
-        logger.debug("Creating container with {} to {}...", image, instanceId)
+    private suspend fun createContainer(instanceId: Uuid, name: String, options: CreateInstanceOptions): String {
+        logger.debug("Creating container with {} to {}...", options.image, instanceId)
+        requireNotNull(options.port)
 
         return dockerClient.containers.create {
-            this.image = image
-            this.name = name
-            labels = mapOf("id" to "gg.kuken.instance.$instanceId")
+            this@create.name = name
+            this@create.image = options.image
+            labels = mapOf("gg.kuken.instance.id" to instanceId.toString())
+            env = options.env.mapValues { (_, value) ->
+                value.replace("{addr.port}", options.port.toString())
+            }.map { (key, value) -> "$key=$value" }
+
+            hostConfig {
+                portBindings(options.port) {
+                    add(PortBinding(options.host, options.port))
+                }
+            }
         }
     }
 
-    private suspend fun connectInstance(
-        containerId: String,
-        host: String?,
-        port: Int?,
-    ): HostPort? {
+    private suspend fun connectInstance(containerId: String) {
         val networkToConnect = kukenConfig.docker.network.name
         logger.debug("Connecting $containerId to $networkToConnect...")
 
-        return runCatching {
-            val connection =
-                dockerNetworkService.connect(
-                    network = networkToConnect,
-                    container = containerId,
-                    host = host,
-                    port = port?.toShort(),
-                )
-            logger.debug("Connected {} to {} at {}", containerId, networkToConnect, connection)
-            connection
+        runCatching {
+             dockerNetworkService.connect(
+                 network = networkToConnect,
+                 container = containerId
+             )
+            logger.debug("Connected {} to {}", containerId, networkToConnect)
         }.onFailure { error ->
             logger.error("Unable to connect {} to the network {}", containerId, networkToConnect, error)
         }.getOrNull()
@@ -286,7 +283,7 @@ class DockerInstanceService(
                 status = status,
                 updatePolicy = ImageUpdatePolicy.Always,
                 containerId = containerId,
-                connection = address,
+                address = address,
                 runtime = runtime,
                 blueprintId = blueprintId,
                 createdAt = Clock.System.now(),

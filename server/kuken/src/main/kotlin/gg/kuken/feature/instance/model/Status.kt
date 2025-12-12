@@ -38,6 +38,11 @@ enum class InstanceStatus(
                 Dead, Paused, Exited, Running, Stopped, Starting, Removing, Stopping, Restarting -> true
                 else -> false
             }
+
+    companion object {
+
+        fun getByLabel(label: String) = entries.firstOrNull { it.label == label } ?: Unknown
+    }
 }
 
 @Serializable

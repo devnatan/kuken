@@ -16,19 +16,14 @@ class DockerNetworkService(
     private val dockerClient: DockerClient,
 ) {
     companion object {
-        private const val ALL_INTERFACES = "0.0.0.0"
+
         private const val MACVLAN_DRIVER = "macvlan"
         internal const val HOST_DRIVER = "host"
     }
 
     private val logger = LogManager.getLogger(DockerNetworkService::class.java)
 
-    suspend fun connect(
-        network: String,
-        container: String,
-        host: String?,
-        port: Short?,
-    ): HostPort {
+    suspend fun connect(network: String, container: String) {
         val network =
             runCatching {
                 withContext(IO) { dockerClient.networks.inspect(network) }
@@ -68,24 +63,22 @@ class DockerNetworkService(
                 cause = exception,
             )
         }
-
-        return createAddress(host, port)
     }
 
     /**
      * Creates a new connection using the specified host and port. If the host is null, it defaults to
      * listening on all network interfaces. If the port is null, a random available port is selected.
      *
-     * @param host The hostname or IP address to bind to. If null, defaults to all interfaces.
+     * @param host The hostname or IP address to bind to.
      * @param port The port number to bind to. If null, a random available port is selected.
      * @return An instance of [HostPort] containing the resolved host and port configuration.
      */
     suspend fun createAddress(
         host: String?,
-        port: Short?,
+        port: UShort?,
     ): HostPort =
         HostPort(
-            host = host ?: ALL_INTERFACES,
+            host = host,
             port = port ?: randomPort(),
         )
 
@@ -94,11 +87,11 @@ class DockerNetworkService(
      *
      * @return A randomly selected, available port number.
      */
-    private suspend fun randomPort(): Short =
-        withContext(Dispatchers.IO) {
+    private suspend fun randomPort(): UShort =
+        withContext(IO) {
             ServerSocket(0).use { socket ->
-                socket.localPort.toShort()
-            }
+                socket.localPort
+            }.toUShort()
         }
 
     /**

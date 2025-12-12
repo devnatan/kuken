@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class CreateInstanceOptions(
     val image: String,
     val host: String? = null,
-    val port: Int? = null,
+    val port: UShort? = null,
+    val env: Map<String, String> = emptyMap(),
 )

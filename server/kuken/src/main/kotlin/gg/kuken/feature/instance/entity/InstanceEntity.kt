@@ -20,7 +20,7 @@ object InstanceTable : UUIDTable("instances") {
     val containerId = varchar("cid", length = 255).nullable()
     val blueprintId = uuid("bid")
     val host = varchar("host", length = 255).nullable()
-    val port = short("port").nullable()
+    val port = ushort("port").nullable()
     val status = varchar("status", length = 255)
     val createdAt = timestamp("created_at")
     val nodeId = varchar("node", length = 255)
@@ -61,10 +61,12 @@ class InstanceRepositoryImpl(
                 updatePolicy = instance.updatePolicy.id
                 containerId = instance.containerId
                 blueprintId = instance.blueprintId.toJavaUuid()
-                host = instance.connection?.host
-                port = instance.connection?.port
+                host = instance.address?.host
+                port = instance.address?.port
                 status = instance.status.label
                 nodeId = instance.nodeId
+                createdAt = instance.createdAt
+
             }
         }
     }
