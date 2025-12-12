@@ -1,6 +1,7 @@
 package gg.kuken.feature.blueprint.http.routes
 
 import gg.kuken.feature.blueprint.BlueprintService
+import gg.kuken.feature.blueprint.LocalBlueprintSpecSource
 import gg.kuken.feature.blueprint.RemoteBlueprintSpecSource
 import gg.kuken.feature.blueprint.http.BlueprintRoutes
 import gg.kuken.feature.blueprint.http.dto.ImportBlueprintRequest
@@ -17,7 +18,7 @@ fun Route.importBlueprint() {
 
     post<BlueprintRoutes.Import> {
         val req = call.receiveValidating<ImportBlueprintRequest>(validator)
-        val spec = blueprintService.importBlueprint(RemoteBlueprintSpecSource(req.url))
+        val spec = blueprintService.importBlueprint(LocalBlueprintSpecSource(req.url))
 
         call.respond(spec)
     }
