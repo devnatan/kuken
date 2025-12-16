@@ -7,6 +7,9 @@ export const HomeRoutes: Array<RouteRecordRaw> = [
     {
         path: "",
         name: HOME_ROUTE,
-        component: importPage("home", "Home")
+        component: importPage("home", "Home"),
+        meta: {
+            title: "Home"
+        }
     },
 ];

@@ -27,7 +27,10 @@ export default createRouter({
         {
             path: "/setup",
             name: "setup",
-            component: importPage("platform", "Setup")
+            component: importPage("platform", "Setup"),
+            meta: {
+                title: "Set Up"
+            }
         },
     ]
 })
