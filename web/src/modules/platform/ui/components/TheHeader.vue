@@ -1,32 +1,24 @@
 <template>
   <header :class="$style.root">
-    <div :class="$style.account_info">
-      <router-link
-        to="account"
-        title="My Account"
+    <div :class="$style.logo">
+      <img
+        src="/img/icon-white-transparent.png"
+        alt="Logo"
       >
-        <Avatar
-          :src="undefined"
-          :label="`Account avatar`"
-        />
-      </router-link>
     </div>
   </header>
 </template>
-<script setup lang="ts">
-import Avatar from "@/modules/platform/ui/components/Avatar.vue"
-</script>
+
 <style lang="scss" module>
 .root {
-	position: absolute;
-	right: 0;
-	margin-top: 3.2rem;
-	margin-right: 4.8rem;
+  margin: 8px 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
 }
 
-.account_info {
-	width: 40px;
-	height: 40px;
-	max-height: 40px;
+.logo img {
+  max-width: 72px;
 }
 </style>

@@ -1,12 +1,16 @@
 <template>
-  <VContainer>
-    <h1>home.title</h1>
-  </VContainer>
+  <div class="container">
+    <Breadcrumb />
+    <h2><b>Game Directory</b></h2>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { useAccountsStore } from "@/modules/accounts/accounts.store"
-import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
-
-const account = useAccountsStore().getAccount
+import Breadcrumb from "@/modules/platform/ui/components/Breadcrumb.vue";
 </script>
+
+<style scoped lang="scss">
+.container {
+  padding: 48px;
+}
+</style>

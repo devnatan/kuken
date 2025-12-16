@@ -1,16 +1,17 @@
+<script setup lang="ts">
+import TheHeader from "@/modules/platform/ui/components/TheHeader.vue";
+</script>
 <template>
   <div :class="$style.root">
-    <TheSidebar />
-    <div :class="$style.body">
+    <!-- <TheSidebar /> -->
+    <main :class="$style.body">
       <TheHeader />
-      <slot />
-    </div>
+      <div :class="$style.content">
+        <slot />
+      </div>
+    </main>
   </div>
 </template>
-<script setup lang="ts">
-import TheHeader from "@/modules/platform/ui/components/TheHeader.vue"
-import TheSidebar from "@/modules/platform/ui/components/TheSidebar.vue"
-</script>
 <style lang="scss" module>
 .root {
 	display: flex;
@@ -23,5 +24,13 @@ import TheSidebar from "@/modules/platform/ui/components/TheSidebar.vue"
 	flex-grow: 1;
 	flex-direction: column;
 	overflow: auto;
+  background-color: #D85F34;
+}
+
+.content {
+  background-color: #fff;
+  border-radius: 20px;
+  margin: 0 32px 32px 32px;
+  height: 100%;
 }
 </style>
