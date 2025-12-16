@@ -28,14 +28,10 @@ jobs:
           server-id: github
           cache: 'gradle'
 
-      - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.0.4
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          validate-wrappers: true
 
       - name: Build with Gradle
-        uses: burrunan/gradle-cache-action@v1
-        env:
-          GITHUB_USERNAME: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          arguments: build -x check
-          gradle-version: wrapper
+        run: ./gradlew build -x check
