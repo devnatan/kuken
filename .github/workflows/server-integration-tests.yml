@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Docker
-        uses: docker-practice/actions-setup-docker@master
+        uses: docker/setup-docker-action@v4.6.0
 
       - name: Setup JDK 24
         uses: actions/setup-java@v5
