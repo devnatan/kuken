@@ -14,7 +14,7 @@ fun Route.setup() {
     val validator by inject<Validator>()
 
     get("/setup") {
-        val state = setupService.state()
+        val state = setupService.currentState()
         if (state.completed) {
             call.response.status(HttpStatusCode.Locked)
             return@get
@@ -24,7 +24,7 @@ fun Route.setup() {
     }
 
     post("/setup") {
-        val currentState = setupService.state()
+        val currentState = setupService.currentState()
         if (currentState.completed) {
             call.response.status(HttpStatusCode.Locked)
             return@post

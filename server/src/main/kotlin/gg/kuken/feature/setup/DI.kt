@@ -4,5 +4,10 @@ import org.koin.dsl.module
 
 val SetupDI =
     module {
-        factory { SetupService(accountService = get()) }
+        factory {
+            SetupService(
+                accountService = get(),
+                remoteConfigService = get(),
+            )
+        }
     }

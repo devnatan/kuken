@@ -27,6 +27,8 @@ interface AccountService {
     ): Account
 
     suspend fun deleteAccount(id: Uuid)
+
+    suspend fun existsAnyAccount(): Boolean
 }
 
 class AccountServiceImpl(
@@ -79,4 +81,6 @@ class AccountServiceImpl(
         accountsRepository.deleteAccount(id)
         eventDispatcher.dispatch(AccountDeletedEvent(id))
     }
+
+    override suspend fun existsAnyAccount(): Boolean = accountsRepository.existsAnyAccount()
 }

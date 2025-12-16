@@ -6,6 +6,7 @@ import gg.kuken.feature.account.model.Account
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import kotlin.uuid.ExperimentalUuidApi
@@ -70,5 +71,10 @@ class AccountsRepositoryImpl(
     override suspend fun existsByEmail(email: String): Boolean =
         suspendTransaction(db = database, readOnly = true) {
             !AccountEntity.find { AccountTable.email eq email }.empty()
+        }
+
+    override suspend fun existsAnyAccount(): Boolean =
+        suspendTransaction(database, readOnly = true) {
+            !AccountTable.select(AccountTable.id).fetchSize(1).empty()
         }
 }

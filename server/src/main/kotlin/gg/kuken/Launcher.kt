@@ -9,6 +9,7 @@ import gg.kuken.feature.account.IdentityGeneratorService
 import gg.kuken.feature.auth.AuthDI
 import gg.kuken.feature.blueprint.BlueprintDI
 import gg.kuken.feature.instance.InstancesDI
+import gg.kuken.feature.remoteConfig.RemoteConfigDI
 import gg.kuken.feature.setup.SetupDI
 import gg.kuken.feature.unit.UnitDI
 import gg.kuken.http.Http
@@ -81,5 +82,5 @@ private fun configureDependencyInjection(config: KukenConfig) =
                 }
             }
 
-        modules(root, AccountDI, AuthDI, InstancesDI, BlueprintDI, UnitDI, SetupDI)
+        modules(root, AccountDI, AuthDI, InstancesDI, BlueprintDI, UnitDI, SetupDI, RemoteConfigDI)
     }

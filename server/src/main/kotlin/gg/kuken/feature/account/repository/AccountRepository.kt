@@ -22,4 +22,6 @@ interface AccountRepository {
     suspend fun deleteAccount(id: Uuid)
 
     suspend fun existsByEmail(email: String): Boolean
+
+    suspend fun existsAnyAccount(): Boolean
 }
