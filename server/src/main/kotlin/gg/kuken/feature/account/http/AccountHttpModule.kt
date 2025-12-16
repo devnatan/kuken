@@ -12,8 +12,8 @@ object AccountHttpModule : HttpModule() {
         app.routing {
             authenticate {
                 listAccounts()
+                register()
             }
-            register()
         }
     }
 }
