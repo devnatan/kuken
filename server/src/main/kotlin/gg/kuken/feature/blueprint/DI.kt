@@ -11,7 +11,7 @@ val BlueprintDI =
             BlueprintRepositoryImpl(database = get())
         }
 
-        single {
+        factory {
             BlueprintService(
                 blueprintRepository = get(),
                 blueprintSpecProvider = get(),

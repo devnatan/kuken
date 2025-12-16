@@ -10,13 +10,14 @@ val InstancesDI =
             InstanceRepositoryImpl(database = get())
         }
 
-        single<InstanceService> {
+        factory<InstanceService> {
             DockerInstanceService(
                 dockerClient = get(),
                 instanceRepository = get(),
                 blueprintService = get(),
                 identityGeneratorService = get(),
                 kukenConfig = get(),
+                dockerNetworkService = DockerNetworkService(dockerClient = get()),
             )
         }
     }

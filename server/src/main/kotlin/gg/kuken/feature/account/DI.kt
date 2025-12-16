@@ -9,7 +9,7 @@ val AccountDI =
         single<AccountRepository>(createdAtStart = true) {
             AccountsRepositoryImpl(database = get())
         }
-        single<AccountService> {
+        factory<AccountService> {
             AccountServiceImpl(
                 identityGeneratorService = get(),
                 accountsRepository = get(),

@@ -17,11 +17,13 @@ class BlueprintService(
     private val blueprintSpecProvider: BlueprintSpecProvider,
     private val identityGeneratorService: IdentityGeneratorService,
 ) {
-    private val json: Json =
-        Json {
-            coerceInputValues = false
-            prettyPrint = true
-        }
+    private companion object {
+        private val json: Json =
+            Json {
+                coerceInputValues = false
+                prettyPrint = true
+            }
+    }
 
     suspend fun listBlueprints(): List<Blueprint> = blueprintRepository.findAll().map(::toModel)
 

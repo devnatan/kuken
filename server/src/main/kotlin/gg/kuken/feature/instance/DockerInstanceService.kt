@@ -38,9 +38,9 @@ class DockerInstanceService(
     private val blueprintService: BlueprintService,
     private val identityGeneratorService: IdentityGeneratorService,
     private val kukenConfig: KukenConfig,
+    private val dockerNetworkService: DockerNetworkService,
 ) : InstanceService {
     private val logger = LogManager.getLogger(DockerInstanceService::class.java)
-    private val dockerNetworkService = DockerNetworkService(dockerClient)
 
     override suspend fun getInstance(instanceId: Uuid): Instance {
         val instance = instanceRepository.findById(instanceId) ?: throw InstanceNotFoundException()
