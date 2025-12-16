@@ -17,8 +17,7 @@ class AccountsService {
     }
 
     async listAccounts(): Promise<Account[]> {
-        return httpService.get("accounts")
-            .then((res: AxiosResponse) => res.data as Account[]);
+        return httpService.get("accounts").then((res: AxiosResponse) => res.data as Account[])
     }
 
     async updateAccount(account: Account): Promise<void> {

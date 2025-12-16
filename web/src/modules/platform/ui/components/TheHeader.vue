@@ -11,14 +11,14 @@
 
 <style lang="scss" module>
 .root {
-  margin: 8px 16px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: 100%;
+    margin: 8px 16px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
 }
 
 .logo img {
-  max-width: 72px;
+    max-width: 72px;
 }
 </style>

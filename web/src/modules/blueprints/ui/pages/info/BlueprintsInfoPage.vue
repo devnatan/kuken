@@ -2,7 +2,7 @@
   <Resource
     :resource="resource"
     :reactivity-key="blueprint"
-    @loaded="(value: unknown) => blueprint = value"
+    @loaded="(value: unknown) => (blueprint = value)"
     @error="onError"
   >
     <div v-if="blueprint">
@@ -15,7 +15,7 @@
   </Resource>
 </template>
 <script setup lang="ts">
-import { inject, ref } from "vue"
+import { ref } from "vue"
 import type { Blueprint } from "@/modules/blueprints/api/models/blueprint.model"
 import blueprintsService from "@/modules/blueprints/api/services/blueprints.service"
 import Resource from "@/modules/platform/ui/components/Resource.vue"
@@ -32,6 +32,7 @@ const errors = ref({ notFound: false })
 
 // Functions
 function onError(error: Error): void {
-    errors.value.notFound = error instanceof HttpError && (error as HttpError).code === HttpErrors.UNKNOWN_BLUEPRINT
+    errors.value.notFound =
+        error instanceof HttpError && (error as HttpError).code === HttpErrors.UNKNOWN_BLUEPRINT
 }
 </script>

@@ -11,22 +11,22 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue"
 
-const emits = defineEmits(['update:modelValue'])
+const emits = defineEmits(["update:modelValue"])
 const props = defineProps<{
-  disabled?: boolean
-  placeholder?: string
-  onSurface?: boolean
-  autoFocus?: boolean
-  modelValue?: string
+    disabled?: boolean
+    placeholder?: string
+    onSurface?: boolean
+    autoFocus?: boolean
+    modelValue?: string
 }>()
 
 function onInputChange(event: Event): void {
-    emits("update:modelValue", (event.target as HTMLInputElement).value);
+    emits("update:modelValue", (event.target as HTMLInputElement).value)
 }
 
-const rootElement = ref<HTMLInputElement | null>(null);
+const rootElement = ref<HTMLInputElement | null>(null)
 onMounted(() => {
     if (props.autoFocus) {
         rootElement.value?.focus()

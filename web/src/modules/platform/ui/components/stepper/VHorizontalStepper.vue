@@ -45,15 +45,14 @@ const steps = reactive(children)
 
 // Effects
 onMounted(() => {
-    console.log("child", children);
+    console.log("child", children)
 })
 
 watch([props.currentStep], (value) => {
     const nextIndex = Math.min(value[0]!, maxSteps.value)
     activeStep.value = undefinedToNull(steps[nextIndex])
-});
+})
 
 // Functions
-function onCurrentStepChange(): void {
-}
+function onCurrentStepChange(): void {}
 </script>

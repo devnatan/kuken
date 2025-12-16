@@ -4,16 +4,14 @@ import type { Logger } from "@/modules/platform/api/services/log.service"
 import logService from "@/modules/platform/api/services/log.service"
 
 class ServerService {
-
     private readonly logger: Logger = logService.create("backend")
 
     async getInfo(): Promise<ServerInfo> {
         const store = usePlatformStore()
-        if (store.hasServerInfo)
-            return store.getServerInfo
+        if (store.hasServerInfo) return store.getServerInfo
 
         const value = { setup: true } as ServerInfo
-        this.logger.debug(value);
+        this.logger.debug(value)
         store.updateServerInfo(value)
         return value
         // return httpService.get("/").then((res: AxiosResponse) => res.data as SystemInfo);

@@ -18,15 +18,15 @@
 @import "@/assets/styles/abstracts/variables";
 
 .root {
-	display: flex;
-	align-items: center;
-	height: 100%;
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 .container {
-	display: flex;
-	align-items: center;
-	height: 100%;
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 .form {
@@ -42,29 +42,29 @@
     padding: 0 7.2rem 0 7.2rem;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
-    box-shadow: rgba(0, 0, 0, .08) 3px 3px 2px 2px;
+    box-shadow: rgba(0, 0, 0, 0.08) 3px 3px 2px 2px;
     display: flex;
     flex-direction: column;
     justify-content: center;
 
-	@media (max-width: map-get($breakpoints, "medium")) {
-		& {
-			width: 100%;
-			max-width: 100%;
-			padding: 24px;
-		}
-	}
+    @media (max-width: map-get($breakpoints, "medium")) {
+        & {
+            width: 100%;
+            max-width: 100%;
+            padding: 24px;
+        }
+    }
 
-	.logo {
-		position: relative;
+    .logo {
+        position: relative;
         height: auto;
         max-width: 128px;
         left: -32px;
-	}
+    }
 
-	.content {
-		margin-top: 96px;
-	}
+    .content {
+        margin-top: 96px;
+    }
 }
 
 .background {
@@ -75,7 +75,7 @@
     bottom: 0;
     mask-size: 40px;
     mask-repeat: repeat;
-    background-color: rgba(255,101,35, 0.12);
-    mask-image: url('/img/icon-color.svg');
+    background-color: rgba(255, 101, 35, 0.12);
+    mask-image: url("/img/icon-color.svg");
 }
 </style>

@@ -1,3 +1,3 @@
 export type ServerInfo = {
-	setup: boolean
+    setup: boolean
 }

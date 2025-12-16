@@ -13,18 +13,14 @@
           >setup.header.label.docs</a>
         </li>
         <li>
-          <a
-            :href="links.login"
-          >setup.header.label.login</a>
+          <a :href="links.login">setup.header.label.login</a>
         </li>
       </ul>
     </VContainer>
   </div>
   <div class="root">
     <VContainer>
-      <h2
-        class="title"
-      >
+      <h2 class="title">
         setup.title'
       </h2>
       <h4>Let's get you up and running!</h4>
@@ -36,9 +32,7 @@
 import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
 import TheLogo from "@/modules/platform/ui/components/TheLogo.vue"
 import configService from "@/modules/platform/api/services/config.service"
-import { useRouter } from "vue-router"
 
-const router = useRouter()
 const links = {
     docs: configService.appWebsite,
     login: "/login"
@@ -99,6 +93,5 @@ const links = {
 }
 
 .languages {
-
 }
 </style>

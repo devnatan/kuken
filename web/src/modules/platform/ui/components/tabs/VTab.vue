@@ -16,10 +16,10 @@ import { TabsInjectionKey } from "@/modules/platform/ui/components/InjectionKeys
 import type { Tab } from "@/modules/platform/ui/components/tabs/VTabList.vue"
 
 const props = defineProps<{
-  id: string
-  label: string
-  disabled?: true
-  icon?: string
+    id: string
+    label: string
+    disabled?: true
+    icon?: string
 }>()
 
 // State
@@ -29,9 +29,10 @@ const isActive = computed(() => tabs!.isTabActive(hash.value))
 
 // Effects
 const tabs = inject<{
-  addTab(tab: Partial<Tab>): void
-  removeTab(id: string): void
-  isTabActive(hash: string): boolean }>(TabsInjectionKey)
+    addTab(tab: Partial<Tab>): void
+    removeTab(id: string): void
+    isTabActive(hash: string): boolean
+        }>(TabsInjectionKey)
 
 onBeforeMount(() => {
     tabs!.addTab({

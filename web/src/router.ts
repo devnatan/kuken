@@ -18,11 +18,7 @@ export default createRouter({
             path: "/",
             component: importPage("platform", "Root"),
             beforeEnter: AuthenticatedOnlyGuard,
-            children: [
-                ...HomeRoutes,
-                ...AccountsRoute,
-                ...BlueprintsRoutes,
-            ]
+            children: [...HomeRoutes, ...AccountsRoute, ...BlueprintsRoutes]
         },
         {
             path: "/setup",
@@ -31,6 +27,6 @@ export default createRouter({
             meta: {
                 title: "Set Up"
             }
-        },
+        }
     ]
 })

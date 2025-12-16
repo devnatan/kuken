@@ -27,31 +27,31 @@
 </template>
 
 <script setup lang="ts">
-import type {RouteLocationRaw} from "vue-router";
-import {computed} from "vue";
+import type { RouteLocationRaw } from "vue-router"
+import { computed } from "vue"
 
 type Props = {
-  variant: "default" | "primary"
-  disabled?: boolean
-  outlined?: true
-  flat?: true
-  block?: true
+    variant: "default" | "primary"
+    disabled?: boolean
+    outlined?: true
+    flat?: true
+    block?: true
     // eslint-disable-next-line vue/require-default-prop
-  to?: RouteLocationRaw
+    to?: RouteLocationRaw
 }
 
 const props = withDefaults(defineProps<Props>(), {
     variant: "default"
 })
 
-defineEmits(["click", "keydown"]);
+defineEmits(["click", "keydown"])
 
 const styleClasses = computed<unknown>(() => [
     `button--${props.variant}`,
     {
-        'button--flat': props.flat,
-        'button--outlined': props.outlined,
-        'button--block': props.block
+        "button--flat": props.flat,
+        "button--outlined": props.outlined,
+        "button--block": props.block
     }
 ])
 </script>

@@ -8,18 +8,17 @@ export const usePlatformStore = defineStore("platform", {
     state: (): PlatformStore => ({ serverInfo: null }),
     getters: {
         getServerInfo(): ServerInfo {
-            if (!this.hasServerInfo)
-                throw new Error("Missing system information")
+            if (!this.hasServerInfo) throw new Error("Missing system information")
 
             return this.serverInfo!
         },
         hasServerInfo(): boolean {
-            return !isNull(this.serverInfo);
+            return !isNull(this.serverInfo)
         }
     },
     actions: {
         updateServerInfo(serverInfo: ServerInfo) {
-            this.serverInfo = serverInfo;
+            this.serverInfo = serverInfo
         }
     }
 })

@@ -15,8 +15,7 @@ export const AuthenticatedOnlyGuard: NavigationGuard = (
 
     const isGoingToLogin = to.name === AUTH_LOGIN_ROUTE
     const localToken = authService.getLocalAccessToken()
-    if (isNull(localToken))
-        return isGoingToLogin ? next() : next({ name: AUTH_LOGIN_ROUTE })
+    if (isNull(localToken)) return isGoingToLogin ? next() : next({ name: AUTH_LOGIN_ROUTE })
 
     authService
         .verify(localToken!)

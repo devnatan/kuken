@@ -1,1 +1,1 @@
-declare module 'vue-material-design-icons/*.vue'
+declare module "vue-material-design-icons/*.vue"

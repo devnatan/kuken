@@ -1,30 +1,30 @@
 .label {
-  font-family: var(--kt-body-font);
-  color: var(--kt-content-neutral-high);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 21.75px;
-  letter-spacing: 0.285px;
-  user-select: none;
-  margin-bottom: 0.2rem;
+    font-family: var(--kt-body-font);
+    color: var(--kt-content-neutral-high);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 21.75px;
+    letter-spacing: 0.285px;
+    user-select: none;
+    margin-bottom: 0.2rem;
 
-  &:not(:first-child) {
-    margin-top: 16px;
-  }
+    &:not(:first-child) {
+        margin-top: 16px;
+    }
 }
 
 .label--high {
-  color: var(--kt-content-neutral-high);
+    color: var(--kt-content-neutral-high);
 }
 
 .label--onColor {
-  color: var(--kt-content-primary-oncolor);
+    color: var(--kt-content-primary-oncolor);
 }
 
 .label--required::after {
-  content: "*";
-  position: relative;
-  display: inline-block;
-  color: var(--kt-content-negative);
-  font-size: 14px;
+    content: "*";
+    position: relative;
+    display: inline-block;
+    color: var(--kt-content-negative);
+    font-size: 14px;
 }

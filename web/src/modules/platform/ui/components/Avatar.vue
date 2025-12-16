@@ -20,7 +20,7 @@ import { ProgressiveImage } from "vue-progressive-image"
 
 const props = defineProps<{ src: string | undefined | null }>()
 
-const src = computed(() => isUndefined(props.src) || isNull(props.src)
-    ? "/img/logo-black.svg"
-    : props.src)
+const src = computed(() =>
+    isUndefined(props.src) || isNull(props.src) ? "/img/logo-black.svg" : props.src
+)
 </script>

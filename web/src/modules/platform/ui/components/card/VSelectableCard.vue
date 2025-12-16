@@ -25,17 +25,17 @@
   </VCard>
 </template>
 <script setup lang="ts">
-import {ref} from "vue";
-import VCard from "@/modules/platform/ui/components/card/VCard.vue";
+import { ref } from "vue"
+import VCard from "@/modules/platform/ui/components/card/VCard.vue"
 
 const props = defineProps<{
-  selected: boolean
-  disabled: boolean
+    selected: boolean
+    disabled: boolean
 }>()
 
-const selected = ref<boolean>(props.selected);
+const selected = ref<boolean>(props.selected)
 
 function onSelect(): void {
-    selected.value = !selected.value;
+    selected.value = !selected.value
 }
 </script>

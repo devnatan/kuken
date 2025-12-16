@@ -17,7 +17,7 @@
 import VIcon from "@/modules/platform/ui/components/icons/VIcon.vue"
 
 defineProps<{
-    icon?: string,
+    icon?: string
     alignY?: true
 }>()
 </script>

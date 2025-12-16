@@ -1,1 +1,1 @@
-declare module 'vue-progressive-image'
+declare module "vue-progressive-image"

@@ -65,67 +65,67 @@ import VIcon from "@/modules/platform/ui/components/icons/VIcon.vue"
 </script>
 <style lang="scss" module>
 .root {
-  padding: 1.6rem 0;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--kt-background-surface);
-  border-right: 1px solid var(--kt-border-low);
+    padding: 1.6rem 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--kt-background-surface);
+    border-right: 1px solid var(--kt-border-low);
 }
 
 .logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 4px;
-  padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px;
+    padding: 0 12px;
 
-  img {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-  }
+    img {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+    }
 }
 
 .items {
-  flex-grow: 1;
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
-  align-items: baseline;
-
-  &:last-child {
-    align-items: flex-end;
-  }
-
-  ul li {
+    flex-grow: 1;
+    margin-top: 24px;
     display: flex;
     justify-content: center;
+    align-items: baseline;
 
-    &:not(:last-child) {
-      margin-bottom: 16px;
+    &:last-child {
+        align-items: flex-end;
     }
 
-    a {
-      padding: 6px;
-      border-radius: 8px;
-      color: var(--kt-content-neutral-high);
+    ul li {
+        display: flex;
+        justify-content: center;
 
-      &:hover {
-        background-color: var(--kt-content-neutral-overlay);
-      }
+        &:not(:last-child) {
+            margin-bottom: 16px;
+        }
 
-      :deep(svg) {
-        width: 24px;
-        height: 24px;
-      }
+        a {
+            padding: 6px;
+            border-radius: 8px;
+            color: var(--kt-content-neutral-high);
+
+            &:hover {
+                background-color: var(--kt-content-neutral-overlay);
+            }
+
+            :deep(svg) {
+                width: 24px;
+                height: 24px;
+            }
+        }
     }
-  }
 }
 
 .account {
 }
 
 .accountAvatar {
-  max-height: 24px;
+    max-height: 24px;
 }
 </style>

@@ -1,7 +1,7 @@
-import type { RouteRecordRaw } from "vue-router";
+import type { RouteRecordRaw } from "vue-router"
 import { importPage } from "@/router"
 
-export const HOME_ROUTE = "home";
+export const HOME_ROUTE = "home"
 
 export const HomeRoutes: Array<RouteRecordRaw> = [
     {
@@ -11,5 +11,5 @@ export const HomeRoutes: Array<RouteRecordRaw> = [
         meta: {
             title: "Home"
         }
-    },
-];
+    }
+]

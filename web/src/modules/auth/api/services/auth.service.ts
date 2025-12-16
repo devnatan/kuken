@@ -16,7 +16,7 @@ class AuthService {
         httpService.axios.interceptors.request.use((request) => {
             const localToken = this.getLocalAccessToken()
             if (!isNull(localToken))
-				request.headers!["Authorization"] = `Bearer ${localToken.token}`
+                request.headers!["Authorization"] = `Bearer ${localToken.token}`
             return request
         })
     }
@@ -26,7 +26,7 @@ class AuthService {
     }
 
     resetLocalAccessToken(): void {
-        localStorageService.remove(AUTHORIZATION_TOKEN_KEY);
+        localStorageService.remove(AUTHORIZATION_TOKEN_KEY)
     }
 
     async login(username: string, password: string): Promise<void> {

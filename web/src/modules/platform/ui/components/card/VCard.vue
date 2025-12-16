@@ -22,11 +22,11 @@
 
 <script setup lang="ts">
 defineProps<{
-  hoverable?: boolean
-  flat?: boolean
-  reduced?: boolean
-  onSurface?: boolean
-  outlined?: boolean
-  scrollable?: boolean
+    hoverable?: boolean
+    flat?: boolean
+    reduced?: boolean
+    onSurface?: boolean
+    outlined?: boolean
+    scrollable?: boolean
 }>()
 </script>

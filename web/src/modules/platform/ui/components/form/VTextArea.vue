@@ -9,6 +9,6 @@
 const emits = defineEmits(["update:modelValue"])
 
 function onInputChange(event: Event): void {
-    emits('update:modelValue', (event.target as HTMLTextAreaElement).value)
+    emits("update:modelValue", (event.target as HTMLTextAreaElement).value)
 }
 </script>

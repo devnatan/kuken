@@ -32,8 +32,8 @@ import logService from "@/modules/platform/api/services/log.service"
 
 const emits = defineEmits(["loaded", "error"])
 const props = defineProps<{
-  resource: () => Promise<unknown>
-  includeRefreshButton?: true
+    resource: () => Promise<unknown>
+    includeRefreshButton?: true
 }>()
 const state = reactive({
     isLoading: true,
@@ -48,7 +48,8 @@ function load(): void {
     state.isEmpty = false
     state.isLoading = true
 
-    props.resource()
+    props
+        .resource()
         .then(onDataLoaded)
         .catch(onError)
         .finally(() => (state.isLoading = false))
@@ -71,10 +72,10 @@ load()
 </script>
 <style lang="scss" module>
 .empty__body {
-  margin-top: 1.6rem;
+    margin-top: 1.6rem;
 }
 
 .button:not(:last-child) {
-  margin-right: 0.8rem;
+    margin-right: 0.8rem;
 }
 </style>

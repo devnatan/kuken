@@ -1,6 +1,6 @@
 <template>
   <label
-    class="label" 
+    class="label"
     :class="{
       'label--onColor': onColor,
       'label--hight': high,
@@ -13,8 +13,8 @@
 
 <script setup lang="ts">
 defineProps<{
-  onColor?: boolean
-  high?: boolean
-  required?: boolean
+    onColor?: boolean
+    high?: boolean
+    required?: boolean
 }>()
 </script>

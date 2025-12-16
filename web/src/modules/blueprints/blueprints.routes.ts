@@ -21,5 +21,4 @@ export const BlueprintsRoutes: Array<RouteRecordRaw> = [
             }
         ]
     }
-
 ]

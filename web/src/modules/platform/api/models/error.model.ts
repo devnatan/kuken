@@ -1,6 +1,6 @@
 export interface KatanError {
-	readonly code: string | number
-	readonly message: string
+    readonly code: string | number
+    readonly message: string
 }
 
 export class HttpError implements Error {

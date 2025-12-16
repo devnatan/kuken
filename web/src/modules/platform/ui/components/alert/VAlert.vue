@@ -32,10 +32,10 @@
 </template>
 
 <script setup lang="ts">
-import {computed} from "vue"
+import { computed } from "vue"
 
 const props = defineProps<{
-  variant: "default" | "info" | "error" | "warn"
+    variant: "default" | "info" | "error" | "warn"
 }>()
 
 // eslint-disable-next-line vue/return-in-computed-property

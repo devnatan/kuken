@@ -29,11 +29,7 @@
   <slot />
 </template>
 
-<script lang="ts">
-
-
-
-</script>
+<script lang="ts"></script>
 <script setup lang="ts">
 import { onMounted, provide, reactive, ref } from "vue"
 import { isUndefined } from "@/utils"
@@ -41,20 +37,20 @@ import VIcon from "@/modules/platform/ui/components/icon/VIcon.vue"
 import { TabsInjectionKey } from "@/modules/platform/ui/components/InjectionKeys"
 
 export type Tab = {
-  id: string
-  index: number
-  name: string
-  hash: string
-  label: string
-  icon: string | undefined
-  isActive: boolean
-  isDisabled: boolean
+    id: string
+    index: number
+    name: string
+    hash: string
+    label: string
+    icon: string | undefined
+    isActive: boolean
+    isDisabled: boolean
 }
 
 defineProps<{ label: string }>()
 const emits = defineEmits<{
-  changed: [tab: Tab]
-  clicked: [tab: Tab]
+    changed: [tab: Tab]
+    clicked: [tab: Tab]
 }>()
 
 // State
@@ -64,12 +60,12 @@ const lastActiveHash = ref("")
 
 // Functions
 function selectTab(hash: string, event?: Event) {
-    const targetTab = findTab(hash);
+    const targetTab = findTab(hash)
 
-    if (isUndefined(targetTab)) return;
+    if (isUndefined(targetTab)) return
     if (!isUndefined(event) && targetTab.isDisabled) {
-        event.preventDefault();
-        return;
+        event.preventDefault()
+        return
     }
 
     if (lastActiveHash.value === currActiveHash.value) {
@@ -77,7 +73,7 @@ function selectTab(hash: string, event?: Event) {
         return
     }
 
-    tabs.forEach((tab: Tab) => tab.isActive = (tab.hash === targetTab.hash))
+    tabs.forEach((tab: Tab) => (tab.isActive = tab.hash === targetTab.hash))
     lastActiveHash.value = currActiveHash.value = targetTab.hash
     emits("changed", targetTab)
 }
@@ -95,31 +91,30 @@ onMounted(() => {
     const urlHash = window.location.hash
     if (!isUndefined(findTab(urlHash))) {
         selectTab(urlHash)
-        return;
+        return
     }
 
-    if (tabs.length > 0)
-        selectTab(tabs[0]!.hash)
+    if (tabs.length > 0) selectTab(tabs[0]!.hash)
 })
 
 provide(TabsInjectionKey, {
     addTab(tab: Tab): void {
         tabs.push({
             ...tab,
-            index: tabs.length,
+            index: tabs.length
         })
     },
     updateTab(id: string, payload: Partial<Tab>): void {
-        const idx = tabs.findIndex((tab: Tab) => tab.id === id);
+        const idx = tabs.findIndex((tab: Tab) => tab.id === id)
         if (idx === -1) throw new Error(`Unknown tab: ${id}`)
 
         Object.assign(tabs[idx]!, payload)
     },
     removeTab(id: string) {
-        const idx = tabs.findIndex((tab: Tab) => tab.id === id);
+        const idx = tabs.findIndex((tab: Tab) => tab.id === id)
         if (idx === -1) throw new Error(`Unknown tab: ${id}`)
 
-        tabs.slice(idx, 1);
+        tabs.slice(idx, 1)
     },
     isTabActive(hash: string): boolean {
         return currActiveHash.value === hash
