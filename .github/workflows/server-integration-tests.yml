@@ -29,10 +29,10 @@ jobs:
       - name: Setup Docker
         uses: docker-practice/actions-setup-docker@master
 
-      - name: Setup JDK 25
+      - name: Setup JDK 24
         uses: actions/setup-java@v5
         with:
-          java-version: '25'
+          java-version: '24'
           distribution: 'adopt'
 
       - name: Setup Gradle
