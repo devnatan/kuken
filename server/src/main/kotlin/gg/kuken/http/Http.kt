@@ -5,6 +5,9 @@ import gg.kuken.feature.account.http.AccountHttpModule
 import gg.kuken.feature.auth.http.AuthHttpModule
 import gg.kuken.feature.blueprint.http.BlueprintHttpModule
 import gg.kuken.feature.instance.http.InstanceHttpModule
+import gg.kuken.feature.remoteConfig.RemoteConfig
+import gg.kuken.feature.remoteConfig.RemoteConfigService
+import gg.kuken.feature.setup.SetupService
 import gg.kuken.feature.setup.http.SetupHttpModule
 import gg.kuken.feature.unit.http.UnitHttpModule
 import gg.kuken.http.websocket.WebSocketManager
@@ -15,10 +18,15 @@ import io.ktor.server.engine.addShutdownHook
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.plugins.openapi.openAPI
 import io.ktor.server.plugins.swagger.swaggerUI
+import io.ktor.server.response.respond
+import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import kotlin.getValue
 
 private const val STOP_GRACE_PERIOD_MILLIS: Long = 1000
 private const val TIMEOUT_MILLIS: Long = 5000
@@ -71,8 +79,36 @@ class Http(
     private fun configureApplication(app: Application): Unit =
         with(app) {
             installDefaultFeatures(appConfig)
+            routing {
+                get("/") {
+                    call.respond(respondServerInfo())
+                }
+            }
+
             registerHttpModules()
         }
+
+    @Serializable
+    private data class ServerInfo(
+        val organization: Organization,
+        val version: String,
+    ) {
+        @Serializable
+        data class Organization(
+            val name: String,
+        )
+    }
+
+    private suspend fun respondServerInfo(): ServerInfo {
+        val remoteConfigService by inject<RemoteConfigService>()
+        return ServerInfo(
+            organization =
+                ServerInfo.Organization(
+                    name = remoteConfigService.getConfigValue(RemoteConfig.OrganizationName),
+                ),
+            version = "0.0.1",
+        )
+    }
 
     private fun createServer() =
         embeddedServer(
