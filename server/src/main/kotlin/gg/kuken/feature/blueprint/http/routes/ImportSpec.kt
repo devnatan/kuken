@@ -18,8 +18,8 @@ fun Route.importBlueprint() {
 
     post<BlueprintRoutes.Import> {
         val req = call.receiveValidating<ImportBlueprintRequest>(validator)
-        val spec = blueprintService.importBlueprint(LocalBlueprintSpecSource(req.url))
+        val blueprint = blueprintService.importBlueprint(RemoteBlueprintSpecSource(req.url))
 
-        call.respond(spec)
+        call.respond(blueprint)
     }
 }
