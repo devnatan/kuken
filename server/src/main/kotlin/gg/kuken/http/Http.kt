@@ -91,6 +91,7 @@ class Http(
     @Serializable
     private data class ServerInfo(
         val organization: Organization,
+        val production: Boolean,
         val version: String,
     ) {
         @Serializable
@@ -106,6 +107,7 @@ class Http(
                 ServerInfo.Organization(
                     name = remoteConfigService.getConfigValue(RemoteConfig.OrganizationName),
                 ),
+            production = !appConfig.devMode,
             version = "0.0.1",
         )
     }
