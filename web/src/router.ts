@@ -13,24 +13,27 @@ export function importPage(module: string, path: string): () => Promise<unknown>
 
 export const SETUP_ROUTE = "setup"
 
-export default createRouter({
+const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         ...AuthRoutes,
         {
             path: "/",
             component: importPage("platform", "Root"),
-            beforeEnter: [RequireSetupGuard, AuthenticatedOnlyGuard],
+            beforeEnter: [AuthenticatedOnlyGuard],
             children: [...HomeRoutes, ...AccountsRoute, ...BlueprintsRoutes]
         },
         {
             path: "/setup",
             name: SETUP_ROUTE,
             component: importPage("setup", "Setup"),
-            beforeEnter: [RequireSetupGuard],
             meta: {
                 title: "Set Up"
             }
         }
     ]
 })
+
+router.beforeEach(RequireSetupGuard)
+
+export default router

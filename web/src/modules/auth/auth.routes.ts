@@ -8,7 +8,7 @@ export const AuthRoutes: Array<RouteRecordRaw> = [
     {
         path: "/login",
         name: AUTH_LOGIN_ROUTE,
-        beforeEnter: AuthenticatedOnlyGuard,
+        beforeEnter: [AuthenticatedOnlyGuard],
         component: importPage("auth", "Login"),
         meta: {
             title: "Log In"

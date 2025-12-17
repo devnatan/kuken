@@ -1,6 +1,6 @@
 export type Setup = {
     completed: boolean
-    remainingSteps: Set<SetupStep>
+    remainingSteps: [SetupStep]
 }
 
 export type SetupStep = { type: "create-account" } | { type: "organization-name" }
