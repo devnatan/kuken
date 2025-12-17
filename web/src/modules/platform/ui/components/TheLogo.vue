@@ -1,9 +1,5 @@
 <template>
-  <img
-    alt="Kuken Logo"
-    aria-label="Logo"
-    :src="src"
-  >
+    <img alt="Kuken Logo" aria-label="Logo" :src="src" />
 </template>
 <script setup lang="ts">
 import { computed } from "vue"

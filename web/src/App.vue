@@ -1,10 +1,7 @@
 <template>
-  <LoadingState
-    v-if="isLoading"
-    :class="$style.loading"
-  />
-  <router-view v-else />
-  <ModalsContainer />
+    <LoadingState v-if="isLoading" :class="$style.loading" />
+    <router-view v-else />
+    <ModalsContainer />
 </template>
 
 <script setup lang="ts">

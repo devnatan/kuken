@@ -1,8 +1,5 @@
 <template>
-  <div
-    ref="root"
-    class="loading-state"
-  />
+    <div ref="root" class="loading-state" />
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from "vue"

@@ -1,10 +1,7 @@
 <template>
-  <div
-    class="layout"
-    :style="style"
-  >
-    <slot />
-  </div>
+    <div class="layout" :style="style">
+        <slot />
+    </div>
 </template>
 <script setup lang="ts">
 import type { CSSProperties } from "vue"

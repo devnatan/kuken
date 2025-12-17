@@ -24,24 +24,17 @@ const activeLink = computed(() => links[links.length - 1]!)
 </script>
 
 <template>
-  <div
-    v-if="isVisible"
-    class="root"
-  >
-    <router-link
-      v-for="link in inactiveLinks"
-      :key="link.title"
-      class="link"
-      :to="{ name: link.href }"
-    >
-      {{ link.title }}
-    </router-link>
-    <span
-      key="active"
-      class="link"
-      v-text="activeLink.title"
-    />
-  </div>
+    <div v-if="isVisible" class="root">
+        <router-link
+            v-for="link in inactiveLinks"
+            :key="link.title"
+            class="link"
+            :to="{ name: link.href }"
+        >
+            {{ link.title }}
+        </router-link>
+        <span key="active" class="link" v-text="activeLink.title" />
+    </div>
 </template>
 
 <style scoped lang="scss">

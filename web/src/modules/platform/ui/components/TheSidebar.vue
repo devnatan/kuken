@@ -1,62 +1,53 @@
 <template>
-  <aside
-    :class="$style.root"
-    role="complementary"
-  >
-    <div :class="$style.logo">
-      <router-link to="/">
-        <TheLogo :black="true" />
-      </router-link>
-    </div>
-    <div :class="$style.items">
-      <ul>
-        <li>
-          <router-link to="about">
-            <!--            <VIcon name="Information" />-->
-          </router-link>
-        </li>
-        <li>
-          <a href="#">
-            <VIcon name="Apps" />
-          </a>
-        </li>
-        <li>
-          <router-link to="/blueprints">
-            <VIcon name="Puzzle" />
-          </router-link>
-        </li>
-        <li>
-          <router-link to="users">
-            <!--            <VIcon name="AccountMultipleOutline" />-->
-          </router-link>
-        </li>
-      </ul>
-    </div>
-    <div :class="$style.items">
-      <ul>
-        <li>
-          <a
-            :href="appWebsite"
-            target="_blank"
-          >
-            <!--            <VIcon name="HelpCircleOutline" />-->
-          </a>
-        </li>
-        <li>
-          <router-link
-            to="about"
-            :class="$style.account"
-          >
-            <Avatar
-              :class="$style.accountAvatar"
-              :src="undefined"
-              label="Account avatar"
-            />
-          </router-link>
-        </li>
-      </ul>
-    </div>
-  </aside>
+    <aside :class="$style.root" role="complementary">
+        <div :class="$style.logo">
+            <router-link to="/">
+                <TheLogo :black="true" />
+            </router-link>
+        </div>
+        <div :class="$style.items">
+            <ul>
+                <li>
+                    <router-link to="about">
+                        <!--            <VIcon name="Information" />-->
+                    </router-link>
+                </li>
+                <li>
+                    <a href="#">
+                        <VIcon name="Apps" />
+                    </a>
+                </li>
+                <li>
+                    <router-link to="/blueprints">
+                        <VIcon name="Puzzle" />
+                    </router-link>
+                </li>
+                <li>
+                    <router-link to="users">
+                        <!--            <VIcon name="AccountMultipleOutline" />-->
+                    </router-link>
+                </li>
+            </ul>
+        </div>
+        <div :class="$style.items">
+            <ul>
+                <li>
+                    <a :href="appWebsite" target="_blank">
+                        <!--            <VIcon name="HelpCircleOutline" />-->
+                    </a>
+                </li>
+                <li>
+                    <router-link to="about" :class="$style.account">
+                        <Avatar
+                            :class="$style.accountAvatar"
+                            :src="undefined"
+                            label="Account avatar"
+                        />
+                    </router-link>
+                </li>
+            </ul>
+        </div>
+    </aside>
 </template>
 <script setup lang="ts">
 import Avatar from "@/modules/platform/ui/components/Avatar.vue"

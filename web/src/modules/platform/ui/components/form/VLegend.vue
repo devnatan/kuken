@@ -1,5 +1,5 @@
 <template>
-  <legend>
-    <slot />
-  </legend>
+    <legend>
+        <slot />
+    </legend>
 </template>

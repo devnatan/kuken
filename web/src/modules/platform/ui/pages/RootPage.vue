@@ -1,7 +1,7 @@
 <template>
-  <component :is="layout">
-    <router-view />
-  </component>
+    <component :is="layout">
+        <router-view />
+    </component>
 </template>
 <script setup lang="ts">
 import { useRouter } from "vue-router"

@@ -1,16 +1,12 @@
 <template>
-  <div
-    v-if="!src"
-    class="avatar"
-    :style="{
-      backgroundImage: `url(${src})`
-    }"
-  />
-  <ProgressiveImage
-    v-else
-    class="avatar"
-    :src="src"
-  />
+    <div
+        v-if="!src"
+        class="avatar"
+        :style="{
+            backgroundImage: `url(${src})`
+        }"
+    />
+    <ProgressiveImage v-else class="avatar" :src="src" />
 </template>
 
 <script setup lang="ts">

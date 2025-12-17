@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-row">
-    <slot />
-  </div>
+    <div class="flex-row">
+        <slot />
+    </div>
 </template>

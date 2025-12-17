@@ -9,7 +9,7 @@
     width: 100%;
     border-radius: 8px;
     letter-spacing: 0.25px;
-    border: 1px solid var(--kt-content-neutral);
+    background-color: var(--kt-background-surface-high);
 
     &:hover {
         border-color: var(--kt-content-neutral-low);

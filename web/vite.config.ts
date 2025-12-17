@@ -4,6 +4,7 @@ import { resolve, dirname } from 'node:path'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
+// @ts-ignore
 import pkg from "./package.json"
 import { splitVendorChunkPlugin } from 'vite'
 

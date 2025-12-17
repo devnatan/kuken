@@ -1,29 +1,29 @@
 <template>
-  <router-link
-    v-if="to"
-    class="button"
-    :class="styleClasses"
-    :tabindex="disabled ? -1 : 0"
-    :to="to"
-    type="button"
-    v-bind="{ disabled }"
-    @click="$emit('click')"
-    @keydown.enter="$emit('keydown', $event)"
-  >
-    <slot />
-  </router-link>
-  <button
-    v-else
-    class="button"
-    :class="styleClasses"
-    :tabindex="disabled ? -1 : 0"
-    type="button"
-    v-bind="{ disabled }"
-    @click="$emit('click', $event)"
-    @keydown.enter="$emit('keydown', $event)"
-  >
-    <slot />
-  </button>
+    <router-link
+        v-if="to"
+        class="button"
+        :class="styleClasses"
+        :tabindex="disabled ? -1 : 0"
+        :to="to"
+        type="button"
+        v-bind="{ disabled }"
+        @click="$emit('click')"
+        @keydown.enter="$emit('keydown', $event)"
+    >
+        <slot />
+    </router-link>
+    <button
+        v-else
+        class="button"
+        :class="styleClasses"
+        :tabindex="disabled ? -1 : 0"
+        type="button"
+        v-bind="{ disabled }"
+        @click="$emit('click', $event)"
+        @keydown.enter="$emit('keydown', $event)"
+    >
+        <slot />
+    </button>
 </template>
 
 <script setup lang="ts">

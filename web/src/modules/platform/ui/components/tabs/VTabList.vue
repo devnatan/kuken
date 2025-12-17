@@ -1,32 +1,21 @@
 <template>
-  <ul
-    class="tab-list"
-    :aria-label="label"
-    role="tablist"
-  >
-    <li
-      v-for="(tab, idx) in tabs"
-      :key="idx"
-      role="presentation"
-    >
-      <a
-        :aria-controls="tab.hash"
-        :aria-selected="tab.isActive"
-        :href="tab.hash"
-        class="tab"
-        :class="{ 'tab--active': tab.isActive }"
-        role="tab"
-        @click="selectTab(tab.hash, $event)"
-      >
-        <VIcon
-          v-if="tab.icon"
-          :name="tab.icon"
-        />
-        <span v-text="tab.label" />
-      </a>
-    </li>
-  </ul>
-  <slot />
+    <ul class="tab-list" :aria-label="label" role="tablist">
+        <li v-for="(tab, idx) in tabs" :key="idx" role="presentation">
+            <a
+                :aria-controls="tab.hash"
+                :aria-selected="tab.isActive"
+                :href="tab.hash"
+                class="tab"
+                :class="{ 'tab--active': tab.isActive }"
+                role="tab"
+                @click="selectTab(tab.hash, $event)"
+            >
+                <VIcon v-if="tab.icon" :name="tab.icon" />
+                <span v-text="tab.label" />
+            </a>
+        </li>
+    </ul>
+    <slot />
 </template>
 
 <script lang="ts"></script>

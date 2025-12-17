@@ -1,8 +1,5 @@
 <template>
-  <textarea
-    class="textarea"
-    @input="onInputChange"
-  />
+    <textarea class="textarea" @input="onInputChange" />
 </template>
 
 <script setup lang="ts">

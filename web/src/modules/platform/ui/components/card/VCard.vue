@@ -1,23 +1,20 @@
 <template>
-  <div
-    class="button"
-    :class="{
-      'card--hoverable': hoverable,
-      'card--flat': flat,
-      'card--reduced': reduced,
-      'card--onSurface': onSurface,
-      'card--outlined': outlined,
-      'card--scrollable': scrollable
-    }"
-  >
     <div
-      v-if="$slots.title"
-      class="card__title"
+        class="button"
+        :class="{
+            'card--hoverable': hoverable,
+            'card--flat': flat,
+            'card--reduced': reduced,
+            'card--onSurface': onSurface,
+            'card--outlined': outlined,
+            'card--scrollable': scrollable
+        }"
     >
-      <slot name="title" />
+        <div v-if="$slots.title" class="card__title">
+            <slot name="title" />
+        </div>
+        <slot />
     </div>
-    <slot />
-  </div>
 </template>
 
 <script setup lang="ts">

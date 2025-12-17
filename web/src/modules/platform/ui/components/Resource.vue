@@ -1,26 +1,12 @@
 <template>
-  <LoadingState
-    v-if="state.isLoading"
-    key="loading"
-  />
-  <EmptyState
-    v-else-if="state.isEmpty"
-    key="empty"
-  >
-    <slot name="empty" />
-    <VButton
-      v-if="includeRefreshButton"
-      :class="$style.button"
-      @click="load"
-    >
-      empty-state.refresh
-    </VButton>
-  </EmptyState>
-  <slot
-    v-else
-    key="content"
-    :refresh="load"
-  />
+    <LoadingState v-if="state.isLoading" key="loading" />
+    <EmptyState v-else-if="state.isEmpty" key="empty">
+        <slot name="empty" />
+        <VButton v-if="includeRefreshButton" :class="$style.button" @click="load">
+            empty-state.refresh
+        </VButton>
+    </EmptyState>
+    <slot v-else key="content" :refresh="load" />
 </template>
 
 <script setup lang="ts">

@@ -1,15 +1,16 @@
 <template>
-  <div class="container">
-    <Breadcrumb />
-    <h2 class="title">
-      Hello {{ account.email }}
-    </h2>
-  </div>
+    <div class="container">
+        <Breadcrumb />
+        <VTitle> Hello {{ account.email }} </VTitle>
+        <VButton to="setup"> Go to setup </VButton>
+    </div>
 </template>
 
 <script setup lang="ts">
 import Breadcrumb from "@/modules/platform/ui/components/Breadcrumb.vue"
 import { useAccount } from "@/modules/accounts/accounts.store.ts"
+import VButton from "@/modules/platform/ui/components/button/VButton.vue"
+import VTitle from "@/modules/platform/ui/components/typography/VTitle.vue"
 
 const account = useAccount()
 </script>
@@ -17,21 +18,5 @@ const account = useAccount()
 <style scoped lang="scss">
 .container {
     padding: 48px;
-}
-
-.title {
-    position: relative;
-    font-weight: bold;
-    width: fit-content;
-
-    &:after {
-        content: "";
-        display: inline;
-        border-top: 2px solid var(--kt-content-primary);
-        width: 23%;
-        bottom: 3px;
-        position: absolute;
-        right: 15%;
-    }
 }
 </style>

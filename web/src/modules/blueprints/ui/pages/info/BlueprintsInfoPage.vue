@@ -1,18 +1,14 @@
 <template>
-  <Resource
-    :resource="resource"
-    :reactivity-key="blueprint"
-    @loaded="(value: unknown) => (blueprint = value)"
-    @error="onError"
-  >
-    <div v-if="blueprint">
-      Blueprint {{ blueprint.spec.name }}
-    </div>
-    <div v-else-if="errors.notFound">
-      Não encontrado
-    </div>
-    <ErrorState v-else />
-  </Resource>
+    <Resource
+        :resource="resource"
+        :reactivity-key="blueprint"
+        @loaded="(value: unknown) => (blueprint = value)"
+        @error="onError"
+    >
+        <div v-if="blueprint">Blueprint {{ blueprint.spec.name }}</div>
+        <div v-else-if="errors.notFound">Não encontrado</div>
+        <ErrorState v-else />
+    </Resource>
 </template>
 <script setup lang="ts">
 import { ref } from "vue"

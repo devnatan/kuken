@@ -1,17 +1,13 @@
 <template>
-  <div class="root">
-    <div class="form">
-      <img
-        src="/img/icon-color.svg"
-        class="logo"
-        alt="Icon"
-      >
-      <div class="content">
-        <slot />
-      </div>
+    <div class="root">
+        <div class="form">
+            <img src="/img/icon-color.svg" class="logo" alt="Icon" />
+            <div class="content">
+                <slot />
+            </div>
+        </div>
+        <div class="background" />
     </div>
-    <div class="background" />
-  </div>
 </template>
 <style lang="scss" scoped>
 // TODO remove it from here

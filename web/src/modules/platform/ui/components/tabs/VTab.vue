@@ -1,13 +1,13 @@
 <template>
-  <section
-    v-show="isActive"
-    :id="`tabpanel-${id}`"
-    :aria-hidden="!isActive"
-    :tabindex="isActive ? 0 : -1"
-    role="tabpanel"
-  >
-    <slot />
-  </section>
+    <section
+        v-show="isActive"
+        :id="`tabpanel-${id}`"
+        :aria-hidden="!isActive"
+        :tabindex="isActive ? 0 : -1"
+        role="tabpanel"
+    >
+        <slot />
+    </section>
 </template>
 
 <script setup lang="ts">
@@ -32,7 +32,7 @@ const tabs = inject<{
     addTab(tab: Partial<Tab>): void
     removeTab(id: string): void
     isTabActive(hash: string): boolean
-        }>(TabsInjectionKey)
+}>(TabsInjectionKey)
 
 onBeforeMount(() => {
     tabs!.addTab({

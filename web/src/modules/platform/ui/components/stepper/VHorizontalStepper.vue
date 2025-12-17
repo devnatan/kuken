@@ -1,34 +1,18 @@
 <template>
-  <div
-    class="stepper"
-    @update-step="onCurrentStepChange"
-  >
-    <p>Current step: {{ currentStep }}</p>
-    <ul
-      v-if="steps.length > 0"
-      class="stepper__step-list"
-    >
-      <li
-        v-for="(_step, index) in steps"
-        :key="index"
-        @click="onCurrentStepChange"
-      >
-        Pirocoptero @ {{ index }}
-        <!--				{{ step.$props.name }}-->
-      </li>
-    </ul>
-    <template
-      v-for="(_step, index) in steps"
-      :key="index"
-    >
-      <keep-alive>
-        <component
-          :is="activeStep"
-          v-if="currentStep === index"
-        />
-      </keep-alive>
-    </template>
-  </div>
+    <div class="stepper" @update-step="onCurrentStepChange">
+        <p>Current step: {{ currentStep }}</p>
+        <ul v-if="steps.length > 0" class="stepper__step-list">
+            <li v-for="(_step, index) in steps" :key="index" @click="onCurrentStepChange">
+                Pirocoptero @ {{ index }}
+                <!--				{{ step.$props.name }}-->
+            </li>
+        </ul>
+        <template v-for="(_step, index) in steps" :key="index">
+            <keep-alive>
+                <component :is="activeStep" v-if="currentStep === index" />
+            </keep-alive>
+        </template>
+    </div>
 </template>
 <script setup lang="ts">
 import { onMounted, reactive, ref, useSlots, watch } from "vue"

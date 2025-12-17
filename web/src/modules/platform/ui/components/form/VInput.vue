@@ -1,13 +1,13 @@
 <template>
-  <input
-    class="input"
-    :disabled="disabled"
-    :readonly="disabled"
-    :class="{
-      'input--onSurface': onSurface
-    }"
-    @input="onInputChange"
-  >
+    <input
+        class="input"
+        :disabled="disabled"
+        :readonly="disabled"
+        :class="{
+            'input--onSurface': onSurface
+        }"
+        @input="onInputChange"
+    />
 </template>
 
 <script setup lang="ts">

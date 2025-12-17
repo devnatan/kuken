@@ -1,56 +1,45 @@
 <template>
-  <AuthLayout>
-    <h4>Log In</h4>
-    <p :class="$style.subtitle">
-      Enter your credentials to access your account.
-    </p>
-    <VForm @submit.prevent="performLogin">
-      <VFieldSet>
-        <VLabel>
-          Email
-          <VInput
-            v-model="credentials.email"
-            type="email"
-            required="true"
-            autocomplete="email"
-          />
-        </VLabel>
-        <VLabel>
-          Password
-          <VInput
-            v-model="credentials.password"
-            type="password"
-            required="true"
-            autocomplete="current-password"
-          />
-        </VLabel>
-      </VFieldSet>
-      <p
-        v-if="errorTranslationText"
-        :class="$style.error"
-        v-text="errorTranslationText"
-      />
-      <VLayout gap="sm">
-        <VButton
-          type="submit"
-          variant="primary"
-          block
-          :disabled="loginBeingPerformed"
-          :class="$style.loginButton"
-        >
-          Log In
-        </VButton>
-        <VButton
-          v-if="currentAccount"
-          variant="default"
-          block
-          @click="navigateToIndex"
-        >
-          Continue as {{ currentAccount }}
-        </VButton>
-      </VLayout>
-    </VForm>
-  </AuthLayout>
+    <AuthLayout>
+        <h4>Log In</h4>
+        <p :class="$style.subtitle">Enter your credentials to access your account.</p>
+        <VForm @submit.prevent="performLogin">
+            <VFieldSet>
+                <VLabel>
+                    Email
+                    <VInput
+                        v-model="credentials.email"
+                        type="email"
+                        required="true"
+                        autocomplete="email"
+                    />
+                </VLabel>
+                <VLabel>
+                    Password
+                    <VInput
+                        v-model="credentials.password"
+                        type="password"
+                        required="true"
+                        autocomplete="current-password"
+                    />
+                </VLabel>
+            </VFieldSet>
+            <p v-if="errorTranslationText" :class="$style.error" v-text="errorTranslationText" />
+            <VLayout gap="sm">
+                <VButton
+                    type="submit"
+                    variant="primary"
+                    block
+                    :disabled="loginBeingPerformed"
+                    :class="$style.loginButton"
+                >
+                    Log In
+                </VButton>
+                <VButton v-if="currentAccount" variant="default" block @click="navigateToIndex">
+                    Continue as {{ currentAccount }}
+                </VButton>
+            </VLayout>
+        </VForm>
+    </AuthLayout>
 </template>
 <script setup lang="ts">
 import VButton from "@/modules/platform/ui/components/button/VButton.vue"

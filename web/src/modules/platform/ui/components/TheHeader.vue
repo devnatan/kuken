@@ -1,17 +1,14 @@
 <template>
-  <header :class="$style.root">
-    <div :class="$style.logo">
-      <img
-        src="/img/icon-white-transparent.png"
-        alt="Logo"
-      >
-    </div>
-  </header>
+    <header :class="$style.root">
+        <div :class="$style.logo">
+            <img src="/img/icon-white-transparent.png" alt="Logo" />
+        </div>
+    </header>
 </template>
 
 <style lang="scss" module>
 .root {
-    margin: 8px 16px;
+    padding: 0 16px;
     display: flex;
     flex-direction: row;
     align-items: center;

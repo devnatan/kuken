@@ -2,15 +2,15 @@
 import TheHeader from "@/modules/platform/ui/components/TheHeader.vue"
 </script>
 <template>
-  <div :class="$style.root">
-    <!-- <TheSidebar /> -->
-    <main :class="$style.body">
-      <TheHeader />
-      <div :class="$style.content">
-        <slot />
-      </div>
-    </main>
-  </div>
+    <div :class="$style.root">
+        <!-- <TheSidebar /> -->
+        <main :class="$style.body">
+            <TheHeader />
+            <div :class="$style.content">
+                <slot :class="$style.content" />
+            </div>
+        </main>
+    </div>
 </template>
 <style lang="scss" module>
 .root {
