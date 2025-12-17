@@ -8,6 +8,8 @@ import { SetupStepType } from "@/modules/setup/api/models/setup.model.ts"
 import SetupStep from "@/modules/setup/ui/components/SetupStep.vue"
 import SetupCreateAccount from "@/modules/setup/ui/components/SetupCreateAccount.vue"
 import SetupOrganizationName from "@/modules/setup/ui/components/SetupOrganizationName.vue"
+import router from "@/router.ts"
+import { AUTH_LOGIN_ROUTE } from "@/modules/auth/auth.routes.ts"
 
 type PendingSetup = {
     currentStep: string
@@ -46,7 +48,7 @@ async function completeSetup() {
         }
     })
 
-    alert("Deu bom fi, mete o pé agr")
+    await router.replace({ name: AUTH_LOGIN_ROUTE })
 }
 
 type SetupStepInterface = {
