@@ -21,7 +21,7 @@ const router = createRouter({
             path: "/",
             component: importPage("platform", "Root"),
             beforeEnter: [AuthenticatedOnlyGuard],
-            children: [...HomeRoutes, ...AccountsRoute, ...BlueprintsRoutes]
+            children: [...HomeRoutes, ...AccountsRoute]
         },
         {
             path: "/setup",
