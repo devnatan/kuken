@@ -287,9 +287,9 @@ class BlueprintParser(
                         BlueprintSpecRemote(
                             origin = remote.string("origin"),
                             assets =
-                                remote.struct("assets")?.let {
+                                remote.struct("assets")?.let { assets ->
                                     BlueprintSpecRemote.Assets(
-                                        iconUrl = remote.string("iconUrl"),
+                                        iconUrl = assets.string("iconUrl"),
                                     )
                                 },
                         )
