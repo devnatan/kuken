@@ -9,6 +9,7 @@
     font-weight: bold;
     width: fit-content;
     margin-bottom: 48px;
+    user-select: none;
 
     &:after {
         content: "";
