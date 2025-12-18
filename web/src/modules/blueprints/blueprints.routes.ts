@@ -9,10 +9,14 @@ export const BlueprintsRoutes: Array<RouteRecordRaw> = [
         path: "blueprints",
         name: BLUEPRINTS_ROUTE,
         component: importPage(MODULE, "Blueprints"),
+
         children: [
             {
                 path: "",
-                component: importPage(MODULE, "home/BlueprintsHome")
+                component: importPage(MODULE, "home/BlueprintsHome"),
+                meta: {
+                    title: "Game Directory"
+                }
             },
             {
                 path: ":blueprintId",
