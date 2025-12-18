@@ -4,16 +4,16 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface BlueprintSpecSource {
-    @JvmInline
+sealed class BlueprintSpecSource {
+    @Serializable
     @SerialName("local")
-    value class Local(
+    data class Local(
         val filePath: String,
-    ) : BlueprintSpecSource
+    ) : BlueprintSpecSource()
 
-    @JvmInline
+    @Serializable
     @SerialName("remote")
-    value class Remote(
+    data class Remote(
         val url: String,
-    ) : BlueprintSpecSource
+    ) : BlueprintSpecSource()
 }
