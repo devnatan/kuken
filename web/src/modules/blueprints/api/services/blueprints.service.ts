@@ -18,7 +18,7 @@ class BlueprintsService {
 
     async importBlueprint(url: string): Promise<ImportBlueprintResponse> {
         return httpService
-            .post("/blueprints/import", { url })
+            .post("/blueprints/import", { url, type: "remote" })
             .then((res: AxiosResponse) => res.data as Blueprint)
     }
 }
