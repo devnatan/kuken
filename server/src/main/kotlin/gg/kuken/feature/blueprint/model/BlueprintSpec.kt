@@ -24,7 +24,13 @@ data class BlueprintSpecOption(
 @Serializable
 data class BlueprintSpecRemote(
     val origin: String,
-)
+    val assets: Assets?,
+) {
+    @Serializable
+    data class Assets(
+        val iconUrl: String,
+    )
+}
 
 @Serializable
 data class BlueprintSpecBuild(

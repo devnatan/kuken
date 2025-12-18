@@ -23,6 +23,26 @@ internal object Properties {
             qualifiedName = "build",
             kind = Struct(allowUnknown = false),
         )
+    val Remote =
+        Property(
+            qualifiedName = "remote",
+            kind = Struct(allowUnknown = false),
+        )
+    val RemoteOrigin =
+        Property(
+            qualifiedName = "remote.origin",
+            kind = Literal,
+        )
+    val RemoteAssets =
+        Property(
+            qualifiedName = "remote.assets",
+            kind = Struct(allowUnknown = false),
+        )
+    val RemoteAssetsIconUrl =
+        Property(
+            qualifiedName = "remote.assets.iconUrl",
+            kind = Literal,
+        )
     val Entrypoint =
         Property(
             qualifiedName = "build.entrypoint",

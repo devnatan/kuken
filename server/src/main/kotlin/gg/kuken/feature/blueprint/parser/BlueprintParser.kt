@@ -15,6 +15,7 @@ import gg.kuken.feature.blueprint.model.BlueprintSpec
 import gg.kuken.feature.blueprint.model.BlueprintSpecBuild
 import gg.kuken.feature.blueprint.model.BlueprintSpecImage
 import gg.kuken.feature.blueprint.model.BlueprintSpecInstance
+import gg.kuken.feature.blueprint.model.BlueprintSpecRemote
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -281,7 +282,18 @@ class BlueprintParser(
             BlueprintSpec(
                 name = string("name"),
                 version = string("version"),
-                remote = null,
+                remote =
+                    struct("remote")?.let { remote ->
+                        BlueprintSpecRemote(
+                            origin = remote.string("origin"),
+                            assets =
+                                remote.struct("assets")?.let {
+                                    BlueprintSpecRemote.Assets(
+                                        iconUrl = remote.string("iconUrl"),
+                                    )
+                                },
+                        )
+                    },
                 build =
                     struct("build")?.let { build ->
                         BlueprintSpecBuild(
