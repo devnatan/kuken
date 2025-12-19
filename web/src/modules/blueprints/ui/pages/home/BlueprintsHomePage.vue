@@ -10,8 +10,9 @@ import VFieldSet from "@/modules/platform/ui/components/form/VFieldSet.vue"
 import VInput from "@/modules/platform/ui/components/form/VInput.vue"
 import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 import VLabel from "@/modules/platform/ui/components/form/VLabel.vue"
+import type { Blueprint } from "@/modules/blueprints/api/models/blueprint.model.ts"
 
-let state = reactive({ readyToUseBlueprints: [] })
+let state = reactive({ readyToUseBlueprints: [] as Blueprint[] })
 const importUrl = ref("")
 
 async function performImport() {

@@ -1,6 +1,10 @@
 <template>
     <Resource :resource="resource" @loaded="(value) => (blueprint = value)">
-        <div v-if="blueprint">Blueprint {{ blueprint.spec.name }}</div>
+        <template v-if="blueprint">
+            <h4>{{ blueprint.spec.name }}</h4>
+
+            <img :src="blueprint.spec.remote.assets.iconUrl" :alt="`${blueprint.id} icon`" />
+        </template>
     </Resource>
 </template>
 <script setup lang="ts">
