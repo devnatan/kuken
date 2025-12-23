@@ -15,9 +15,10 @@ import gg.kuken.feature.instance.model.InstanceRuntimeNetwork
 import gg.kuken.feature.instance.model.InstanceRuntimeSingleNetwork
 import gg.kuken.feature.instance.model.InstanceStatus
 import gg.kuken.feature.instance.repository.InstanceRepository
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onCompletion
+import gg.kuken.http.exception.ResourceException
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Default
 import me.devnatan.dockerkt.DockerClient
 import me.devnatan.dockerkt.models.PortBinding
 import me.devnatan.dockerkt.models.container.hostConfig
@@ -39,7 +40,7 @@ class DockerInstanceService(
     private val identityGeneratorService: IdentityGeneratorService,
     private val kukenConfig: KukenConfig,
     private val dockerNetworkService: DockerNetworkService,
-) : InstanceService {
+) : InstanceService, CoroutineScope by CoroutineScope(Default + CoroutineName("DockerInstanceService")) {
     private val logger = LogManager.getLogger(DockerInstanceService::class.java)
 
     override suspend fun getInstance(instanceId: Uuid): Instance {
@@ -95,17 +96,6 @@ class DockerInstanceService(
         }
     }
 
-    /**
-     * Creates and registers a new instance based on the provided parameters.
-     * Initializes a container by creating and connecting it, then registers the instance with
-     * the appropriate status and associated details.
-     *
-     * @param instanceId The unique identifier for the instance to be created.
-     * @param options The options specifying the image, host, and port to be used for the instance.
-     * @param generatedName The generated name used to identify the instance's container.
-     * @param blueprint The blueprint specifying the configuration details for the instance.
-     * @return The newly created and registered instance.
-     */
     private suspend fun createAndRegisterInstance(
         instanceId: Uuid,
         options: CreateInstanceOptions,
@@ -116,48 +106,62 @@ class DockerInstanceService(
             blueprint.spec.build
                 ?.env
                 .orEmpty() + options.env
-        val (containerId, address) =
-            createAndConnectContainer(
-                instanceId = instanceId,
-                options =
-                    options.copy(
-                        env = env,
-                    ),
-                name = generatedName,
-            )
 
-        val status =
-            if (address == null) {
-                InstanceStatus.NetworkAssignmentFailed
-            } else {
-                InstanceStatus.Created
-            }
-
-        return registerInstance(
+        val result = createAndConnectContainer(
             instanceId = instanceId,
-            blueprintId = blueprint.id,
-            status = status,
-            containerId = containerId,
-            address = address,
+            options = options.copy(env = env),
+            name = generatedName,
         )
+
+        return handleCreateAndContainerResult(result, instanceId, blueprint)
     }
 
-    /**
-     * Creates a container for the specified instance and connects it to the configured network.
-     *
-     * @param instanceId The unique identifier of the instance for which the container is being created.
-     * @param name The name to assign to the created container.
-     * @return A pair containing the ID of the created container and the associated `HostPort` information,
-     *         or null for `HostPort` if the connection to the network failed.
-     */
+    private suspend fun handleCreateAndContainerResult(
+        result: CreateAndConnectContainerResult,
+        instanceId: Uuid,
+        blueprint: Blueprint
+    ): Instance = when (result) {
+        is CreateAndConnectContainerResult.Done -> {
+            registerInstance(
+                instanceId = instanceId,
+                blueprintId = blueprint.id,
+                status = InstanceStatus.Created,
+                containerId = result.containerId,
+                address = result.address,
+            )
+        }
+
+        is CreateAndConnectContainerResult.CreateContainerFailed -> {
+            registerInstance(
+                instanceId = instanceId,
+                blueprintId = blueprint.id,
+                status = InstanceStatus.Unavailable,
+                containerId = null,
+                address = result.address,
+            )
+        }
+
+        is CreateAndConnectContainerResult.NetworkConnectFailed -> {
+            registerInstance(
+                instanceId = instanceId,
+                blueprintId = blueprint.id,
+                status = InstanceStatus.NetworkAssignmentFailed,
+                containerId = result.containerId,
+                address = result.address,
+            )
+        }
+    }
+
     private suspend fun createAndConnectContainer(
         instanceId: Uuid,
         name: String,
         options: CreateInstanceOptions,
-    ): Pair<String, HostPort?> {
+    ): CreateAndConnectContainerResult {
         val address = dockerNetworkService.createAddress(options.host, options.port)
-        val containerId =
-            createContainer(
+        val containerId: String
+
+        try {
+            containerId = createContainer(
                 instanceId = instanceId,
                 name = name,
                 options =
@@ -166,63 +170,92 @@ class DockerInstanceService(
                         port = address.port,
                     ),
             )
+        } catch (e: Throwable) {
+            logger.error("Failed to create container for instance {}", instanceId, e)
+            return CreateAndConnectContainerResult.CreateContainerFailed(address)
+        }
 
-        connectInstance(containerId = containerId)
-        return containerId to address
+        try {
+            connectInstance(containerId = containerId)
+        } catch (e: Throwable) {
+            logger.error("Failed to connect container {} (instance: {}) to network", containerId, instanceId, e)
+            return CreateAndConnectContainerResult.NetworkConnectFailed(containerId, address)
+        }
+
+        return CreateAndConnectContainerResult.Done(containerId, address)
     }
 
-    /**
-     * Pulls the specified container image and creates an instance using the pulled image.
-     * Updates the instance repository with the status of the operation and connects the created container
-     * to the desired network. Handles image pull completion or failure and sets the appropriate status.
-     *
-     * @param instanceId The unique identifier of the instance being created.
-     * @param instanceName The name to assign to the instance's container.
-     * @param options The options containing the image, host, and port details for creating the instance.
-     * @return The created instance object containing status, container details, and metadata.
-     * @throws InstanceNotFoundException If the instance with the given ID cannot be found during the update.
-     */
+    private sealed class CreateAndConnectContainerResult {
+
+        data class Done(val containerId: String, val address: HostPort) : CreateAndConnectContainerResult()
+
+        data class CreateContainerFailed(val address: HostPort) : CreateAndConnectContainerResult()
+
+        data class NetworkConnectFailed(val containerId: String, val address: HostPort) : CreateAndConnectContainerResult()
+    }
+
+    private suspend fun pullImageForInstanceCreation(image: String): InstanceStatus {
+        try {
+            dockerClient.images
+                .pull(image)
+                .collect { pull -> logger.debug("Pulling image: {}: {}", image, pull) }
+        } catch (exception: ResourceException) {
+            logger.error("Failed to pull image: {}", image, exception)
+            return InstanceStatus.ImagePullFailed
+        }
+
+        logger.debug("Image {} pull completed.", image)
+        return InstanceStatus.ImagePullCompleted
+    }
+
     private suspend fun pullImageAndCreateInstance(
         instanceId: Uuid,
         instanceName: String,
         options: CreateInstanceOptions,
     ): Instance {
-        val job = CompletableDeferred<InstanceStatus>()
+        val instanceImageStatus = pullImageForInstanceCreation(options.image)
+        val createResult = createAndConnectContainer(
+            instanceId = instanceId,
+            name = instanceName,
+            options = options
+        )
 
-        dockerClient.images
-            .pull(options.image)
-            .catch { error -> logger.error("Failed to pull image: {}", options.image, error) }
-            .onCompletion { error ->
-                val status =
-                    if (error != null) {
-                        InstanceStatus.ImagePullFailed
-                    } else {
-                        InstanceStatus.ImagePullCompleted
-                    }
+        val updatedInstance = when(createResult) {
+            is CreateAndConnectContainerResult.Done -> {
+                val container = createResult.containerId
+                val address = createResult.address
 
-                logger.debug("Image {} pull completed.", options.image)
-                job.complete(status)
-            }.collect { pull -> logger.debug("Pulling image {}: {}", options.image, pull) }
+                instanceRepository.update(instanceId) {
+                    this.containerId = container
+                    this.host = address.host
+                    this.port = address.port
+                    this.status = InstanceStatus.Created.label
+                }
+            }
+            is CreateAndConnectContainerResult.CreateContainerFailed -> {
+                val address = createResult.address
 
-        val (container, address) =
-            createAndConnectContainer(
-                instanceId = instanceId,
-                name = instanceName,
-                options = options,
-            )
+                instanceRepository.update(instanceId) {
+                    this.host = address.host
+                    this.port = address.port
+                    this.status = instanceImageStatus.label
+                }
+            }
+            is CreateAndConnectContainerResult.NetworkConnectFailed -> {
+                val container = createResult.containerId
+                val address = createResult.address
 
-        val imagePullStatus = job.await()
-        val updatedInstance =
-            instanceRepository.update(instanceId) {
-                this.containerId = container
-                this.host = address?.host
-                this.port = address?.port
-                this.status =
-                    when {
-                        address == null -> InstanceStatus.NetworkAssignmentFailed
-                        else -> imagePullStatus
-                    }.label
-            } ?: throw InstanceNotFoundException()
+                instanceRepository.update(instanceId) {
+                    this.containerId = container
+                    this.host = address.host
+                    this.port = address.port
+                    this.status = InstanceStatus.NetworkAssignmentFailed.label
+                }
+            }
+        }
+
+        if (updatedInstance == null)
+            throw InstanceNotFoundException()
 
         return toInstance(updatedInstance)
     }
@@ -268,17 +301,11 @@ class DockerInstanceService(
 
     private suspend fun connectInstance(containerId: String) {
         val networkToConnect = kukenConfig.docker.network.name
-        logger.debug("Connecting $containerId to $networkToConnect...")
-
-        runCatching {
-            dockerNetworkService.connect(
-                network = networkToConnect,
-                container = containerId,
-            )
-            logger.debug("Connected {} to {}", containerId, networkToConnect)
-        }.onFailure { error ->
-            logger.error("Unable to connect {} to the network {}", containerId, networkToConnect, error)
-        }.getOrNull()
+        dockerNetworkService.connect(
+            network = networkToConnect,
+            container = containerId,
+        )
+        logger.debug("Connected {} to {}", containerId, networkToConnect)
     }
 
     private suspend fun registerInstance(
