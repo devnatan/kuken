@@ -9,6 +9,7 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
+        mavenCentral()
         maven("https://maven.pkg.github.com/devnatan/docker-kotlin") {
             credentials {
                 username = providers.environmentVariable("GITHUB_ACTOR")
@@ -19,18 +20,6 @@ dependencyResolutionManagement {
                     .orElse(providers.gradleProperty("githubToken"))
                     .get()
             }
-
-            exclusiveContent {
-                forRepository {
-                    maven("https://maven.pkg.github.com/devnatan/docker-kotlin")
-                }
-
-                filter {
-                    includeModule("me.devnatan", "docker-kotlin")
-                }
-            }
         }
-
-        mavenCentral()
     }
 }
