@@ -13,7 +13,6 @@ import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.apache.logging.log4j.LogManager
-import org.katan.http.websocket.WebSocketPacketEventHandler
 import java.nio.channels.ClosedChannelException
 import java.util.Collections
 import kotlin.reflect.jvm.jvmName

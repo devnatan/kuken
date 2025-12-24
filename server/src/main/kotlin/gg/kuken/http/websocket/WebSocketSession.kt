@@ -4,7 +4,7 @@ import io.ktor.server.websocket.DefaultWebSocketServerSession
 import io.ktor.websocket.Frame
 import kotlinx.serialization.json.Json
 
-class WebSocketSession constructor(
+class WebSocketSession(
     val id: Int,
     val connection: DefaultWebSocketServerSession,
     @Transient private val json: Json,

@@ -1,6 +1,5 @@
-package org.katan.http.websocket
+package gg.kuken.http.websocket
 
-import gg.kuken.http.websocket.WebSocketPacketContext
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 
