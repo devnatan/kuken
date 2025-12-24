@@ -41,7 +41,8 @@ class DockerInstanceService(
     private val identityGeneratorService: IdentityGeneratorService,
     private val kukenConfig: KukenConfig,
     private val dockerNetworkService: DockerNetworkService,
-) : InstanceService, CoroutineScope by CoroutineScope(Default + CoroutineName("DockerInstanceService")) {
+) : InstanceService,
+    CoroutineScope by CoroutineScope(Default + CoroutineName("DockerInstanceService")) {
     private val logger = LogManager.getLogger(DockerInstanceService::class.java)
 
     override suspend fun getInstance(instanceId: Uuid): Instance {
@@ -108,11 +109,12 @@ class DockerInstanceService(
                 ?.env
                 .orEmpty() + options.env
 
-        val result = createAndConnectContainer(
-            instanceId = instanceId,
-            options = options.copy(env = env),
-            name = generatedName,
-        )
+        val result =
+            createAndConnectContainer(
+                instanceId = instanceId,
+                options = options.copy(env = env),
+                name = generatedName,
+            )
 
         return handleCreateAndContainerResult(result, instanceId, blueprint)
     }
@@ -120,38 +122,39 @@ class DockerInstanceService(
     private suspend fun handleCreateAndContainerResult(
         result: CreateAndConnectContainerResult,
         instanceId: Uuid,
-        blueprint: Blueprint
-    ): Instance = when (result) {
-        is CreateAndConnectContainerResult.Done -> {
-            registerInstance(
-                instanceId = instanceId,
-                blueprintId = blueprint.id,
-                status = InstanceStatus.Created,
-                containerId = result.containerId,
-                address = result.address,
-            )
-        }
+        blueprint: Blueprint,
+    ): Instance =
+        when (result) {
+            is CreateAndConnectContainerResult.Done -> {
+                registerInstance(
+                    instanceId = instanceId,
+                    blueprintId = blueprint.id,
+                    status = InstanceStatus.Created,
+                    containerId = result.containerId,
+                    address = result.address,
+                )
+            }
 
-        is CreateAndConnectContainerResult.CreateContainerFailed -> {
-            registerInstance(
-                instanceId = instanceId,
-                blueprintId = blueprint.id,
-                status = InstanceStatus.Unavailable,
-                containerId = null,
-                address = result.address,
-            )
-        }
+            is CreateAndConnectContainerResult.CreateContainerFailed -> {
+                registerInstance(
+                    instanceId = instanceId,
+                    blueprintId = blueprint.id,
+                    status = InstanceStatus.Unavailable,
+                    containerId = null,
+                    address = result.address,
+                )
+            }
 
-        is CreateAndConnectContainerResult.NetworkConnectFailed -> {
-            registerInstance(
-                instanceId = instanceId,
-                blueprintId = blueprint.id,
-                status = InstanceStatus.NetworkAssignmentFailed,
-                containerId = result.containerId,
-                address = result.address,
-            )
+            is CreateAndConnectContainerResult.NetworkConnectFailed -> {
+                registerInstance(
+                    instanceId = instanceId,
+                    blueprintId = blueprint.id,
+                    status = InstanceStatus.NetworkAssignmentFailed,
+                    containerId = result.containerId,
+                    address = result.address,
+                )
+            }
         }
-    }
 
     private suspend fun createAndConnectContainer(
         instanceId: Uuid,
@@ -162,15 +165,16 @@ class DockerInstanceService(
         val containerId: String
 
         try {
-            containerId = createContainer(
-                instanceId = instanceId,
-                name = name,
-                options =
-                    options.copy(
-                        host = address.host,
-                        port = address.port,
-                    ),
-            )
+            containerId =
+                createContainer(
+                    instanceId = instanceId,
+                    name = name,
+                    options =
+                        options.copy(
+                            host = address.host,
+                            port = address.port,
+                        ),
+                )
         } catch (e: Throwable) {
             logger.error("Failed to create container for instance {}", instanceId, e)
             return CreateAndConnectContainerResult.CreateContainerFailed(address)
@@ -187,12 +191,19 @@ class DockerInstanceService(
     }
 
     private sealed class CreateAndConnectContainerResult {
+        data class Done(
+            val containerId: String,
+            val address: HostPort,
+        ) : CreateAndConnectContainerResult()
 
-        data class Done(val containerId: String, val address: HostPort) : CreateAndConnectContainerResult()
+        data class CreateContainerFailed(
+            val address: HostPort,
+        ) : CreateAndConnectContainerResult()
 
-        data class CreateContainerFailed(val address: HostPort) : CreateAndConnectContainerResult()
-
-        data class NetworkConnectFailed(val containerId: String, val address: HostPort) : CreateAndConnectContainerResult()
+        data class NetworkConnectFailed(
+            val containerId: String,
+            val address: HostPort,
+        ) : CreateAndConnectContainerResult()
     }
 
     private suspend fun pullImageForInstanceCreation(image: String): InstanceStatus {
@@ -215,48 +226,53 @@ class DockerInstanceService(
         options: CreateInstanceOptions,
     ): Instance {
         val instanceImageStatus = pullImageForInstanceCreation(options.image)
-        val createResult = createAndConnectContainer(
-            instanceId = instanceId,
-            name = instanceName,
-            options = options
-        )
+        val createResult =
+            createAndConnectContainer(
+                instanceId = instanceId,
+                name = instanceName,
+                options = options,
+            )
 
-        val updatedInstance = when(createResult) {
-            is CreateAndConnectContainerResult.Done -> {
-                val container = createResult.containerId
-                val address = createResult.address
+        val updatedInstance =
+            when (createResult) {
+                is CreateAndConnectContainerResult.Done -> {
+                    val container = createResult.containerId
+                    val address = createResult.address
 
-                instanceRepository.update(instanceId) {
-                    this.containerId = container
-                    this.host = address.host
-                    this.port = address.port
-                    this.status = InstanceStatus.Created.label
+                    instanceRepository.update(instanceId) {
+                        this.containerId = container
+                        this.host = address.host
+                        this.port = address.port
+                        this.status = InstanceStatus.Created.label
+                    }
+                }
+
+                is CreateAndConnectContainerResult.CreateContainerFailed -> {
+                    val address = createResult.address
+
+                    instanceRepository.update(instanceId) {
+                        this.host = address.host
+                        this.port = address.port
+                        this.status = instanceImageStatus.label
+                    }
+                }
+
+                is CreateAndConnectContainerResult.NetworkConnectFailed -> {
+                    val container = createResult.containerId
+                    val address = createResult.address
+
+                    instanceRepository.update(instanceId) {
+                        this.containerId = container
+                        this.host = address.host
+                        this.port = address.port
+                        this.status = InstanceStatus.NetworkAssignmentFailed.label
+                    }
                 }
             }
-            is CreateAndConnectContainerResult.CreateContainerFailed -> {
-                val address = createResult.address
 
-                instanceRepository.update(instanceId) {
-                    this.host = address.host
-                    this.port = address.port
-                    this.status = instanceImageStatus.label
-                }
-            }
-            is CreateAndConnectContainerResult.NetworkConnectFailed -> {
-                val container = createResult.containerId
-                val address = createResult.address
-
-                instanceRepository.update(instanceId) {
-                    this.containerId = container
-                    this.host = address.host
-                    this.port = address.port
-                    this.status = InstanceStatus.NetworkAssignmentFailed.label
-                }
-            }
-        }
-
-        if (updatedInstance == null)
+        if (updatedInstance == null) {
             throw InstanceNotFoundException()
+        }
 
         return toInstance(updatedInstance)
     }
@@ -334,13 +350,12 @@ class DockerInstanceService(
         return instance
     }
 
-    private suspend fun tryBuildRuntime(containerId: String): InstanceRuntime? {
-        return try {
+    private suspend fun tryBuildRuntime(containerId: String): InstanceRuntime? =
+        try {
             buildRuntime(containerId)
         } catch (_: ContainerNotFoundException) {
             null
         }
-    }
 
     private suspend fun buildRuntime(containerId: String): InstanceRuntime {
         val inspection = dockerClient.containers.inspect(containerId)
