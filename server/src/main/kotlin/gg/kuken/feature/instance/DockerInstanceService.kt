@@ -23,6 +23,7 @@ import me.devnatan.dockerkt.DockerClient
 import me.devnatan.dockerkt.models.PortBinding
 import me.devnatan.dockerkt.models.container.hostConfig
 import me.devnatan.dockerkt.models.portBindings
+import me.devnatan.dockerkt.resource.container.ContainerNotFoundException
 import me.devnatan.dockerkt.resource.container.create
 import me.devnatan.dockerkt.resource.container.remove
 import me.devnatan.dockerkt.resource.exec.create
@@ -45,7 +46,7 @@ class DockerInstanceService(
 
     override suspend fun getInstance(instanceId: Uuid): Instance {
         val instance = instanceRepository.findById(instanceId) ?: throw InstanceNotFoundException()
-        val runtime = instance.containerId?.let { id -> buildRuntime(id) }
+        val runtime = instance.containerId?.let { id -> tryBuildRuntime(id) }
 
         return Instance(
             id = instance.id.value.toKotlinUuid(),
@@ -331,6 +332,14 @@ class DockerInstanceService(
 
         instanceRepository.create(instance)
         return instance
+    }
+
+    private suspend fun tryBuildRuntime(containerId: String): InstanceRuntime? {
+        return try {
+            buildRuntime(containerId)
+        } catch (_: ContainerNotFoundException) {
+            null
+        }
     }
 
     private suspend fun buildRuntime(containerId: String): InstanceRuntime {
