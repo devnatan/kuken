@@ -2,10 +2,9 @@ package gg.kuken.http.websocket
 
 typealias WebSocketOp = Int
 
+@Suppress("ConstPropertyName")
 object WebSocketOpCodes {
-    const val INSTANCE_FETCH_LOGS: WebSocketOp = 0
+    const val InstanceLogsRequest: WebSocketOp = 1
 
-    const val INSTANCE_RUN_COMMAND: WebSocketOp = 1
-
-    const val INSTANCE_STATS_STREAMING: WebSocketOp = 2
+    const val InstanceUnavailable: WebSocketOp = 2
 }

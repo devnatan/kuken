@@ -37,7 +37,7 @@ class Http(
 ) : KoinComponent {
     private var shutdownPending = atomic(false)
     private val engine: EmbeddedServer<*, *> = createServer()
-    private val webSocketManager = WebSocketManager(json = Json)
+    private val webSocketManager = WebSocketManager(json = Json { ignoreUnknownKeys = true })
 
     init {
         if (appConfig.devMode) {

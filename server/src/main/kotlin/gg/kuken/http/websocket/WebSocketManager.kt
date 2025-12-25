@@ -25,7 +25,7 @@ class WebSocketManager(
     private val logger = LogManager.getLogger(WebSocketManager::class.java)
     private val sessions = Collections.synchronizedSet<WebSocketSession>(linkedSetOf())
     private val generatedId = atomic(0)
-    private val handlers = mutableMapOf<WebSocketOp, MutableList<WebSocketPacketEventHandler>>()
+    private val handlers = mutableMapOf<WebSocketOp, MutableList<WebSocketClientMessageHandler>>()
 
     suspend fun connect(connection: DefaultWebSocketServerSession) {
         val session = WebSocketSession(generatedId.getAndIncrement(), connection, json)
@@ -40,11 +40,11 @@ class WebSocketManager(
             for (frame in connection.incoming) {
                 if (frame !is Frame.Text) continue
 
-                val packet: WebSocketPacket
+                val packet: WebSocketClientMessage
                 try {
                     packet = json.decodeFromString(frame.readText())
                 } catch (e: SerializationException) {
-                    logger.error("Failed to handle WebSocket packet", e)
+                    logger.error("Failed to deserialize WebSocket packet text", e)
                     continue
                 }
 
@@ -63,16 +63,21 @@ class WebSocketManager(
     }
 
     private suspend fun packetReceived(
-        packet: WebSocketPacket,
+        packet: WebSocketClientMessage,
         session: WebSocketSession,
     ) {
-        val context = WebSocketPacketContext(packet, session)
+        val context = WebSocketClientMessageContext(packet, session)
         handlers[packet.op]?.forEach { handler ->
             with(handler) {
                 try {
                     context.handle()
                 } catch (e: Throwable) {
-                    logger.error("Failed to handle WebSocket packet", e)
+                    logger.error(
+                        "Uncaught exception in WebSocket client message handler in {} (op {})",
+                        handler::class.qualifiedName,
+                        packet.op,
+                        e,
+                    )
                 }
             }
         }
@@ -90,7 +95,7 @@ class WebSocketManager(
 
     fun register(
         op: WebSocketOp,
-        handler: WebSocketPacketEventHandler,
+        handler: WebSocketClientMessageHandler,
     ) {
         handler.coroutineContext = Job() +
             CoroutineName(
