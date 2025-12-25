@@ -66,19 +66,23 @@ class WebSocketManager(
         packet: WebSocketClientMessage,
         session: WebSocketSession,
     ) {
+        val handlerList = handlers[packet.op]
+        if (handlerList.isNullOrEmpty()) {
+            logger.warn("No WebSocket client message handler registered for op {}", packet.op)
+            return
+        }
+
         val context = WebSocketClientMessageContext(packet, session)
-        handlers[packet.op]?.forEach { handler ->
-            with(handler) {
-                try {
-                    context.handle()
-                } catch (e: Throwable) {
-                    logger.error(
-                        "Uncaught exception in WebSocket client message handler in {} (op {})",
-                        handler::class.qualifiedName,
-                        packet.op,
-                        e,
-                    )
-                }
+        for (handler in handlerList) {
+            try {
+                with(handler) { context.handle() }
+            } catch (e: Throwable) {
+                logger.error(
+                    "Uncaught exception in WebSocket client message handler in {} (op {})",
+                    handler::class.qualifiedName,
+                    packet.op,
+                    e,
+                )
             }
         }
     }
