@@ -101,13 +101,7 @@ class WebSocketManager(
         op: WebSocketOp,
         handler: WebSocketClientMessageHandler,
     ) {
-        handler.coroutineContext = Job() +
-            CoroutineName(
-                "%s-%s".format(
-                    op,
-                    handler::class.simpleName ?: "unknown-websocket-handler",
-                ),
-            )
+        handler.coroutineContext = Job() + CoroutineName("$op-${handler::class.simpleName ?: "unknown"}")
         handlers.computeIfAbsent(op) { mutableListOf() }.add(handler)
     }
 }
