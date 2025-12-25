@@ -1,10 +1,13 @@
 package gg.kuken.http.websocket
 
 import kotlinx.coroutines.CoroutineScope
+import org.koin.core.component.KoinComponent
 import kotlin.coroutines.CoroutineContext
 
-abstract class WebSocketPacketEventHandler : CoroutineScope {
-    override lateinit var coroutineContext: CoroutineContext set
+abstract class WebSocketPacketEventHandler :
+    CoroutineScope,
+    KoinComponent {
+    override lateinit var coroutineContext: CoroutineContext
 
     abstract suspend fun WebSocketPacketContext.handle()
 }

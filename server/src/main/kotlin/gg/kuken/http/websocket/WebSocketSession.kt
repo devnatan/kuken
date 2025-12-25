@@ -2,6 +2,7 @@ package gg.kuken.http.websocket
 
 import io.ktor.server.websocket.DefaultWebSocketServerSession
 import io.ktor.websocket.Frame
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 
 class WebSocketSession(
@@ -9,8 +10,11 @@ class WebSocketSession(
     val connection: DefaultWebSocketServerSession,
     @Transient private val json: Json,
 ) {
-    suspend fun send(message: WebSocketResponse<*>) {
-        connection.outgoing.send(Frame.Text(json.encodeToString(message)))
+    suspend fun <T> send(
+        serializer: KSerializer<WebSocketResponse<T>>,
+        message: WebSocketResponse<T>,
+    ) {
+        connection.outgoing.send(Frame.Text(json.encodeToString(serializer, message)))
     }
 
     override fun equals(other: Any?): Boolean {
@@ -20,7 +24,6 @@ class WebSocketSession(
         other as WebSocketSession
 
         if (id != other.id) return false
-        if (connection != other.connection) return false
 
         return true
     }

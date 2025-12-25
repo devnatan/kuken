@@ -40,15 +40,19 @@ class WebSocketManager(
             for (frame in connection.incoming) {
                 if (frame !is Frame.Text) continue
 
+                val packet: WebSocketPacket
                 try {
-                    val packet: WebSocketPacket = json.decodeFromString(frame.readText())
-                    packetReceived(packet, session)
+                    packet = json.decodeFromString(frame.readText())
                 } catch (e: SerializationException) {
                     logger.error("Failed to handle WebSocket packet", e)
+                    continue
                 }
+
+                packetReceived(packet, session)
             }
-        } catch (e: ClosedReceiveChannelException) {
-            logger.debug("WebSocket session receive channel closed")
+        } catch (_: ClosedReceiveChannelException) {
+            val closeReason = session.connection.closeReason.await()
+            logger.debug("WebSocket session receive channel closed: {}", closeReason)
         } catch (e: Throwable) {
             val closeReason = session.connection.closeReason.await()
             logger.error("WebSocket session handling uncaught error: $closeReason", e)
@@ -63,10 +67,13 @@ class WebSocketManager(
         session: WebSocketSession,
     ) {
         val context = WebSocketPacketContext(packet, session)
-
         handlers[packet.op]?.forEach { handler ->
             with(handler) {
-                context.handle()
+                try {
+                    context.handle()
+                } catch (e: Throwable) {
+                    logger.error("Failed to handle WebSocket packet", e)
+                }
             }
         }
     }
@@ -75,9 +82,10 @@ class WebSocketManager(
         try {
             session.connection.close()
         } catch (_: ClosedChannelException) {
+        } finally {
+            sessions.remove(session)
+            generatedId.decrementAndGet()
         }
-
-        sessions.remove(session)
     }
 
     fun register(
