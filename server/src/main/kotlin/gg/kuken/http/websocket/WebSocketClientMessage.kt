@@ -3,7 +3,6 @@ package gg.kuken.http.websocket
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
@@ -13,7 +12,7 @@ import kotlin.uuid.Uuid
 @Serializable
 data class WebSocketClientMessage(
     @SerialName("o") @Required val op: Int,
-    @SerialName("d") @Transient val data: JsonObject? = null,
+    @SerialName("d") val data: JsonObject? = null,
 )
 
 data class WebSocketClientMessageContext(
