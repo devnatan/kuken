@@ -12,6 +12,13 @@ export const HomeRoutes: Array<RouteRecordRaw> = [
         meta: {
             title: "Homepage"
         },
-        children: [...BlueprintsRoutes]
+        children: [
+            {
+                path: "",
+                name: "home.units",
+                component: importPage("home", "HomeUnitList")
+            },
+            ...BlueprintsRoutes
+        ]
     }
 ]
