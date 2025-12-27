@@ -7,6 +7,7 @@ import gg.kuken.http.websocket.WebSocketOpCodes
 import gg.kuken.http.websocket.respond
 import gg.kuken.http.websocket.uuid
 import me.devnatan.dockerkt.DockerClient
+import me.devnatan.dockerkt.resource.container.ContainerNotFoundException
 import me.devnatan.dockerkt.resource.container.logs
 
 class InstanceLogsRequestWebSocketClientMessageHandler(
@@ -23,8 +24,12 @@ class InstanceLogsRequestWebSocketClientMessageHandler(
             return
         }
 
-        dockerClient.containers.logs(containerId).collect { log ->
-            respond(data = mapOf("msg" to log))
+        try {
+            dockerClient.containers.logs(containerId).collect { log ->
+                respond(data = mapOf("msg" to log))
+            }
+        } catch (_: ContainerNotFoundException) {
+            respond(WebSocketOpCodes.InstanceUnavailable)
         }
     }
 }
