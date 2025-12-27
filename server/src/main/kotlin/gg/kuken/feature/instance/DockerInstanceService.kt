@@ -403,7 +403,7 @@ class DockerInstanceService(
         instanceId: Uuid,
         nameFormat: String?,
     ): String {
-        val format = nameFormat ?: "kuken-{node}-{id}"
+        val format = nameFormat ?: "kk-{node}-{id}"
 
         return format
             .replace("{id}", instanceId.toString())
