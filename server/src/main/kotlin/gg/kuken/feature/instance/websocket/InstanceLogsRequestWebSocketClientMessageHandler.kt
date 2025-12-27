@@ -6,6 +6,8 @@ import gg.kuken.http.websocket.WebSocketClientMessageHandler
 import gg.kuken.http.websocket.WebSocketOpCodes
 import gg.kuken.http.websocket.respond
 import gg.kuken.http.websocket.uuid
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import me.devnatan.dockerkt.DockerClient
 import me.devnatan.dockerkt.resource.container.ContainerNotFoundException
 import me.devnatan.dockerkt.resource.container.logs
@@ -25,9 +27,18 @@ class InstanceLogsRequestWebSocketClientMessageHandler(
         }
 
         try {
-            dockerClient.containers.logs(containerId).collect { log ->
-                respond(data = mapOf("msg" to log))
-            }
+            dockerClient.containers
+                .logs(containerId)
+                .onStart {
+                    respond(WebSocketOpCodes.InstanceLogsRequestStarted)
+                }.onCompletion {
+                    respond(WebSocketOpCodes.InstanceLogsRequestFinished)
+                }.collect { frame ->
+                    respond(
+                        op = WebSocketOpCodes.InstanceLogsRequestFrame,
+                        data = frame,
+                    )
+                }
         } catch (_: ContainerNotFoundException) {
             respond(WebSocketOpCodes.InstanceUnavailable)
         }
