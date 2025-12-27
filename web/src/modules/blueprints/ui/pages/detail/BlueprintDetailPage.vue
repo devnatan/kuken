@@ -24,6 +24,12 @@
                     <section>
                         <div class="servers-using">
                             <span>There’s no servers using this blueprint.</span>
+                            <VButton
+                                variant="primary"
+                                :to="{ name: 'units.create', query: { blueprint: blueprint.id } }"
+                            >
+                                Create new server
+                            </VButton>
                         </div>
                     </section>
                 </VCol>
@@ -99,6 +105,7 @@ const blueprint = ref<Blueprint | null>(null)
 
 .servers-using {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     color: var(--kt-content-neutral-low);

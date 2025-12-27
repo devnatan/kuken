@@ -78,7 +78,7 @@ class WebSocketService {
         this.logger.debug(`Added listener for op ${op}`)
 
         return () => {
-            this.listeners.get(op)?.splice(this.listeners.get(op)?.indexOf(listener)!, 1);
+            this.listeners.get(op)?.splice(this.listeners.get(op)?.indexOf(listener)!, 1)
             this.logger.debug(`Removed listener for op ${op}`)
         }
     }
