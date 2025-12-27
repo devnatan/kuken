@@ -20,7 +20,7 @@
     background-color: var(--kt-background-surface-high);
     color: var(--kt-content-neutral);
 
-    &[disabled] {
+    &[disabled="true"] {
         opacity: 0.38;
     }
 
@@ -51,8 +51,8 @@
     border-color: var(--kt-content-primary);
     color: var(--kt-content-primary-oncolor);
 
-    &:not([disabled]):hover,
-    &:not([disabled]):focus {
+    &:not([disabled="true"]):hover,
+    &:not([disabled="true"]):focus {
         background-color: var(--kt-content-primary-hover);
         border-color: var(--kt-content-primary-hover);
         color: var(--kt-content-primary-oncolor);
