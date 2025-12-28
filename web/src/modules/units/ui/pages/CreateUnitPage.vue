@@ -2,7 +2,7 @@
 import unitsService from "@/modules/units/api/services/units.service.ts"
 import { useAsyncState } from "@vueuse/core"
 import VButton from "@/modules/platform/ui/components/button/VButton.vue"
-import { effect, reactive, ref } from "vue"
+import { effect, reactive } from "vue"
 import VForm from "@/modules/platform/ui/components/form/VForm.vue"
 import VFieldSet from "@/modules/platform/ui/components/form/VFieldSet.vue"
 import VLabel from "@/modules/platform/ui/components/form/VLabel.vue"
