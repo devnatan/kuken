@@ -6,4 +6,7 @@ import kotlinx.serialization.Serializable
 enum class ResourceType {
     Blueprint,
     Instance,
+    Unit,
+    Account,
+    Role,
 }

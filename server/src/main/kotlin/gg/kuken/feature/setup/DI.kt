@@ -8,6 +8,9 @@ val SetupDI =
             SetupService(
                 accountService = get(),
                 remoteConfigService = get(),
+                accountPermissionRepository = get(),
+                permissionRepository = get(),
+                roleRepository = get(),
             )
         }
     }
