@@ -1,5 +1,7 @@
 package gg.kuken.feature.unit.http.routes
 
+import gg.kuken.feature.rbac.Permissions
+import gg.kuken.feature.rbac.http.requirePermission
 import gg.kuken.feature.unit.UnitService
 import gg.kuken.feature.unit.http.UnitRoutes
 import gg.kuken.feature.unit.http.dto.UnitResponse
@@ -9,6 +11,8 @@ import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 
 internal fun Route.listUnits() {
+    requirePermission(Permissions.ListUnits)
+
     val unitService by inject<UnitService>()
 
     get<UnitRoutes.All> {
