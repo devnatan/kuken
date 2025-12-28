@@ -63,10 +63,11 @@ object AuthHttpModule : HttpModule() {
 
                 validate { credentials ->
                     val account =
-                        runCatching { authService.verify(credentials.subject) }
-                            .onFailure { exception ->
-                                if (appConfig.devMode) exception.printStackTrace()
-                            }.getOrNull() ?: respondError(HttpError.NotFound)
+                        runCatching {
+                            authService.verify(credentials.subject)
+                        }.onFailure { exception ->
+                            if (appConfig.devMode) exception.printStackTrace()
+                        }.getOrNull() ?: respondError(HttpError.NotFound)
 
                     AccountPrincipal(account)
                 }
