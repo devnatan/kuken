@@ -34,5 +34,7 @@ export const RequireSetupGuard: NavigationGuard = async (
         return next(error)
     }
 
+    if (_to.name == SETUP_ROUTE) return next()
+
     return next({ name: SETUP_ROUTE })
 }
