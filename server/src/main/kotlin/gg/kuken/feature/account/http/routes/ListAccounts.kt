@@ -1,6 +1,7 @@
 package gg.kuken.feature.account.http.routes
 
 import gg.kuken.feature.account.AccountService
+import gg.kuken.feature.account.http.AccountRoutes
 import gg.kuken.feature.account.http.dto.AccountResponse
 import io.ktor.server.resources.get
 import io.ktor.server.response.respond

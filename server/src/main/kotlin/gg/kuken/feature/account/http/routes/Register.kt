@@ -1,6 +1,7 @@
 package gg.kuken.feature.account.http.routes
 
 import gg.kuken.feature.account.AccountService
+import gg.kuken.feature.account.http.AccountRoutes
 import gg.kuken.feature.account.http.dto.RegisterRequest
 import gg.kuken.feature.account.http.dto.RegisterResponse
 import gg.kuken.http.util.receiveValidating

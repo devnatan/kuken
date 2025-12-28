@@ -1,4 +1,4 @@
-package gg.kuken.feature.account.http.routes
+package gg.kuken.feature.account.http
 
 import io.ktor.resources.Resource
 import kotlinx.serialization.Serializable
@@ -15,6 +15,12 @@ class AccountRoutes {
     @Serializable
     @Resource("")
     class Register(
+        val parent: AccountRoutes = AccountRoutes(),
+    )
+
+    @Serializable
+    @Resource("@me/permissions")
+    class Permissions(
         val parent: AccountRoutes = AccountRoutes(),
     )
 }

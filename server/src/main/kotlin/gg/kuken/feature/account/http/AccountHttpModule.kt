@@ -1,6 +1,7 @@
 package gg.kuken.feature.account.http
 
 import gg.kuken.feature.account.http.routes.listAccounts
+import gg.kuken.feature.account.http.routes.permissions
 import gg.kuken.feature.account.http.routes.register
 import gg.kuken.http.HttpModule
 import io.ktor.server.application.Application
@@ -13,6 +14,7 @@ object AccountHttpModule : HttpModule() {
             authenticate {
                 listAccounts()
                 register()
+                permissions()
             }
         }
     }
