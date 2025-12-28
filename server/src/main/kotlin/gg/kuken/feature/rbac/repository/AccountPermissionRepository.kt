@@ -43,7 +43,7 @@ class AccountPermissionRepository(
         accountId: Uuid,
         roleId: Uuid,
         grantedBy: Uuid,
-        expiresAt: Instant? = null,
+        expiresAt: Instant?,
     ): AccountRole =
         suspendTransaction {
             val id = UUID.randomUUID()

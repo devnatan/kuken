@@ -38,7 +38,7 @@ class RoleRepository(
     suspend fun createRole(
         name: String,
         description: String,
-        isSystem: Boolean = false,
+        isSystem: Boolean,
     ): Role =
         suspendTransaction {
             val id = UUID.randomUUID()
@@ -75,7 +75,7 @@ class RoleRepository(
     suspend fun addPermissionToRole(
         roleId: Uuid,
         permissionId: Uuid,
-        policy: PermissionPolicy = PermissionPolicy.AllowAll,
+        policy: PermissionPolicy,
         allowedResourceIds: List<Uuid> = emptyList(),
         deniedResourceIds: List<Uuid> = emptyList(),
     ): Uuid =

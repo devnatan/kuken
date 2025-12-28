@@ -5,4 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class ResourceType {
     Blueprint,
+    Instance,
 }

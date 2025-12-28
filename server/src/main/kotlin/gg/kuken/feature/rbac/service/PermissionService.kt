@@ -14,9 +14,6 @@ class PermissionService(
     private val roleRepository: RoleRepository,
     private val accountPermissionRepository: AccountPermissionRepository,
 ) {
-    /**
-     * Verifica se uma conta tem permissão específica com detalhes de origem
-     */
     suspend fun checkPermission(
         accountId: Uuid,
         permissionName: String,
@@ -24,7 +21,14 @@ class PermissionService(
     ): PermissionCheckResult {
         val permission =
             permissionRepository.getPermissionByName(permissionName)
-                ?: return PermissionCheckResult(false, null, null, null, null, null)
+                ?: return PermissionCheckResult(
+                    hasPermission = false,
+                    source = null,
+                    sourceId = null,
+                    sourceName = null,
+                    policy = null,
+                    appliedRule = null,
+                )
 
         val directCheck = checkDirectPermissions(accountId, permission, resourceId)
         if (directCheck.hasPermission) {
@@ -36,21 +40,22 @@ class PermissionService(
             return roleCheck
         }
 
-        return PermissionCheckResult(false, null, null, null, null, null)
+        return PermissionCheckResult(
+            hasPermission = false,
+            source = null,
+            sourceId = null,
+            sourceName = null,
+            policy = null,
+            appliedRule = null,
+        )
     }
 
-    /**
-     * Verificação simplificada (sem detalhes de herança)
-     */
     suspend fun hasPermission(
         accountId: Uuid,
         permissionName: String,
         resourceId: Uuid? = null,
     ): Boolean = checkPermission(accountId, permissionName, resourceId).hasPermission
 
-    /**
-     * Verifica permissões diretas do usuário
-     */
     private suspend fun checkDirectPermissions(
         accountId: Uuid,
         permission: Permission,
@@ -98,12 +103,16 @@ class PermissionService(
             }
         }
 
-        return PermissionCheckResult(false, null, null, null, null, null)
+        return PermissionCheckResult(
+            hasPermission = false,
+            source = null,
+            sourceId = null,
+            sourceName = null,
+            policy = null,
+            appliedRule = null,
+        )
     }
 
-    /**
-     * Verifica permissões herdadas de roles
-     */
     private suspend fun checkRolePermissions(
         accountId: Uuid,
         permission: Permission,
@@ -156,12 +165,16 @@ class PermissionService(
             }
         }
 
-        return PermissionCheckResult(false, null, null, null, null, null)
+        return PermissionCheckResult(
+            hasPermission = false,
+            source = null,
+            sourceId = null,
+            sourceName = null,
+            policy = null,
+            appliedRule = null,
+        )
     }
 
-    /**
-     * Obtém todas as permissões efetivas com origem
-     */
     suspend fun getEffectivePermissionsWithSource(accountId: Uuid): List<Pair<Permission, PermissionCheckResult>> {
         val effectivePermissions = mutableListOf<Pair<Permission, PermissionCheckResult>>()
         val allPermissions = permissionRepository.getAllPermissions()
@@ -176,9 +189,6 @@ class PermissionService(
         return effectivePermissions
     }
 
-    /**
-     * Obtém permissões efetivas para um recurso específico
-     */
     suspend fun getEffectivePermissionsForResource(
         accountId: Uuid,
         resourceId: Uuid,

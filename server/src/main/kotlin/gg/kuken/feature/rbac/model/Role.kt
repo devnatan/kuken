@@ -9,7 +9,7 @@ data class Role(
     val id: Uuid,
     val name: String,
     val description: String,
-    val isSystem: Boolean = false,
+    val isSystem: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant,
 )
