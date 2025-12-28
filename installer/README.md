@@ -13,9 +13,9 @@ wget -qO- https://raw.githubusercontent.com/devnatan/kuken/main/installer/instal
 Manual installation
 ```shell
 curl -fsSL https://raw.githubusercontent.com/devnatan/kuken/main/installer/installer.sh
-cat install.sh
-chmod +x install.sh
-./install.sh
+cat installer.sh
+chmod +x installer.sh
+./installer.sh
 ```
  
 System installation
