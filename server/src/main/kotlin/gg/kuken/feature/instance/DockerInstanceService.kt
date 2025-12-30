@@ -62,6 +62,11 @@ class DockerInstanceService(
         )
     }
 
+    override suspend fun getInstanceContainerId(instanceId: Uuid): String {
+        val containerId = instanceRepository.findContainerById(instanceId) ?: throw InstanceNotFoundException()
+        return containerId
+    }
+
     override suspend fun createInstance(
         blueprintId: Uuid,
         options: CreateInstanceOptions,
