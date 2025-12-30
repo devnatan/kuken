@@ -4,11 +4,12 @@ package gg.kuken.feature.instance.repository
 
 import gg.kuken.feature.instance.entity.InstanceEntity
 import gg.kuken.feature.instance.model.Instance
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 interface InstanceRepository {
     suspend fun findById(id: Uuid): InstanceEntity?
+
+    suspend fun findContainerById(instanceId: Uuid): String?
 
     suspend fun create(instance: Instance)
 

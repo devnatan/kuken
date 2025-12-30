@@ -4,11 +4,13 @@ import gg.kuken.feature.instance.model.Instance
 import gg.kuken.feature.instance.repository.InstanceRepository
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.dao.UUIDEntity
 import org.jetbrains.exposed.v1.dao.UUIDEntityClass
 import org.jetbrains.exposed.v1.datetime.timestamp
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.util.UUID
@@ -54,6 +56,13 @@ class InstanceRepositoryImpl(
         suspendTransaction(db = database) {
             InstanceEntity.findById(id.toJavaUuid())
         }
+
+    override suspend fun findContainerById(instanceId: Uuid): String? = suspendTransaction(db = database) {
+        InstanceTable.select(InstanceTable.containerId)
+            .where { InstanceTable.id eq instanceId.toJavaUuid() }
+            .map { it[InstanceTable.containerId] }
+            .singleOrNull()
+    }
 
     override suspend fun create(instance: Instance) {
         suspendTransaction(db = database) {
