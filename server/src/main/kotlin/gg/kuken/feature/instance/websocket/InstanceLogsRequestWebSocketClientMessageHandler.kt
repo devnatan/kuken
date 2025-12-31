@@ -35,7 +35,7 @@ class InstanceLogsRequestWebSocketClientMessageHandler(
                     follow = true
                     showTimestamps = false
                     stdout = true
-                    stderr = false
+                    stderr = true
                 }.onStart {
                     respond(
                         op = WebSocketOpCodes.InstanceLogsRequestStarted,
