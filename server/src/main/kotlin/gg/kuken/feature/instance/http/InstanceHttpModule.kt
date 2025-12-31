@@ -8,12 +8,12 @@ import gg.kuken.feature.instance.http.routes.readFile
 import gg.kuken.feature.instance.http.routes.writeFile
 import gg.kuken.feature.instance.websocket.InstanceLogsRequestWebSocketClientMessageHandler
 import gg.kuken.http.HttpModule
-import gg.kuken.http.websocket.WebSocketClientMessageHandler
-import gg.kuken.http.websocket.WebSocketOp
-import gg.kuken.http.websocket.WebSocketOpCodes
-import io.ktor.server.application.Application
-import io.ktor.server.auth.authenticate
-import io.ktor.server.routing.routing
+import gg.kuken.websocket.WebSocketClientMessageHandler
+import gg.kuken.websocket.WebSocketOp
+import gg.kuken.websocket.WebSocketOpCodes
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.routing.*
 import org.koin.core.component.get
 
 internal object InstanceHttpModule : HttpModule() {

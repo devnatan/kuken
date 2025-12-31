@@ -1,8 +1,8 @@
 package gg.kuken.feature.instance
 
-import gg.kuken.feature.instance.entity.InstanceRepositoryImpl
-import gg.kuken.feature.instance.repository.InstanceRepository
-import gg.kuken.feature.instance.service.InstanceFileService
+import gg.kuken.core.docker.DockerNetworkService
+import gg.kuken.feature.instance.data.entity.InstanceRepositoryImpl
+import gg.kuken.feature.instance.data.repository.InstanceRepository
 import org.koin.dsl.module
 
 val InstancesDI =
@@ -19,6 +19,7 @@ val InstancesDI =
                 identityGeneratorService = get(),
                 kukenConfig = get(),
                 dockerNetworkService = DockerNetworkService(dockerClient = get()),
+                eventDispatcher = get(),
             )
         }
 

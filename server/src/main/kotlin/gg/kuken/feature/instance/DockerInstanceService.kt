@@ -1,10 +1,12 @@
 package gg.kuken.feature.instance
 
 import gg.kuken.KukenConfig
+import gg.kuken.core.EventDispatcher
+import gg.kuken.core.docker.DockerNetworkService
 import gg.kuken.feature.account.IdentityGeneratorService
 import gg.kuken.feature.blueprint.BlueprintService
 import gg.kuken.feature.blueprint.model.Blueprint
-import gg.kuken.feature.instance.entity.InstanceEntity
+import gg.kuken.feature.instance.data.entity.InstanceEntity
 import gg.kuken.feature.instance.model.CreateInstanceOptions
 import gg.kuken.feature.instance.model.HostPort
 import gg.kuken.feature.instance.model.ImageUpdatePolicy
@@ -14,7 +16,7 @@ import gg.kuken.feature.instance.model.InstanceRuntimeMount
 import gg.kuken.feature.instance.model.InstanceRuntimeNetwork
 import gg.kuken.feature.instance.model.InstanceRuntimeSingleNetwork
 import gg.kuken.feature.instance.model.InstanceStatus
-import gg.kuken.feature.instance.repository.InstanceRepository
+import gg.kuken.feature.instance.data.repository.InstanceRepository
 import gg.kuken.http.exception.ResourceException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +43,7 @@ class DockerInstanceService(
     private val identityGeneratorService: IdentityGeneratorService,
     private val kukenConfig: KukenConfig,
     private val dockerNetworkService: DockerNetworkService,
+    private val eventDispatcher: EventDispatcher,
 ) : InstanceService,
     CoroutineScope by CoroutineScope(Default + CoroutineName("DockerInstanceService")) {
     private val logger = LogManager.getLogger(DockerInstanceService::class.java)

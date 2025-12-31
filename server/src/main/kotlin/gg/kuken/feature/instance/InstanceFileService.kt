@@ -1,9 +1,7 @@
-package gg.kuken.feature.instance.service
+package gg.kuken.feature.instance
 
 import gg.kuken.core.io.FileEntry
 import gg.kuken.core.io.FileSystem
-import gg.kuken.feature.instance.InstanceService
-import gg.kuken.feature.instance.io.InProcessDockerContainerFileSystem
 import me.devnatan.dockerkt.DockerClient
 import org.koin.core.component.KoinComponent
 import kotlin.uuid.Uuid

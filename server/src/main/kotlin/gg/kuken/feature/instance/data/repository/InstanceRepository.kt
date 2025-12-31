@@ -1,8 +1,6 @@
+package gg.kuken.feature.instance.data.repository
 
-
-package gg.kuken.feature.instance.repository
-
-import gg.kuken.feature.instance.entity.InstanceEntity
+import gg.kuken.feature.instance.data.entity.InstanceEntity
 import gg.kuken.feature.instance.model.Instance
 import kotlin.uuid.Uuid
 

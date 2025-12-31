@@ -1,8 +1,10 @@
-package gg.kuken.feature.instance
+package gg.kuken.core.docker
 
+import gg.kuken.feature.instance.InvalidNetworkAssignmentException
+import gg.kuken.feature.instance.NetworkConnectionFailed
+import gg.kuken.feature.instance.UnknownNetworkException
 import gg.kuken.feature.instance.model.HostPort
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
 import me.devnatan.dockerkt.DockerClient
 import me.devnatan.dockerkt.DockerException
@@ -28,7 +30,7 @@ class DockerNetworkService(
     ) {
         val network =
             runCatching {
-                withContext(IO) { dockerClient.networks.inspect(network) }
+                withContext(Dispatchers.IO) { dockerClient.networks.inspect(network) }
             }.recoverCatching {
                 tryCreateNetwork(network)
             }.getOrThrow()
@@ -53,7 +55,7 @@ class DockerNetworkService(
         }
 
         try {
-            withContext(IO) {
+            withContext(Dispatchers.IO) {
                 dockerClient.networks.connectContainer(
                     id = network.id,
                     container = container,
@@ -73,7 +75,7 @@ class DockerNetworkService(
      *
      * @param host The hostname or IP address to bind to.
      * @param port The port number to bind to. If null, a random available port is selected.
-     * @return An instance of [HostPort] containing the resolved host and port configuration.
+     * @return An instance of [gg.kuken.feature.instance.model.HostPort] containing the resolved host and port configuration.
      */
     suspend fun createAddress(
         host: String?,
@@ -90,7 +92,7 @@ class DockerNetworkService(
      * @return A randomly selected, available port number.
      */
     private suspend fun randomPort(): UShort =
-        withContext(IO) {
+        withContext(Dispatchers.IO) {
             ServerSocket(0)
                 .use { socket ->
                     socket.localPort
@@ -98,10 +100,10 @@ class DockerNetworkService(
         }
 
     /**
-     * Tries to create a network with the given [name] returning the newly created [Network].
+     * Tries to create a network with the given [name] returning the newly created [me.devnatan.dockerkt.models.network.Network].
      *
      * @param name The network name.
-     * @throws UnknownNetworkException If network couldn't be found.
+     * @throws gg.kuken.feature.instance.UnknownNetworkException If network couldn't be found.
      */
     private suspend fun tryCreateNetwork(name: String): Network {
         val created = createNetwork(name)
