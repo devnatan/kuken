@@ -1,5 +1,6 @@
 package gg.kuken.feature.instance.http
 
+import gg.kuken.feature.instance.http.routes.command
 import gg.kuken.feature.instance.http.routes.deleteFile
 import gg.kuken.feature.instance.http.routes.getInstanceDetails
 import gg.kuken.feature.instance.http.routes.listFiles
@@ -25,6 +26,7 @@ internal object InstanceHttpModule : HttpModule() {
                     readFile()
                     writeFile()
                     deleteFile()
+                    command()
                 }
             }
         }

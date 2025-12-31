@@ -435,29 +435,28 @@ class DockerInstanceService(
     }
 
     override suspend fun startInstance(instanceId: Uuid) {
-        val instance = getValidInstance(instanceId)
-        dockerClient.containers.start(instance.containerId!!)
+        dockerClient.containers.start(getInstanceContainerId(instanceId))
     }
 
     override suspend fun stopInstance(instanceId: Uuid) {
-        val instance = getValidInstance(instanceId)
-        dockerClient.containers.stop(instance.containerId!!)
+        dockerClient.containers.stop(getInstanceContainerId(instanceId))
     }
 
     override suspend fun runInstanceCommand(
         instanceId: Uuid,
         commandToRun: String,
     ) {
-        val instance = getValidInstance(instanceId)
+        val container = getInstanceContainerId(instanceId)
         val execId =
-            dockerClient.exec.create(instance.containerId!!) {
+            dockerClient.exec.create(container) {
                 tty = true
                 attachStdin = false
                 attachStdout = false
                 attachStderr = false
-                command = commandToRun.split(" ")
+                command = listOf("sh", "-c") + commandToRun
             }
 
+        // TODO Command output as Result
         dockerClient.exec.start(execId) {
             detach = true
         }

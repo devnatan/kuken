@@ -29,4 +29,11 @@ class InstanceRoutes {
         val instanceId: Uuid,
         val path: String,
     )
+
+    @Serializable
+    @Resource("{instanceId}/command")
+    class Command(
+        val parent: InstanceRoutes = InstanceRoutes(),
+        val instanceId: Uuid,
+    )
 }
