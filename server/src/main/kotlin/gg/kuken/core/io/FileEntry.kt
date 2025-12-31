@@ -14,7 +14,7 @@ data class FileEntry(
     val permissions: String,
     val isExecutable: Boolean,
     val isReadable: Boolean,
-    val isWritable: Boolean
+    val isWritable: Boolean,
 ) {
     val isDirectory: Boolean
         get() = type == FileType.DIRECTORY

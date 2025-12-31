@@ -4,5 +4,5 @@ enum class FileType {
     FILE,
     DIRECTORY,
     SYMLINK,
-    OTHER
+    OTHER,
 }

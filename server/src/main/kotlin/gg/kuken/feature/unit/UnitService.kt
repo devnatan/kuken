@@ -22,9 +22,9 @@ internal class UnitService(
     private val identityGeneratorService: IdentityGeneratorService,
     private val instanceService: InstanceService,
 ) : CoroutineScope by CoroutineScope(SupervisorJob()) {
-    suspend fun getUnits(): List<KukenUnit> = unitRepository.listUnits().map(::KukenUnit)
+    suspend fun getUnits(): List<KukenUnit> = unitRepository.listUnits().map(::mapToKukenUnit)
 
-    suspend fun getUnit(id: Uuid): KukenUnit = unitRepository.findById(id)?.let(::KukenUnit) ?: throw UnitNotFoundException()
+    suspend fun getUnit(id: Uuid): KukenUnit = unitRepository.findById(id)?.let(::mapToKukenUnit) ?: throw UnitNotFoundException()
 
     suspend fun createUnit(options: UnitCreateOptions): KukenUnit {
         val generatedId = identityGeneratorService.generate()
@@ -64,7 +64,7 @@ internal class UnitService(
         return unit
     }
 
-    private fun KukenUnit(entity: UnitEntity) =
+    private fun mapToKukenUnit(entity: UnitEntity) =
         with(entity) {
             KukenUnit(
                 id = id.value.toKotlinUuid(),

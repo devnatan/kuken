@@ -57,12 +57,14 @@ class InstanceRepositoryImpl(
             InstanceEntity.findById(id.toJavaUuid())
         }
 
-    override suspend fun findContainerById(instanceId: Uuid): String? = suspendTransaction(db = database) {
-        InstanceTable.select(InstanceTable.containerId)
-            .where { InstanceTable.id eq instanceId.toJavaUuid() }
-            .map { it[InstanceTable.containerId] }
-            .singleOrNull()
-    }
+    override suspend fun findContainerById(instanceId: Uuid): String? =
+        suspendTransaction(db = database) {
+            InstanceTable
+                .select(InstanceTable.containerId)
+                .where { InstanceTable.id eq instanceId.toJavaUuid() }
+                .map { it[InstanceTable.containerId] }
+                .singleOrNull()
+        }
 
     override suspend fun create(instance: Instance) {
         suspendTransaction(db = database) {

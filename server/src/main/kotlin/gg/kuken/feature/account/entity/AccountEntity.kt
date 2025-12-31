@@ -6,7 +6,7 @@ import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
 import org.jetbrains.exposed.v1.dao.UUIDEntity
 import org.jetbrains.exposed.v1.dao.UUIDEntityClass
 import org.jetbrains.exposed.v1.datetime.timestamp
-import java.util.*
+import java.util.UUID
 import kotlin.uuid.toKotlinUuid
 
 class AccountEntity(

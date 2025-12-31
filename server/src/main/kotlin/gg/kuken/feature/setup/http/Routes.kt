@@ -3,9 +3,11 @@ package gg.kuken.feature.setup.http
 import gg.kuken.feature.setup.SetupService
 import gg.kuken.feature.setup.http.dto.SetupRequest
 import gg.kuken.http.util.receiveValidating
-import io.ktor.http.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import jakarta.validation.Validator
 import org.koin.ktor.ext.inject
 
