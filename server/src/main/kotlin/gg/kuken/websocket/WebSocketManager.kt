@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import kotlinx.coroutines.supervisorScope
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.apache.logging.log4j.LogManager
@@ -105,4 +106,11 @@ class WebSocketManager(
         handler.coroutineContext = Job() + CoroutineName("$op-${handler::class.simpleName ?: "unknown"}")
         handlers.computeIfAbsent(op) { mutableListOf() }.add(handler)
     }
+
+    internal suspend inline fun broadcasting(crossinline block: suspend (WebSocketSession) -> Unit) = supervisorScope {
+        sessions.forEach { session -> block(session) }
+    }
+
+    fun isReceivingEvents(): Boolean = sessions.isNotEmpty()
+
 }

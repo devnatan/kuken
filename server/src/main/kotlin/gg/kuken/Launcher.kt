@@ -15,9 +15,11 @@ import gg.kuken.feature.setup.SetupDI
 import gg.kuken.feature.unit.UnitDI
 import gg.kuken.http.Http
 import gg.kuken.orchestrator.Orchestrator
+import gg.kuken.websocket.WebSocketManager
 import jakarta.validation.Validation
 import jakarta.validation.Validator
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import me.devnatan.dockerkt.DockerClient
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -35,7 +37,8 @@ fun main() {
         val database = di.koin.get<Database>()
         checkDatabaseConnection(database)
 
-        Http(config).start()
+        val webSocketManager = di.koin.get<WebSocketManager>()
+        Http(config, webSocketManager).start()
     }
 }
 
@@ -74,6 +77,10 @@ private fun configureDependencyInjection(config: KukenConfig) =
 
                 single<Orchestrator> {
                     Orchestrator(redisClient = get())
+                }
+
+                single {
+                    WebSocketManager(json = Json { ignoreUnknownKeys = true })
                 }
             }
 

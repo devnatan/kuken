@@ -29,4 +29,11 @@ val InstancesDI =
                 dockerClient = get(),
             )
         }
+
+        single<InstanceEventRedirector>(createdAtStart = true) {
+            InstanceEventRedirector(
+                webSocketManager = get(),
+                eventDispatcher = get(),
+            )
+        }
     }

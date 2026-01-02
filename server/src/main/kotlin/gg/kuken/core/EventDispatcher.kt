@@ -1,6 +1,7 @@
 package gg.kuken.core
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,7 +18,7 @@ suspend inline fun <reified T : Any> EventDispatcher.listen(): Flow<T> = listen(
 
 class EventDispatcherImpl :
     EventDispatcher,
-    CoroutineScope by CoroutineScope(SupervisorJob()) {
+    CoroutineScope by CoroutineScope(Dispatchers.IO + SupervisorJob()) {
     private val publisher = MutableSharedFlow<Any>(extraBufferCapacity = 1)
 
     override suspend fun <T : Any> listen(eventType: KClass<T>): Flow<T> = publisher.filterIsInstance(eventType)

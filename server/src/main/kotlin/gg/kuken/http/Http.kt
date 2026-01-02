@@ -33,10 +33,10 @@ private const val TIMEOUT_MILLIS: Long = 5000
 
 class Http(
     val appConfig: KukenConfig,
+    val webSocketManager: WebSocketManager,
 ) : KoinComponent {
     private var shutdownPending = atomic(false)
     private val engine: EmbeddedServer<*, *> = createServer()
-    private val webSocketManager = WebSocketManager(json = Json { ignoreUnknownKeys = true })
 
     init {
         if (appConfig.devMode) {

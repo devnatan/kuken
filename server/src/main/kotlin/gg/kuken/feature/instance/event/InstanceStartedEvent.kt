@@ -4,4 +4,8 @@ import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
 @Serializable
-data class InstanceStartedEvent(val instanceId: Uuid)
+sealed interface InstanceEvent {
+
+    @Serializable
+    data class InstanceStartedEvent(val instanceId: Uuid) : InstanceEvent
+}
