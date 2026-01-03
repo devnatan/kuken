@@ -24,6 +24,7 @@ containing the environment variables needed to run the project locally.
 We use ESLint as linter and Prettier as code formatter.
 
 ```
+yarn format
 yarn lint
 ```
 

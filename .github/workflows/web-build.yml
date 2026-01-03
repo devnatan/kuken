@@ -48,4 +48,4 @@ jobs:
           cache-dependency-path: web/package-lock.json
 
       - name: Build
-        run: cd web && yarn ci && yarn build-only
+        run: cd web && yarn ci && yarn build

@@ -8,7 +8,7 @@ COPY package*.json ./
 ENV NODE_OPTIONS "--max_old_space_size=4096"
 RUN yarn ci
 COPY . .
-RUN yarn build-only
+RUN yarn build
 
 # Production stage
 FROM nginx:stable-alpine AS production-stage
