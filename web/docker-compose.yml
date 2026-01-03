@@ -10,6 +10,8 @@ services:
       - "80:80"
     environment:
       - NODE_ENV=production
+    volumes:
+      - ./logs:/var/log/nginx
     restart: unless-stopped
     networks:
       - kuken-app
