@@ -30,19 +30,13 @@ kuken --version
 ### Windows
 
 ```powershell
-# Download (replace VERSION with the latest version)
 Invoke-WebRequest -Uri "https://github.com/devnatan/kuken/releases/download/v0.1.0/kuken-windows.exe" -OutFile "kuken.exe"
-
-# Move to a directory in PATH (e.g., C:\Program Files\Kuken)
 Move-Item kuken.exe "C:\Program Files\Kuken\kuken.exe"
-
-# Add to PATH if needed
 [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\Kuken", "Machine")
 
 # Verify installation (restart PowerShell first)
 kuken --version
 ```
-
 
 ## Uninstallation
 
