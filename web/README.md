@@ -1,6 +1,6 @@
 # web-ui
 
-## Building for Development
+## Building for Local Development
 
 **Clone the project repository**
 
@@ -19,16 +19,16 @@ yarn dev
 Also is needed to configure environment variables, create a `.env.local` file
 containing the environment variables needed to run the project locally.
 
-**Building for production**
-
-```
-yarn build
-```
-
 **Format and lint codebase**
 
 We use ESLint as linter and Prettier as code formatter.
 
 ```
 yarn lint
+```
+
+## Building for Production
+
+```
+yarn build
 ```
