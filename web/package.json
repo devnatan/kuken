@@ -18,7 +18,7 @@
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/lang-markdown": "^6.3.2",
     "@codemirror/lint": "^6.8.4",
-    "@intlify/unplugin-vue-i18n": "^6.0.3",
+    "@intlify/unplugin-vue-i18n": "^11.0.3",
     "@uiw/codemirror-extensions-color": "^4.23.10",
     "@uiw/codemirror-extensions-hyper-link": "^4.23.10",
     "@vueuse/core": "^14.1.0",
