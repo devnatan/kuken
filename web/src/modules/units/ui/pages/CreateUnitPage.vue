@@ -9,6 +9,9 @@ import VLabel from "@/modules/platform/ui/components/form/VLabel.vue"
 import VInput from "@/modules/platform/ui/components/form/VInput.vue"
 import type { CreateUnitRequest } from "@/modules/units/api/models/create-unit.model.ts"
 import { useRoute } from "vue-router"
+import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
+import VTitle from "@/modules/platform/ui/components/typography/VTitle.vue"
+import Breadcrumb from "@/modules/platform/ui/components/Breadcrumb.vue"
 
 const form = reactive({
     name: "",
@@ -20,11 +23,11 @@ const { state, isLoading, execute } = useAsyncState(unitsService.createUnit, nul
 })
 
 const createUnit = () =>
-    execute(0, <CreateUnitRequest>{
+    execute(0, {
         name: form.name,
         blueprint: form.blueprint,
         image: form.image
-    })
+    } as CreateUnitRequest)
 
 effect(() => {
     form.blueprint = useRoute().query.blueprint as string
@@ -32,21 +35,31 @@ effect(() => {
 </script>
 
 <template>
-    <VForm @submit.prevent="createUnit">
-        <VFieldSet>
-            <VLabel>Name</VLabel>
-            <VInput v-model="form.name" type="text" required="true" />
-        </VFieldSet>
-        <VFieldSet>
-            <VLabel>Blueprint</VLabel>
-            <VInput v-model="form.blueprint" type="text" required="true" />
-        </VFieldSet>
-        <VFieldSet>
-            <VLabel>Image</VLabel>
-            <VInput v-model="form.image" type="text" required="true" />
-        </VFieldSet>
-        <VButton :disabled="isLoading" variant="primary" type="submit"> Create </VButton>
-    </VForm>
+    <VContainer class="container">
+        <Breadcrumb />
+        <VTitle>Create new server</VTitle>
+        <VForm @submit.prevent="createUnit">
+            <VFieldSet>
+                <VLabel>Name</VLabel>
+                <VInput v-model="form.name" type="text" required="true" />
+            </VFieldSet>
+            <VFieldSet>
+                <VLabel>Blueprint</VLabel>
+                <VInput v-model="form.blueprint" type="text" required="true" />
+            </VFieldSet>
+            <VFieldSet>
+                <VLabel>Image</VLabel>
+                <VInput v-model="form.image" type="text" required="true" />
+            </VFieldSet>
+            <VButton :disabled="isLoading" variant="primary" type="submit"> Create </VButton>
+        </VForm>
+    </VContainer>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.container {
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+}
+</style>
