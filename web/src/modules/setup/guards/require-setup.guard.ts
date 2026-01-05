@@ -18,7 +18,13 @@ export const RequireSetupGuard: NavigationGuard = async (
     }
 
     try {
-        await setupService.getSetup()
+        const { completed } = await setupService.getSetup()
+        if (completed) {
+            const isGoingToSetupPage = _to.name == SETUP_ROUTE
+
+            // Trying to access setup but setup is already completed
+            return isGoingToSetupPage ? next("/") : next()
+        }
     } catch (error) {
         if (!(error instanceof AxiosError)) throw error
 
