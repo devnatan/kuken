@@ -30,7 +30,7 @@ import TheHeader from "@/modules/platform/ui/components/TheHeader.vue"
 .content {
     background-color: #fff;
     border-radius: 20px;
-    margin: 0 32px 32px 32px;
+    margin: 0 24px 24px 24px;
     height: 100%;
 }
 </style>
