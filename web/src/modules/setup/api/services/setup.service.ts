@@ -4,7 +4,9 @@ import type { Setup, SetupRequest } from "@/modules/setup/api/models/setup.model
 
 class SetupService {
     async getSetup(): Promise<Setup> {
-        return httpService.get("setup").then((res: AxiosResponse) => res.data as Setup)
+        return httpService.get("setup")
+            .then((res: AxiosResponse) => res.data as Setup)
+            .catch(() => ({ completed: true } as Setup))
     }
 
     async completeSetup(request: SetupRequest): Promise<Setup> {
