@@ -1,9 +1,9 @@
 export type Setup = {
     completed: boolean
-    remainingSteps: [SetupStep]
+    remainingSteps: [{
+        type: string
+    }]
 }
-
-export type SetupStep = { type: "create-account" } | { type: "organization-name" }
 
 export const SetupStepType = {
     CREATE_ACCOUNT: "create-account",

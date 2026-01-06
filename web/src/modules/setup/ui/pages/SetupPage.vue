@@ -20,7 +20,7 @@ type PendingSetup = {
     }
 }
 
-const remainingSteps: SetupStepType[] = reactive([])
+const remainingSteps: string[] = reactive([])
 const setup: Reactive<PendingSetup> = reactive({
     currentStep: "",
     payload: {
@@ -51,6 +51,17 @@ async function completeSetup() {
     await router.replace({ name: AUTH_LOGIN_ROUTE })
 }
 
+async function proceedSetup() {
+  const current = setup.currentStep
+  remainingSteps.splice(remainingSteps.indexOf(current), 1)
+
+  if (remainingSteps.length === 0) {
+    return await completeSetup()
+  }
+
+  setup.currentStep = remainingSteps[0]
+}
+
 type SetupStepInterface = {
     title: string
     description: string
@@ -59,16 +70,16 @@ type SetupStepInterface = {
 
 const steps: Array<SetupStepInterface> = [
     {
+      title: "Set up your organization",
+      description:
+          "Choose a name to identify your organization inside the platform.<br/>You can change this later if needed.",
+      stepType: SetupStepType.ORGANIZATION_NAME
+    },
+    {
         title: "Create your admin account",
         description:
             "This will be the first account in the system.<br/>You'll use it to access the dashboard, create servers, and manage your settings.",
         stepType: SetupStepType.CREATE_ACCOUNT
-    },
-    {
-        title: "Set up your organization",
-        description:
-            "Choose a name to identify your organization inside the platform.<br/>You can change this later if needed.",
-        stepType: SetupStepType.ORGANIZATION_NAME
     }
 ]
 
@@ -105,13 +116,13 @@ init()
                         <SetupCreateAccount
                             v-model:email="setup.payload.email"
                             v-model:password="setup.payload.password"
-                            @done="setup.currentStep = SetupStepType.ORGANIZATION_NAME"
+                            @done="proceedSetup"
                         />
                     </template>
                     <template v-if="setup.currentStep == SetupStepType.ORGANIZATION_NAME">
                         <SetupOrganizationName
                             v-model:organization-name="setup.payload.orgName"
-                            @done="completeSetup()"
+                            @done="proceedSetup()"
                         />
                     </template>
                 </div>
