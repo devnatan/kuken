@@ -49,7 +49,7 @@ jobs:
       - name: Build with Gradle
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build -x check
+        run: ./gradlew buildFatJar
 
       - name: Build Native Image
         env:
