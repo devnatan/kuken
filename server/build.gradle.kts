@@ -1,4 +1,5 @@
 import io.ktor.plugin.OpenApiPreview
+import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 
 plugins {
     application
@@ -64,4 +65,22 @@ ktor {
     }
 
     development = providers.environmentVariable("PRODUCTION").isPresent
+}
+
+dokka {
+    dokkaPublications.html {
+        moduleName.set("Küken")
+        moduleVersion.set(project.version.toString())
+    }
+
+    dokkaSourceSets.configureEach {
+        documentedVisibilities.set(setOf(VisibilityModifier.Public))
+        displayName.set("API")
+
+        sourceLink {
+            localDirectory.set(file("src/main/kotlin"))
+            remoteUrl("https://github.com/devnatan/kuken/blob/main/server/src/main/kotlin")
+            remoteLineSuffix.set("#L")
+        }
+    }
 }
