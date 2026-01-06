@@ -88,7 +88,7 @@ graalvmNative {
             buildArgs.add("--add-modules=jdk.unsupported")
             buildArgs.add("-J--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED")
             buildArgs.add("-H:+AllowIncompleteClasspath")
-            
+
             buildArgs.add("--install-exit-handlers")
             buildArgs.add("-H:+ReportUnsupportedElementsAtRuntime")
             buildArgs.add("-H:+ReportExceptionStackTraces")
