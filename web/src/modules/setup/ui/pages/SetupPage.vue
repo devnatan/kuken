@@ -52,14 +52,14 @@ async function completeSetup() {
 }
 
 async function proceedSetup() {
-  const current = setup.currentStep
-  remainingSteps.splice(remainingSteps.indexOf(current), 1)
+    const current = setup.currentStep
+    remainingSteps.splice(remainingSteps.indexOf(current), 1)
 
-  if (remainingSteps.length === 0) {
-    return await completeSetup()
-  }
+    if (remainingSteps.length === 0) {
+        return await completeSetup()
+    }
 
-  setup.currentStep = remainingSteps[0]
+    setup.currentStep = remainingSteps[0]
 }
 
 type SetupStepInterface = {
@@ -70,10 +70,10 @@ type SetupStepInterface = {
 
 const steps: Array<SetupStepInterface> = [
     {
-      title: "Set up your organization",
-      description:
-          "Choose a name to identify your organization inside the platform.<br/>You can change this later if needed.",
-      stepType: SetupStepType.ORGANIZATION_NAME
+        title: "Set up your organization",
+        description:
+            "Choose a name to identify your organization inside the platform.<br/>You can change this later if needed.",
+        stepType: SetupStepType.ORGANIZATION_NAME
     },
     {
         title: "Create your admin account",

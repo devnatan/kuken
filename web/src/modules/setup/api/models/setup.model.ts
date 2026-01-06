@@ -1,8 +1,10 @@
 export type Setup = {
     completed: boolean
-    remainingSteps: [{
-        type: string
-    }]
+    remainingSteps: [
+        {
+            type: string
+        }
+    ]
 }
 
 export const SetupStepType = {
