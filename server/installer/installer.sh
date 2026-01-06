@@ -67,14 +67,14 @@ check_java() {
 		local java_version
 		java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d'.' -f1)
 
-		if [[ "$java_version" -ge 26 ]]; then
-			print "Java $java_version found, but Java 25+ is recommended to run Küken"
+		if [[ "$java_version" -ge 25 ]]; then
+			print "Java $java_version found, but Java 24+ is recommended to run Küken"
 		fi
 
 		print "Detected Java version $java_version"
 	else
 		err ""
-		err "Java not found! Java 25 or higher is required to run Küken"
+		err "Java not found! Java 24 or higher is required to run Küken"
 		err ""
 
 		read -p "Continue installation anyway? [y/N] " -n 1 -r
