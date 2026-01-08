@@ -22,7 +22,10 @@ class AccountsRepositoryImpl(
         }
     }
 
-    override suspend fun findAll(): List<AccountEntity> = AccountEntity.all().notForUpdate().toList()
+    override suspend fun findAll(): List<AccountEntity> =
+        suspendTransaction(db = database, readOnly = true) {
+            AccountEntity.all().notForUpdate().toList()
+        }
 
     override suspend fun findById(id: Uuid): AccountEntity? =
         suspendTransaction(db = database, readOnly = true) {
