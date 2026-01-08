@@ -1,6 +1,6 @@
 package gg.kuken.feature.unit.http.routes
 
-import gg.kuken.feature.account.http.AccountKey
+import gg.kuken.feature.rbac.http.getCurrentAccount
 import gg.kuken.feature.unit.UnitService
 import gg.kuken.feature.unit.http.UnitRoutes
 import gg.kuken.feature.unit.http.dto.CreateUnitRequest
@@ -37,7 +37,7 @@ private fun RoutingContext.buildUnitCreateOptions(request: CreateUnitRequest): U
         name = request.name,
         blueprintId = request.blueprint,
         externalId = null,
-        actorId = call.attributes.getOrNull(AccountKey)?.id,
+        actorId = call.getCurrentAccount().id,
         image = request.image,
         options = request.options,
         network =

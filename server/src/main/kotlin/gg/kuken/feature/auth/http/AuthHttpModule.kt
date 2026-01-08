@@ -2,7 +2,6 @@ package gg.kuken.feature.auth.http
 
 import com.auth0.jwt.interfaces.JWTVerifier
 import gg.kuken.KukenConfig
-import gg.kuken.feature.account.http.AccountKey
 import gg.kuken.feature.account.http.AccountPrincipal
 import gg.kuken.feature.auth.AuthService
 import gg.kuken.feature.auth.http.exception.InvalidAccessTokenException
@@ -12,15 +11,10 @@ import gg.kuken.http.HttpError
 import gg.kuken.http.HttpModule
 import gg.kuken.http.util.respondError
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCallPipeline
-import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.jwt
-import io.ktor.server.auth.principal
-import io.ktor.server.routing.Routing
-import io.ktor.server.routing.intercept
 import io.ktor.server.routing.routing
 import org.koin.ktor.ext.inject
 import kotlin.getValue
@@ -35,18 +29,8 @@ object AuthHttpModule : HttpModule() {
             routing {
                 login()
                 authenticate { verify() }
-                addAccountAttributeIfNeeded()
             }
         }
-
-    private fun Routing.addAccountAttributeIfNeeded() {
-        intercept(ApplicationCallPipeline.Call) {
-            val account =
-                call.principal<AccountPrincipal>()?.account
-                    ?: return@intercept
-            call.attributes.put(AccountKey, account)
-        }
-    }
 
     private fun Application.installAuthentication() {
         val appConfig by inject<KukenConfig>()

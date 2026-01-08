@@ -5,9 +5,9 @@ import gg.kuken.feature.account.http.AccountRoutes
 import gg.kuken.feature.account.http.dto.RegisterRequest
 import gg.kuken.feature.account.http.dto.RegisterResponse
 import gg.kuken.http.util.receiveValidating
-import io.ktor.server.resources.post
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.post
 import jakarta.validation.Validator
 import org.koin.ktor.ext.inject
 

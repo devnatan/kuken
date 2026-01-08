@@ -3,8 +3,6 @@ package gg.kuken.feature.blueprint.http.routes
 import gg.kuken.feature.blueprint.BlueprintService
 import gg.kuken.feature.blueprint.BlueprintSpecSource
 import gg.kuken.feature.blueprint.http.BlueprintRoutes
-import gg.kuken.feature.rbac.Permissions
-import gg.kuken.feature.rbac.http.requirePermission
 import gg.kuken.http.util.receiveValid
 import io.ktor.server.resources.post
 import io.ktor.server.response.respond

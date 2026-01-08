@@ -1,7 +1,6 @@
 package gg.kuken.http
 
 import gg.kuken.KukenConfig
-import gg.kuken.feature.rbac.http.RBACAuthorizationPlugin
 import gg.kuken.http.exception.ResourceException
 import gg.kuken.http.util.ValidationException
 import io.ktor.http.HttpHeaders
@@ -36,7 +35,6 @@ fun Application.installDefaultFeatures(config: KukenConfig) {
     install(Resources)
     install(DefaultHeaders)
     install(AutoHeadResponse)
-    install(RBACAuthorizationPlugin)
 
     install(CallLogging) {
         level = if (config.devMode) Level.DEBUG else Level.INFO

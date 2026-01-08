@@ -1,7 +1,7 @@
 package gg.kuken.feature.account.http.routes
 
 import gg.kuken.feature.account.http.AccountRoutes
-import gg.kuken.feature.rbac.http.getAccountId
+import gg.kuken.feature.rbac.http.getCurrentAccount
 import gg.kuken.feature.rbac.model.PermissionAction
 import gg.kuken.feature.rbac.model.PermissionName
 import gg.kuken.feature.rbac.model.PermissionPolicy
@@ -35,7 +35,7 @@ fun Route.permissions() {
     val permissionService by inject<PermissionService>()
 
     get<AccountRoutes.Permissions> {
-        val accountId = call.getAccountId()
+        val accountId = call.getCurrentAccount().id
         val permissions = permissionService.getEffectivePermissionsWithSource(accountId)
 
         val response =

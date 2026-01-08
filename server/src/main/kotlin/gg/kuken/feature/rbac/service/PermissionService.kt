@@ -19,16 +19,19 @@ class PermissionService(
         permissionName: String,
         resourceId: Uuid? = null,
     ): PermissionCheckResult {
+        val emptyPermissionCheckResult =
+            PermissionCheckResult(
+                hasPermission = false,
+                source = null,
+                sourceId = null,
+                sourceName = null,
+                policy = null,
+                appliedRule = null,
+            )
+
         val permission =
             permissionRepository.getPermissionByName(permissionName)
-                ?: return PermissionCheckResult(
-                    hasPermission = false,
-                    source = null,
-                    sourceId = null,
-                    sourceName = null,
-                    policy = null,
-                    appliedRule = null,
-                )
+                ?: return emptyPermissionCheckResult
 
         val directCheck = checkDirectPermissions(accountId, permission, resourceId)
         if (directCheck.hasPermission) {
@@ -40,14 +43,7 @@ class PermissionService(
             return roleCheck
         }
 
-        return PermissionCheckResult(
-            hasPermission = false,
-            source = null,
-            sourceId = null,
-            sourceName = null,
-            policy = null,
-            appliedRule = null,
-        )
+        return emptyPermissionCheckResult
     }
 
     suspend fun hasPermission(
