@@ -4,11 +4,16 @@
     <ModalsContainer />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ModalsContainer } from "vue-final-modal"
 import LoadingState from "@/modules/platform/ui/components/LoadingState.vue"
 import { ref } from "vue"
 import backendService from "@/modules/platform/api/services/backend.service.ts"
+import { useHead } from "@unhead/vue"
+
+useHead({
+    title: `Küken`
+})
 
 const isLoading = ref(true)
 
