@@ -8,6 +8,7 @@ import gg.kuken.feature.blueprint.repository.BlueprintRepository
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.apache.logging.log4j.LogManager
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 import kotlin.uuid.toKotlinUuid
@@ -17,6 +18,8 @@ class BlueprintService(
     private val blueprintSpecProvider: BlueprintSpecProvider,
     private val identityGeneratorService: IdentityGeneratorService,
 ) {
+    private val logger = LogManager.getLogger(BlueprintService::javaClass)
+
     private companion object {
         private val json: Json =
             Json {
@@ -32,7 +35,9 @@ class BlueprintService(
             ?: throw BlueprintNotFoundException()
 
     suspend fun importBlueprint(source: BlueprintSpecSource): Blueprint {
+        logger.debug("Importing {}", source)
         val spec = blueprintSpecProvider.provide(source)
+
         val encoded = json.encodeToString(spec).encodeToByteArray()
         val entity =
             blueprintRepository.create(
