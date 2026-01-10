@@ -22,10 +22,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.webSocket
 import kotlinx.atomicfu.atomic
+import kotlinx.io.files.FileNotFoundException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.slf4j.LoggerFactory
 import kotlin.getValue
 
 private const val STOP_GRACE_PERIOD_MILLIS: Long = 1000
@@ -35,6 +37,8 @@ class Http(
     val appConfig: KukenConfig,
     val webSocketManager: WebSocketManager,
 ) : KoinComponent {
+
+    private val log = LoggerFactory.getLogger(Http::class.java)
     private var shutdownPending = atomic(false)
     private val engine: EmbeddedServer<*, *> = createServer()
 
@@ -57,13 +61,17 @@ class Http(
 
     private fun Application.configureAPIDocs() {
         routing {
-            openAPI(path = "openapi", swaggerFile = "openapi/generated.json")
-            swaggerUI(path = "swagger", swaggerFile = "openapi/generated.json")
+            try {
+                openAPI(path = "openapi", swaggerFile = "openapi/generated.json")
+                swaggerUI(path = "swagger", swaggerFile = "openapi/generated.json")
+            } catch (e: FileNotFoundException) {
+                log.error("Could not generate Open API docs: ${e.message}")
+            }
         }
     }
 
     private fun Application.registerHttpModules() {
-        if (!appConfig.devMode) {
+        if (appConfig.devMode) {
             configureAPIDocs()
         }
 
