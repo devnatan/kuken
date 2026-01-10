@@ -10,12 +10,13 @@ import LoadingState from "@/modules/platform/ui/components/LoadingState.vue"
 import { ref } from "vue"
 import backendService from "@/modules/platform/api/services/backend.service.ts"
 import { useHead } from "@unhead/vue"
-
-useHead({
-    title: `Küken`
-})
+import configService from "@/modules/platform/api/services/config.service.ts"
 
 const isLoading = ref(true)
+
+useHead({
+    title: configService.appName
+})
 
 backendService.getInfo().finally(() => (isLoading.value = false))
 </script>

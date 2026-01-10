@@ -4,11 +4,18 @@
     </VContainer>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
+import { useHead } from "@unhead/vue"
+import { usePlatformStore } from "@/modules/platform/platform.store.ts"
+
+const organizationName = usePlatformStore().getBackendInfo.organization.name
+useHead({
+    title: `Welcome to ${organizationName}`
+})
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .container {
     padding: 48px;
     display: flex;

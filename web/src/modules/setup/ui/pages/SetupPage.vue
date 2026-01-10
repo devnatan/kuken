@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import RootLayout from "@/modules/platform/ui/layouts/RootLayout.vue"
 import VTitle from "@/modules/platform/ui/components/typography/VTitle.vue"
 import VCol from "@/modules/platform/ui/components/grid/VCol.vue"
@@ -10,6 +10,12 @@ import SetupCreateAccount from "@/modules/setup/ui/components/SetupCreateAccount
 import SetupOrganizationName from "@/modules/setup/ui/components/SetupOrganizationName.vue"
 import router from "@/router.ts"
 import { AUTH_LOGIN_ROUTE } from "@/modules/auth/auth.routes.ts"
+import { useHead } from "@unhead/vue"
+import configService from "@/modules/platform/api/services/config.service.ts"
+
+useHead({
+    title: `Configure ${configService.appName} organization`
+})
 
 type PendingSetup = {
     currentStep: string
@@ -59,7 +65,7 @@ async function proceedSetup() {
         return await completeSetup()
     }
 
-    setup.currentStep = remainingSteps[0]
+    setup.currentStep = remainingSteps[0] as string
 }
 
 type SetupStepInterface = {
@@ -76,7 +82,7 @@ const steps: Array<SetupStepInterface> = [
         stepType: SetupStepType.ORGANIZATION_NAME
     },
     {
-        title: "Create your admin account",
+        title: "Create admin account",
         description:
             "This will be the first account in the system.<br/>You'll use it to access the dashboard, create servers, and manage your settings.",
         stepType: SetupStepType.CREATE_ACCOUNT
@@ -130,7 +136,7 @@ init()
         </div>
     </RootLayout>
 </template>
-<style module lang="scss">
+<style lang="scss" module>
 .content {
     padding: 48px;
 }

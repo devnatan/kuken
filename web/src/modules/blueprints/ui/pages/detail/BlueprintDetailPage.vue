@@ -6,10 +6,10 @@
                     <section>
                         <div class="header">
                             <div
-                                class="icon"
                                 :style="{
                                     backgroundImage: `url(${blueprint.spec.remote.assets.iconUrl})`
                                 }"
+                                class="icon"
                             />
                             <div class="text">
                                 <h4 class="title">{{ blueprint.spec.name }}</h4>
@@ -25,8 +25,8 @@
                         <div class="servers-using">
                             <span>There’s no servers using this blueprint.</span>
                             <VButton
-                                variant="primary"
                                 :to="{ name: 'units.create', query: { blueprint: blueprint.id } }"
+                                variant="primary"
                             >
                                 Create new server
                             </VButton>
@@ -61,7 +61,7 @@
         </template>
     </Resource>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref } from "vue"
 import type { Blueprint } from "@/modules/blueprints/api/models/blueprint.model"
 import blueprintsService from "@/modules/blueprints/api/services/blueprints.service"
@@ -70,11 +70,16 @@ import VCol from "@/modules/platform/ui/components/grid/VCol.vue"
 import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
 import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 import VCard from "@/modules/platform/ui/components/card/VCard.vue"
+import { useHead } from "@unhead/vue"
 
 const props = defineProps<{ blueprintId: string }>()
 
 const resource = () => blueprintsService.getBlueprint(props.blueprintId)
 const blueprint = ref<Blueprint | null>(null)
+
+useHead({
+    title: () => (blueprint.value ? `${blueprint.value.spec.name} - Game Directory` : "")
+})
 </script>
 <style lang="scss" scoped>
 .header {

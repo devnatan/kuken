@@ -8,23 +8,24 @@
         <Resource
             :resource="unitsService.listUnits"
             @loaded="(data: Unit[]) => (state.units = data)"
-            class="server-list"
         >
-            <router-link
-                :to="{ name: 'instance.console', params: { instanceId: unit.instance.id } }"
-                v-for="unit in state.units"
-                :key="unit.id"
-                class="server-list-item"
-            >
-                <ProgressiveImage :src="unit.instance.blueprint.iconUrl!" />
-                Unit: {{ unit.name }}
-            </router-link>
+            <div class="server-list">
+                <router-link
+                    v-for="unit in state.units"
+                    :key="unit.id"
+                    :to="{ name: 'instance.console', params: { instanceId: unit.instance.id } }"
+                    class="server-list-item"
+                >
+                    <ProgressiveImage :src="unit.instance.blueprint.iconUrl!" />
+                    Unit: {{ unit.name }}
+                </router-link>
+            </div>
         </Resource>
-        <VButton variant="primary" to="blueprints"> Go to blueprints </VButton>
+        <VButton to="blueprints" variant="primary"> Go to blueprints </VButton>
     </VContainer>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
 import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 import { reactive } from "vue"
@@ -37,7 +38,7 @@ import { ProgressiveImage } from "vue-progressive-image"
 let state = reactive({ units: [] as Unit[] })
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .container {
     padding: 48px;
     display: flex;

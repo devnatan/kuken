@@ -1,5 +1,10 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import Breadcrumb from "@/modules/platform/ui/components/Breadcrumb.vue"
+import { useHead } from "@unhead/vue"
+
+useHead({
+    title: "Game Directory"
+})
 </script>
 
 <template>
@@ -7,4 +12,4 @@ import Breadcrumb from "@/modules/platform/ui/components/Breadcrumb.vue"
     <router-view />
 </template>
 
-<style scoped lang="scss"></style>
+<style lang="scss" scoped></style>

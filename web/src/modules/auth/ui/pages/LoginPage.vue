@@ -2,8 +2,8 @@
     <AuthLayout>
         <h4>Log In</h4>
         <p :class="$style.subtitle">
-            <template v-if="backendInfo">
-                Enter your credentials to access {{ backendInfo.organization.name }}.
+            <template v-if="organizationName">
+                Enter your credentials to access {{ organizationName }}.
             </template>
             <template v-else> Enter your credentials to access your account. </template>
         </p>
@@ -13,40 +13,40 @@
                     Email
                     <VInput
                         v-model="credentials.email"
-                        type="email"
-                        required="true"
                         autocomplete="email"
+                        required="true"
+                        type="email"
                     />
                 </VLabel>
                 <VLabel>
                     Password
                     <VInput
                         v-model="credentials.password"
-                        type="password"
-                        required="true"
                         autocomplete="current-password"
+                        required="true"
+                        type="password"
                     />
                 </VLabel>
             </VFieldSet>
             <p v-if="errorTranslationText" :class="$style.error" v-text="errorTranslationText" />
             <VLayout gap="sm">
                 <VButton
+                    :class="$style.loginButton"
+                    :disabled="loginBeingPerformed"
+                    block
                     type="submit"
                     variant="primary"
-                    block
-                    :disabled="loginBeingPerformed"
-                    :class="$style.loginButton"
                 >
                     Log In
                 </VButton>
-                <VButton v-if="currentAccount" variant="default" block @click="navigateToIndex">
+                <VButton v-if="currentAccount" block variant="default" @click="navigateToIndex">
                     Continue as {{ currentAccount }}
                 </VButton>
             </VLayout>
         </VForm>
     </AuthLayout>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 import VForm from "@/modules/platform/ui/components/form/VForm.vue"
 import VLabel from "@/modules/platform/ui/components/form/VLabel.vue"
@@ -60,17 +60,20 @@ import { useRouter } from "vue-router"
 import { useAccountsStore } from "@/modules/accounts/accounts.store"
 import VLayout from "@/modules/platform/ui/components/grid/VLayout.vue"
 import { usePlatformStore } from "@/modules/platform/platform.store.ts"
+import { useHead } from "@unhead/vue"
 
-const router = useRouter()
+const organizationName = usePlatformStore().getBackendInfo.organization.name
 
-// State
+useHead({
+    title: `Login to ${organizationName}`,
+    titleTemplate: null
+})
+
 const credentials = reactive({ email: "", password: "" })
 const errorTranslationText = ref<string | null>(null)
 const loginBeingPerformed = ref<boolean>(false)
 const currentAccount = useAccountsStore().account?.email
-const backendInfo = usePlatformStore().getBackendInfo
 
-// Functions
 function performLogin() {
     if (loginBeingPerformed.value) return
 
@@ -81,16 +84,18 @@ function performLogin() {
         .login(credentials.email, credentials.password)
         .then(navigateToIndex)
         .catch((error: HttpError) => {
-            errorTranslationText.value =
-                error.code === "ERR_NETWORK"
-                    ? "Unable to connect to the authentication server."
-                    : `error.${error.code}`
+            if (error.code === "ERR_NETWORK")
+                errorTranslationText.value = "Unable to connect to the authentication server."
+
+            if (error.code === 1001) errorTranslationText.value = "Invalid username or password."
+            else errorTranslationText.value = `Unknown error (code ${error.code})`
         })
         .finally(() => {
             loginBeingPerformed.value = false
         })
 }
 
+const router = useRouter()
 function navigateToIndex() {
     router.push("/")
 }
