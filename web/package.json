@@ -13,6 +13,7 @@
     "ci": "yarn install --immutable --immutable-cache --check-cache"
   },
   "dependencies": {
+    "@unhead/vue": "^1.10.0-beta.6",
     "@vueuse/core": "^14.1.0",
     "axios": "1.13.2",
     "consola": "^3.2.3",
