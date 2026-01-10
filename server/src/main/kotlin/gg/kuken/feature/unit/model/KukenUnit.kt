@@ -8,7 +8,6 @@ import kotlin.uuid.Uuid
 class KukenUnit(
     val id: Uuid,
     val externalId: String?,
-    val nodeId: String,
     val name: String,
     val createdAt: Instant,
     val updatedAt: Instant,

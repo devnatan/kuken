@@ -17,7 +17,6 @@ import kotlin.uuid.toJavaUuid
 
 object UnitTable : UUIDTable("units") {
     val externalId = varchar("ext_id", length = 255).nullable()
-    val nodeId = varchar("node_id", length = 255)
     val name = varchar("name", length = 255)
     val createdAt = timestamp("created_at")
     val updatedAt = timestamp("updated_at")
@@ -32,7 +31,6 @@ class UnitEntity(
     companion object : UUIDEntityClass<UnitEntity>(UnitTable)
 
     var externalId by UnitTable.externalId
-    var nodeId by UnitTable.nodeId
     var name by UnitTable.name
     var createdAt by UnitTable.createdAt
     var updatedAt by UnitTable.updatedAt
@@ -66,7 +64,6 @@ class UnitRepositoryImpl(
                 this.name = unit.name
                 this.externalId = unit.externalId
                 this.instanceId = unit.instanceId?.toJavaUuid()
-                this.nodeId = unit.nodeId
                 this.createdAt = unit.createdAt
                 this.updatedAt = unit.updatedAt
                 this.deletedAt = unit.deletedAt

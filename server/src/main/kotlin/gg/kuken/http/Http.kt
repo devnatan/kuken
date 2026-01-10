@@ -37,7 +37,6 @@ class Http(
     val appConfig: KukenConfig,
     val webSocketManager: WebSocketManager,
 ) : KoinComponent {
-
     private val log = LoggerFactory.getLogger(Http::class.java)
     private var shutdownPending = atomic(false)
     private val engine: EmbeddedServer<*, *> = createServer()

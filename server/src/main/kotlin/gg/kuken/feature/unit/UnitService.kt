@@ -51,7 +51,6 @@ internal class UnitService(
             KukenUnit(
                 id = generatedId,
                 externalId = options.externalId,
-                nodeId = kukenConfig.node,
                 name = options.name,
                 createdAt = createdAt,
                 updatedAt = createdAt,
@@ -70,7 +69,6 @@ internal class UnitService(
                 id = id.value.toKotlinUuid(),
                 externalId = externalId,
                 instanceId = instanceId?.toKotlinUuid(),
-                nodeId = nodeId,
                 name = name,
                 createdAt = createdAt,
                 updatedAt = updatedAt,

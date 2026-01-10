@@ -1,17 +1,14 @@
 package gg.kuken.feature.unit.http.dto
 
 import gg.kuken.feature.instance.model.HostPort
-import gg.kuken.feature.instance.model.InstanceStatus
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
-import kotlin.uuid.Uuid
 
 @Serializable
 data class UnitResponse(
     @SerialName("id") val id: String,
     @SerialName("external") val externalId: String?,
-    @SerialName("node") val nodeId: String,
     @SerialName("name") val name: String,
     @SerialName("created") val createdAt: Instant,
     @SerialName("updated") val updatedAt: Instant,

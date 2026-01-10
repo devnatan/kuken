@@ -1,7 +1,6 @@
 package gg.kuken.feature.unit.http.mapper
 
 import gg.kuken.feature.instance.InstanceService
-import gg.kuken.feature.instance.model.Instance
 import gg.kuken.feature.unit.http.dto.UnitResponse
 import gg.kuken.feature.unit.model.KukenUnit
 
@@ -14,7 +13,6 @@ class UnitMapper(
         return UnitResponse(
             id = unit.id.toHexDashString(),
             externalId = unit.externalId,
-            nodeId = unit.nodeId,
             name = unit.name,
             createdAt = unit.createdAt,
             updatedAt = unit.updatedAt,
