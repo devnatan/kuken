@@ -12,11 +12,6 @@ import jakarta.validation.Validator
 import org.koin.ktor.ext.get
 import org.koin.ktor.ext.inject
 
-suspend inline fun PipelineContext<*, ApplicationCall>.respond(
-    response: Any,
-    status: HttpStatusCode = HttpStatusCode.OK,
-): Unit = call.respond(status, response)
-
 suspend inline fun <reified T : Any> ApplicationCall.receiveValid(): T = receiveValidating(get<Validator>())
 
 suspend inline fun <reified T : Any> ApplicationCall.receiveValidating(validator: Validator): T =
