@@ -81,53 +81,67 @@ sealed class BlueprintSpecImage {
     ) : BlueprintSpecImage()
 
     class Serializer : KSerializer<BlueprintSpecImage> {
-
         @OptIn(InternalSerializationApi::class)
-        override val descriptor: SerialDescriptor = buildSerialDescriptor(
-            serialName = "gg.kuken.feature.blueprint.model.BlueprintSpecImage",
-            kind = PolymorphicKind.SEALED
-        )
+        override val descriptor: SerialDescriptor =
+            buildSerialDescriptor(
+                serialName = "gg.kuken.feature.blueprint.model.BlueprintSpecImage",
+                kind = PolymorphicKind.SEALED,
+            )
 
-        override fun deserialize(decoder: Decoder): BlueprintSpecImage = try {
-            Identifier(decoder.decodeString())
-        } catch (_: SerializationException) {
-            decoder.decodeStructure(descriptor) {
-                try {
-                    val imageList = decodeSerializableElement(
-                        descriptor = descriptor,
-                        index = 0,
-                        deserializer = ListSerializer(String.serializer()),
-                    )
+        override fun deserialize(decoder: Decoder): BlueprintSpecImage =
+            try {
+                Identifier(decoder.decodeString())
+            } catch (_: SerializationException) {
+                decoder.decodeStructure(descriptor) {
+                    try {
+                        val imageList =
+                            decodeSerializableElement(
+                                descriptor = descriptor,
+                                index = 0,
+                                deserializer = ListSerializer(String.serializer()),
+                            )
 
-                    MultipleIdentifier(imageList)
-                } catch (_: SerializationException) {
-                    val imageList = decodeSerializableElement(
-                        descriptor = descriptor,
-                        index = 0,
-                        deserializer = ListSerializer(Ref.serializer()),
-                    )
+                        MultipleIdentifier(imageList)
+                    } catch (_: SerializationException) {
+                        val imageList =
+                            decodeSerializableElement(
+                                descriptor = descriptor,
+                                index = 0,
+                                deserializer = ListSerializer(Ref.serializer()),
+                            )
 
-                    MultipleRef(imageList)
+                        MultipleRef(imageList)
+                    }
                 }
             }
-        }
 
         override fun serialize(
             encoder: Encoder,
-            value: BlueprintSpecImage
-        ) = when(value) {
-            is Identifier -> encoder.encodeString(value.id)
-            is MultipleIdentifier -> encoder.encodeStructure(descriptor) {
-                value.images.forEachIndexed { index, string ->
-                    encodeStringElement(descriptor, index, string)
+            value: BlueprintSpecImage,
+        ) = when (value) {
+            is Identifier -> {
+                encoder.encodeString(value.id)
+            }
+
+            is MultipleIdentifier -> {
+                encoder.encodeStructure(descriptor) {
+                    value.images.forEachIndexed { index, string ->
+                        encodeStringElement(descriptor, index, string)
+                    }
                 }
             }
-            is MultipleRef -> encoder.encodeStructure(descriptor) {
-                value.images.forEachIndexed { index, ref ->
-                    encodeSerializableElement(descriptor, index, Ref.serializer(), ref)
+
+            is MultipleRef -> {
+                encoder.encodeStructure(descriptor) {
+                    value.images.forEachIndexed { index, ref ->
+                        encodeSerializableElement(descriptor, index, Ref.serializer(), ref)
+                    }
                 }
             }
-            is Ref -> encoder.encodeSerializableValue(Ref.serializer(), value)
+
+            is Ref -> {
+                encoder.encodeSerializableValue(Ref.serializer(), value)
+            }
         }
     }
 }

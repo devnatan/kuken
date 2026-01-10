@@ -12,19 +12,22 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BlueprintSpecImageSerializerTest {
-
-    private val hocon = Hocon {
-        useConfigNamingConvention = true
-    }
+    private val hocon =
+        Hocon {
+            useConfigNamingConvention = true
+        }
 
     @Serializable
-    private data class Data(val image: BlueprintSpecImage)
+    private data class Data(
+        val image: BlueprintSpecImage,
+    )
 
     private fun parse(input: String): BlueprintSpecImage {
-        val config = ConfigFactory.parseString(
-            input,
-            ConfigParseOptions.defaults().setSyntax(ConfigSyntax.CONF)
-        )
+        val config =
+            ConfigFactory.parseString(
+                input,
+                ConfigParseOptions.defaults().setSyntax(ConfigSyntax.CONF),
+            )
 
         return hocon.decodeFromConfig<Data>(config).image
     }
@@ -39,39 +42,51 @@ class BlueprintSpecImageSerializerTest {
 
     @Test
     fun `deserialize multiple identifier`() {
-        val spec = parse("""
-            image = [
-                "busybox:latest",
-                "hello:world"
-            ]
-        """.trimIndent())
+        val spec =
+            parse(
+                """
+                image = [
+                    "busybox:latest",
+                    "hello:world"
+                ]
+                """.trimIndent(),
+            )
 
         assertTrue(spec is BlueprintSpecImage.MultipleIdentifier)
-        assertEquals(listOf(
-            "busybox:latest",
-            "hello:world"
-        ), spec.images)
+        assertEquals(
+            listOf(
+                "busybox:latest",
+                "hello:world",
+            ),
+            spec.images,
+        )
     }
 
     @Test
     fun `deserialize multiple ref`() {
-        val spec = parse("""
-            image = [
-                {
-                    label = "Java 17"
-                    tag = "openjdk:17"
-                },
-                {
-                    label = "Java 21"
-                    tag = "openjdk:21"
-                }
-            ]
-        """.trimIndent())
+        val spec =
+            parse(
+                """
+                image = [
+                    {
+                        label = "Java 17"
+                        tag = "openjdk:17"
+                    },
+                    {
+                        label = "Java 21"
+                        tag = "openjdk:21"
+                    }
+                ]
+                """.trimIndent(),
+            )
 
         assertTrue(spec is BlueprintSpecImage.MultipleRef)
-        assertEquals(listOf(
-            BlueprintSpecImage.Ref(label = "Java 17", tag = "openjdk:17"),
-            BlueprintSpecImage.Ref(label = "Java 21", tag = "openjdk:21"),
-        ), spec.images)
+        assertEquals(
+            listOf(
+                BlueprintSpecImage.Ref(label = "Java 17", tag = "openjdk:17"),
+                BlueprintSpecImage.Ref(label = "Java 21", tag = "openjdk:21"),
+            ),
+            spec.images,
+        )
     }
 }

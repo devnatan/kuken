@@ -24,12 +24,10 @@
     </Appenders>
 
     <Loggers>
-        <!-- LOG everything at INFO level -->
-        <Root level="info">
+        <Root level="debug">
             <AppenderRef ref="Console" />
             <AppenderRef ref="RollingFile" />
         </Root>
-        <Logger name="gg.kuken" level="info"/>
     </Loggers>
 
 </Configuration>

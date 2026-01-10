@@ -31,7 +31,7 @@ import kotlin.reflect.KClass
 
 // TODO detailed error diagnostics
 class BlueprintParser(
-    private val supportedProperties: List<Property> = AllSupportedProperties
+    private val supportedProperties: List<Property> = AllSupportedProperties,
 ) {
     private val parseOptions = ConfigParseOptions.defaults().setSyntax(ConfigSyntax.CONF)
     private val requiredProperties: List<Property> =
@@ -151,14 +151,15 @@ class BlueprintParser(
             return null
         }
 
-        val kind = when (node.valueType()) {
-            ConfigValueType.OBJECT -> PropertyKind.Struct(allowUnknown = false)
-            ConfigValueType.LIST -> PropertyKind.Multiple(PropertyKind.Mixed())
-            ConfigValueType.NUMBER -> PropertyKind.Numeric
-            ConfigValueType.BOOLEAN -> PropertyKind.TrueOrFalse
-            ConfigValueType.NULL -> PropertyKind.Null
-            ConfigValueType.STRING -> PropertyKind.Literal
-        }
+        val kind =
+            when (node.valueType()) {
+                ConfigValueType.OBJECT -> PropertyKind.Struct(allowUnknown = false)
+                ConfigValueType.LIST -> PropertyKind.Multiple(PropertyKind.Mixed())
+                ConfigValueType.NUMBER -> PropertyKind.Numeric
+                ConfigValueType.BOOLEAN -> PropertyKind.TrueOrFalse
+                ConfigValueType.NULL -> PropertyKind.Null
+                ConfigValueType.STRING -> PropertyKind.Literal
+            }
 
         return validate(
             property =
@@ -276,7 +277,8 @@ class BlueprintParser(
         return anyMatch
     }
 
-    private fun transform(config: Config): BlueprintSpec = Hocon {
-        useConfigNamingConvention = true
-    }.decodeFromConfig(config)
+    private fun transform(config: Config): BlueprintSpec =
+        Hocon {
+            useConfigNamingConvention = true
+        }.decodeFromConfig(config)
 }

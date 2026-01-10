@@ -162,12 +162,14 @@ class SetupService(
         )
     }
 
-    suspend fun importBlueprints() = coroutineScope {
-        val baseRemoteUrl = "https://raw.githubusercontent.com/devnatan/kuken/refs/heads/main/blueprints/games"
-        listOf("minecraft/minecraft-java-edition").map { baseName ->
-            async {
-                blueprintService.importBlueprint(BlueprintSpecSource.Remote("$baseRemoteUrl/$baseName.conf"))
-            }
-        }.awaitAll()
-    }
+    suspend fun importBlueprints() =
+        coroutineScope {
+            val baseRemoteUrl = "https://raw.githubusercontent.com/devnatan/kuken/refs/heads/main/blueprints/games"
+            listOf("minecraft/minecraft-java-edition")
+                .map { baseName ->
+                    async {
+                        blueprintService.importBlueprint(BlueprintSpecSource.Remote("$baseRemoteUrl/$baseName.conf"))
+                    }
+                }.awaitAll()
+        }
 }

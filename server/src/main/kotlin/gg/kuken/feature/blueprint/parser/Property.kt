@@ -53,7 +53,9 @@ sealed class PropertyKind {
         constructor(vararg kinds: PropertyKind) : this(kinds.toList())
     }
 
-    data class Reference(val node: String) : PropertyKind()
+    data class Reference(
+        val node: String,
+    ) : PropertyKind()
 }
 
 internal val AllSupportedProperties: List<Property> =
