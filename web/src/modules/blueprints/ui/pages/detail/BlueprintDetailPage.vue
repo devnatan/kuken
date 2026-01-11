@@ -39,10 +39,7 @@
                     <section class="build-configuration">
                         <h4>Build Configuration</h4>
                         <VCard>
-                            <pre>
-                    {{ JSON.stringify(blueprint.spec.build, null, 2) }}
-                  </pre
-                            >
+                            <pre>{{ JSON.stringify(blueprint.spec.build, null, 2) }}</pre>
                         </VCard>
                     </section>
                 </VCol>
@@ -50,10 +47,7 @@
                     <section class="file-descriptor">
                         <h4>File Descriptor</h4>
                         <VCard>
-                            <pre>
-                    {{ JSON.stringify(blueprint.spec, null, 2) }}
-                  </pre
-                            >
+                            <pre>{{ JSON.stringify(blueprint.spec, null, 2) }}</pre>
                         </VCard>
                     </section>
                 </VCol>
