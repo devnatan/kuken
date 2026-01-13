@@ -1,18 +1,20 @@
 <template>
     <input
+        ref="input"
         :class="{
             'input--onSurface': onSurface
         }"
         :disabled="disabled"
         :placeholder="placeholder"
         :readonly="disabled"
+        :value="modelValue"
         class="input"
         @input="onInputChange"
     />
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue"
+import { onMounted, useTemplateRef } from "vue"
 
 const emits = defineEmits(["update:modelValue"])
 const props = defineProps<{
@@ -27,10 +29,10 @@ function onInputChange(event: Event): void {
     emits("update:modelValue", (event.target as HTMLInputElement).value)
 }
 
-const rootElement = ref<HTMLInputElement | null>(null)
+const rootElement = useTemplateRef<HTMLInputElement>("input")
 onMounted(() => {
     if (props.autoFocus) {
-        rootElement.value?.focus()
+        rootElement.value!.focus()
     }
 })
 </script>
