@@ -4,6 +4,7 @@ import gg.kuken.KukenConfig
 import gg.kuken.feature.account.IdentityGeneratorService
 import gg.kuken.feature.instance.InstanceService
 import gg.kuken.feature.instance.model.CreateInstanceOptions
+import gg.kuken.feature.instance.model.HostPort
 import gg.kuken.feature.instance.model.InstanceStatus
 import gg.kuken.feature.unit.data.entity.UnitEntity
 import gg.kuken.feature.unit.data.repository.UnitRepository
@@ -26,19 +27,20 @@ internal class UnitService(
 
     suspend fun getUnit(id: Uuid): KukenUnit = unitRepository.findById(id)?.let(::mapToKukenUnit) ?: throw UnitNotFoundException()
 
-    suspend fun createUnit(options: UnitCreateOptions): KukenUnit {
+    suspend fun createUnit(payload: UnitCreateOptions): KukenUnit {
         val generatedId = identityGeneratorService.generate()
         val instance =
             instanceService.createInstance(
-                blueprintId = options.blueprintId,
+                blueprintId = payload.blueprintId,
                 options =
                     CreateInstanceOptions(
-                        image = options.image,
-                        host = options.network?.host,
-                        port = options.network?.port,
-                        env = options.options,
+                        image = null,
+                        inputs = payload.inputs,
+                        env = mapOf(),
+                        address = HostPort(null, 25565u),
                     ),
             )
+
         val status: UnitStatus =
             when (instance.status) {
                 InstanceStatus.ImagePullFailed -> UnitStatus.MissingInstance
@@ -50,8 +52,8 @@ internal class UnitService(
         val unit =
             KukenUnit(
                 id = generatedId,
-                externalId = options.externalId,
-                name = options.name,
+                externalId = payload.externalId,
+                name = payload.name,
                 createdAt = createdAt,
                 updatedAt = createdAt,
                 status = status,

@@ -6,6 +6,8 @@ import gg.kuken.core.docker.DockerNetworkService
 import gg.kuken.feature.account.IdentityGeneratorService
 import gg.kuken.feature.blueprint.BlueprintService
 import gg.kuken.feature.blueprint.model.Blueprint
+import gg.kuken.feature.blueprint.model.ProcessedBlueprint
+import gg.kuken.feature.instance.DockerInstanceService.GenerateRuntimeResult
 import gg.kuken.feature.instance.data.entity.InstanceEntity
 import gg.kuken.feature.instance.data.repository.InstanceRepository
 import gg.kuken.feature.instance.model.CreateInstanceOptions
@@ -25,6 +27,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.serializer
 import me.devnatan.dockerkt.DockerClient
 import me.devnatan.dockerkt.models.PortBinding
 import me.devnatan.dockerkt.models.container.hostConfig
@@ -90,26 +94,92 @@ class DockerInstanceService(
         return containerId
     }
 
+    @OptIn(InternalSerializationApi::class)
+    private fun performSubstitutions(
+        property: ProcessedBlueprint.Property,
+        options: CreateInstanceOptions,
+    ): String =
+        when (property) {
+            is ProcessedBlueprint.Property.Constant -> {
+                property.value
+            }
+
+            is ProcessedBlueprint.Property.Dynamic -> {
+                logger.debug("Resolving dynamic property ${property.literal}...")
+                check(property.dependencies.isNotEmpty()) {
+                    "Dynamic property provided but no dependencies found"
+                }
+
+                var literal = property.literal
+                property.dependencies
+                    .groupBy { it::class.serializer().descriptor.serialName }
+                    .forEach { (typeName, dependencies) ->
+                        check(dependencies.size == 1) {
+                            "Multiple dependencies are not supported"
+                        }
+
+                        for (dependency in dependencies) {
+                            literal = literal.replace("%{$typeName}", performSubstitutions(dependency, options))
+                        }
+                    }
+
+                literal
+            }
+
+            is ProcessedBlueprint.Property.EnvironmentVariable -> {
+                property.env
+            }
+
+            is ProcessedBlueprint.Property.Input -> {
+                val input =
+                    options.inputs[property.name]
+                        ?: error("Missing required input ${property.name} to render Docker Image")
+
+                input
+            }
+
+            is ProcessedBlueprint.Property.Placeholder -> {
+                when (property.type) {
+                    ProcessedBlueprint.Property.Placeholder.Type.COMMAND_TEMPLATE -> property.expr
+                    ProcessedBlueprint.Property.Placeholder.Type.SERVER_PORT -> options.address.port.toString()
+                }
+            }
+
+            ProcessedBlueprint.Property.Unresolved -> {
+                error("Unresolved property type")
+            }
+        }
+
     override suspend fun createInstance(
         blueprintId: Uuid,
         options: CreateInstanceOptions,
     ): Instance {
-        logger.debug("Creating instance from {}", blueprintId)
+        logger.debug("Creating instance from {}: {}", blueprintId, options)
         val blueprint = blueprintService.getBlueprint(blueprintId)
+        val image: String = performSubstitutions(blueprint.spec.build.docker.image, options)
+        var options = options.copy(image = image)
+
         val instanceId = identityGeneratorService.generate()
         val generatedName =
             generateContainerName(
                 instanceId,
-                blueprint.spec.instance.nameFormat,
+                blueprint.spec.instance.nameFormat
+                    .ifEmpty { null },
             )
         logger.debug("Instance {} runtime identifier is {}", instanceId, generatedName)
 
-        val mergedEnv = options.env
+        val env =
+            blueprint.spec.build.env
+                .map { (key, property) ->
+                    key to performSubstitutions(property, options)
+                }.toMap()
+
+        options = options.copy(env = env)
 
         val createResult =
             tryGenerateRuntime(
                 instanceId = instanceId,
-                options = options.copy(env = mergedEnv),
+                options = options,
                 generatedName = generatedName,
             )
 
@@ -140,7 +210,7 @@ class DockerInstanceService(
 
             is GenerateRuntimeResult.MissingDockerImage -> {
                 launch {
-                    pullDockerImage(options.image).collect { pullStatus ->
+                    pullDockerImage(options.image!!).collect { pullStatus ->
                         logger.debug(
                             "Updating instance {} with new status due to Docker image pull: {}",
                             instanceId,
@@ -219,18 +289,14 @@ class DockerInstanceService(
     ): GenerateRuntimeResult {
         // TODO Allow random port assigned (options.port == null)
         //      https://github.com/DevNatan/docker-kotlin?tab=readme-ov-file#create-and-start-a-container-with-auto-assigned-port-bindings
-        val address = dockerNetworkService.createAddress(options.host, options.port)
+        val address = dockerNetworkService.createAddress(host = options.address.host, port = options.address.port)
 
         val containerId =
             try {
                 createRuntime(
                     instanceId = instanceId,
                     name = name,
-                    options =
-                        options.copy(
-                            host = address.host,
-                            port = address.port,
-                        ),
+                    options = options,
                 )
             } catch (_: ImageNotFoundException) {
                 return GenerateRuntimeResult.MissingDockerImage(address)
@@ -314,7 +380,7 @@ class DockerInstanceService(
         options: CreateInstanceOptions,
     ): String {
         logger.debug("Creating runtime {} (image: {})...", instanceId, options.image)
-        requireNotNull(options.port) { "Port cannot be null" }
+        requireNotNull(options.address.port) { "Port cannot be null" }
 
         return dockerClient.containers.create {
             this@create.name = name
@@ -323,14 +389,14 @@ class DockerInstanceService(
             env =
                 options.env
                     .mapValues { (_, value) ->
-                        value.replace("{addr.port}", options.port.toString())
+                        value.replace("{addr.port}", options.address.port.toString())
                     }.map { (key, value) -> "$key=$value" }
 
             // TODO Allow random port assigned (options.port == null)
             //      https://github.com/DevNatan/docker-kotlin?tab=readme-ov-file#create-and-start-a-container-with-auto-assigned-port-bindings
             hostConfig {
-                portBindings(options.port) {
-                    add(PortBinding(options.host, options.port))
+                portBindings(options.address.port) {
+                    add(PortBinding(options.address.host, options.address.port))
                 }
             }
         }

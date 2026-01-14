@@ -9,6 +9,7 @@ import com.typesafe.config.ConfigUtil
 import com.typesafe.config.ConfigValue
 import com.typesafe.config.ConfigValueFactory
 import gg.kuken.feature.blueprint.model.ProcessedBlueprint
+import gg.kuken.feature.blueprint.model.ProcessedBlueprint.Property
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.hocon.Hocon
@@ -20,26 +21,31 @@ import kotlin.reflect.jvm.isAccessible
 
 @OptIn(ExperimentalSerializationApi::class)
 class BlueprintProcessor {
+    val hocon =
+        Hocon {
+            useConfigNamingConvention = true
+        }
 
-    val hocon = Hocon {
-        useConfigNamingConvention = true
-    }
-
-    fun process(input: String, source: String): ProcessedBlueprint {
+    fun process(
+        input: String,
+        source: String,
+    ): ProcessedBlueprint {
         val parseOptions = ConfigParseOptions.defaults().setSyntax(ConfigSyntax.CONF)
         val parsed = ConfigFactory.parseString(input, parseOptions)
-        val processed = process(
-            key = "",
-            config = parsed
-        ).withValue("source", ConfigValueFactory.fromAnyRef(source))
+        val processed =
+            process(
+                key = "",
+                config = parsed,
+            ).withValue("source", ConfigValueFactory.fromAnyRef(source))
 
         return hocon.decodeFromConfig<ProcessedBlueprint>(processed)
     }
 
     @OptIn(InternalSerializationApi::class)
-    fun process(key: String, config: Config): Config {
-        println("Processing $key...")
-
+    fun process(
+        key: String,
+        config: Config,
+    ): Config {
         var config = config
         var dummy = ConfigFactory.empty()
         for ((path, node) in config.entrySet()) {
@@ -48,24 +54,26 @@ class BlueprintProcessor {
             // Include all root values in descriptor field
             if (key == "" && !path.contains(".")) {
                 config = config.withoutPath(path)
-                dummy = dummy.withValue(
-                    "descriptor.$path",
-                    node
-                )
+                dummy =
+                    dummy.withValue(
+                        "descriptor.$path",
+                        node,
+                    )
                 continue
             }
 
             if (path.equals("remote.assets.icon-url")) {
                 config = config.withoutPath(path)
-                dummy = dummy.withValue(
-                    "assets.${ProcessedBlueprint.Asset.ICON}",
-                    ConfigValueFactory.fromMap(
-                        mapOf(
-                            "type" to "image",
-                            "source" to "url://${node.unwrapped()}"
-                        )
+                dummy =
+                    dummy.withValue(
+                        "assets.${ProcessedBlueprint.Asset.ICON}",
+                        ConfigValueFactory.fromMap(
+                            mapOf(
+                                "type" to "image",
+                                "source" to "url://${node.unwrapped()}",
+                            ),
+                        ),
                     )
-                )
                 continue
             }
 
@@ -102,15 +110,18 @@ class BlueprintProcessor {
                     }
 
                     val property = ProcessedBlueprint.Property.Dynamic(literal, left, dependencies)
-                    val bean = hocon.encodeToConfig(property)
-                        .withValue("type", ConfigValueFactory.fromAnyRef("dynamic"))
-                        .root()
+                    val bean =
+                        hocon
+                            .encodeToConfig(property)
+                            .withValue("type", ConfigValueFactory.fromAnyRef("dynamic"))
+                            .root()
 
                     config = config.withoutPath(path)
-                    dummy = dummy.withValue(
-                        path,
-                        bean
-                    )
+                    dummy =
+                        dummy.withValue(
+                            path,
+                            bean,
+                        )
                     continue
                 }
 
@@ -118,27 +129,52 @@ class BlueprintProcessor {
                     val property = configReferenceToProperty(node)
                     config = config.withoutPath(path)
 
-                    if (property is ProcessedBlueprint.Property.Unresolved) continue
+                    if (property is ProcessedBlueprint.Property.Unresolved) {
+                        continue
+                    }
 
                     val typeName = property::class.serializer().descriptor.serialName
-                    val bean = hocon.encodeToConfig(property)
-                        .withValue("type", ConfigValueFactory.fromAnyRef(typeName))
-                        .root()
+                    val bean =
+                        hocon
+                            .encodeToConfig(property)
+                            .withValue("type", ConfigValueFactory.fromAnyRef(typeName))
+                            .root()
 
-                    dummy = dummy.withValue(
-                        path,
-                        bean
-                    )
+                    dummy =
+                        dummy.withValue(
+                            path,
+                            bean,
+                        )
                     continue
                 }
             }
 
+            if (path.startsWith("build.env")) {
+                val property = Property.Constant(node.unwrapped().toString())
+                val bean =
+                    hocon
+                        .encodeToConfig(property)
+                        .withValue(
+                            "type",
+                            ConfigValueFactory.fromAnyRef(property::class.serializer().descriptor.serialName),
+                        ).root()
+
+                config = config.withoutPath(path)
+                dummy =
+                    dummy.withValue(
+                        path,
+                        bean,
+                    )
+                continue
+            }
+
             if (path.startsWith("inputs") || path.startsWith("build.docker")) {
                 config = config.withoutPath(path)
-                dummy = dummy.withValue(
-                    path,
-                    node
-                )
+                dummy =
+                    dummy.withValue(
+                        path,
+                        node,
+                    )
                 continue
             }
 
@@ -155,19 +191,21 @@ class BlueprintProcessor {
         member.isAccessible = true
 
         try {
-            val expr = member.call(node).toString().run {
-                substring(
-                    startIndex = 2,
-                    endIndex = length - 1
-                )
-            }
+            val expr =
+                member.call(node).toString().run {
+                    substring(
+                        startIndex = 2,
+                        endIndex = length - 1,
+                    )
+                }
 
             if (expr.startsWith("placeholders.")) {
-                val type = when (val name = expr.substringAfter("placeholders.")) {
-                    "build.port" -> ProcessedBlueprint.Property.Placeholder.Type.SERVER_PORT
-                    "commands.template" -> ProcessedBlueprint.Property.Placeholder.Type.COMMAND_TEMPLATE
-                    else -> error("Unsupported placeholder type $name")
-                }
+                val type =
+                    when (val name = expr.substringAfter("placeholders.")) {
+                        "build.port" -> ProcessedBlueprint.Property.Placeholder.Type.SERVER_PORT
+                        "commands.template" -> ProcessedBlueprint.Property.Placeholder.Type.COMMAND_TEMPLATE
+                        else -> error("Unsupported placeholder type $name")
+                    }
 
                 return ProcessedBlueprint.Property.Placeholder(type.substitution)
             }

@@ -53,7 +53,7 @@ class RemoteBlueprintSpecProvider(
         val contents: String = response.body()
         return processor.process(
             input = contents,
-            source = ProcessedBlueprint.Source.externalUrl(source.url)
+            source = ProcessedBlueprint.Source.externalUrl(source.url),
         )
     }
 }
@@ -72,7 +72,7 @@ class LocalBlueprintSpecProvider(
         val contents = file.readText()
         return parser.process(
             input = contents,
-            source = ProcessedBlueprint.Source.fileSystem(file.absolutePath)
+            source = ProcessedBlueprint.Source.fileSystem(file.absolutePath),
         )
     }
 }

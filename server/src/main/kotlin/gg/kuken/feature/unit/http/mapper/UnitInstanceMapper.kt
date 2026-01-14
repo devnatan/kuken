@@ -25,6 +25,8 @@ class UnitInstanceMapper(
         UnitResponse.Instance.Blueprint(
             id = blueprint.id.toHexDashString(),
             iconUrl =
-                blueprint.spec.assets.getValue(Asset.ICON).source,
+                blueprint.spec.assets
+                    .getValue(Asset.ICON)
+                    .source,
         )
 }

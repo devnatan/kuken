@@ -1,5 +1,6 @@
 package gg.kuken.feature.blueprint.model
 
+import com.typesafe.config.Config
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -50,15 +51,18 @@ data class BlueprintSpecRemote(
 }
 
 sealed class ResolvableConfigValue {
+    data class Constant(
+        val value: String,
+    ) : ResolvableConfigValue()
 
-    data class Constant(val value: String) : ResolvableConfigValue()
-
-    data class Placeholder(val type: Type) : ResolvableConfigValue() {
-
-        enum class Type(val substitution: String) {
-
+    data class Placeholder(
+        val type: Type,
+    ) : ResolvableConfigValue() {
+        enum class Type(
+            val substitution: String,
+        ) {
             COMMAND_TEMPLATE("command"),
-            SERVER_PORT("port");
+            SERVER_PORT("port"),
         }
     }
 }
@@ -71,39 +75,42 @@ data class BlueprintSpecBuild(
     val env: Map<String, String> = emptyMap(),
     @Transient val instance: BlueprintSpecInstance? = null,
 ) {
-
     sealed class EnvironmentVariable {
+        data class Constant(
+            val value: String,
+        ) : EnvironmentVariable()
 
-        data class Constant(val value: String) : EnvironmentVariable()
-
-        data class InputReplacement(val inputName: String) : EnvironmentVariable()
+        data class InputReplacement(
+            val inputName: String,
+        ) : EnvironmentVariable()
     }
 
     class EnvKVSerializer : KSerializer<Map<String, Any>> by MapSerializer(String.serializer(), EnvValueSerializer())
 
     class EnvValueSerializer : KSerializer<Any> {
         @OptIn(InternalSerializationApi::class)
-        override val descriptor: SerialDescriptor = buildSerialDescriptor(
-            serialName = "gg.kuken.feature.blueprint.model.BlueprintSpecBuild.EnvValueSerializer",
-            kind = PolymorphicKind.OPEN,
-        )
+        override val descriptor: SerialDescriptor =
+            buildSerialDescriptor(
+                serialName = "gg.kuken.feature.blueprint.model.BlueprintSpecBuild.EnvValueSerializer",
+                kind = PolymorphicKind.OPEN,
+            )
 
         @OptIn(ExperimentalSerializationApi::class)
         override fun deserialize(decoder: Decoder): Any {
             // HoconDecoder is used for external blueprints imports
             // StreamingDecoder is used for database blueprint reads
             if (decoder is HoconDecoder) {
-                return decoder.decodeConfigValue { config, path ->
-                    println("Decoding config from $path: $config")
-                    config.getAnyRef(path)
-                }.toString()
+                return decoder.decodeConfigValue(Config::getAnyRef).toString()
             }
 
             decoder as JsonDecoder
             return decoder.decodeJsonElement().toString()
         }
 
-        override fun serialize(encoder: Encoder, value: Any) {
+        override fun serialize(
+            encoder: Encoder,
+            value: Any,
+        ) {
             encoder.encodeString(value.toString())
         }
     }
