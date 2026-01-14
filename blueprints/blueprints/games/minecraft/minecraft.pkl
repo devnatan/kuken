@@ -1,0 +1,47 @@
+module io.kuken.minecraft
+
+amends "https://kuken.io/blueprints/reference/v1/Reference.pkl"
+
+name = "Minecraft: Java Edition"
+version = "1.0.0"
+url = "https://kuken.io"
+
+build {
+  docker {
+    image = "itzg/minecraft-server:\(DockerImageVersion)"
+  }
+
+  environmentVariables {
+    env("EULA", true)
+    env("TYPE", "VANILLA")
+    env("VERSION", "LATEST")
+    env("ENABLE_RCON", true)
+    env("MEMORY", 1024.mb)
+    env("SERVER_PORT", 25565)
+    env("RCON_PASSWORD", RconPassword)
+    env("RCON_PORT", RconPort)
+  }
+}
+
+local DockerImageVersion = new TextInput("image") {
+  label = "Docker Image version"
+}
+
+local RconPassword = new PasswordInput("rcon-password") {
+  label = "RCON password"
+}
+
+local RconPort = new PortInput("rcon-port") {
+  label = "RCON port"
+  default = 25575
+}
+
+inputs {
+  RconPassword
+  RconPort
+}
+
+local const function env(_name: String, _value: EnvironmentVariableValue): EnvironmentVariable = new {
+  name = _name
+  value = _value
+}

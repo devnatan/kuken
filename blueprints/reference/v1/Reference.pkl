@@ -1,37 +1,78 @@
 @ModuleInfo { minPklVersion = "0.30.2" }
 module io.kuken.Blueprint
 
-inputs: Mapping<String, Input>
+name: String
+version: String
+url: Source
 
+assets: Assets?
+inputs: InputDefinitions
 build: Build
-
 refs: Refs
+
+class Assets {
+  icon: Source
+}
 
 class Refs {
   port = "port"
 }
 
-typealias Property = String | Input
+abstract class Property
 
-abstract class Input {
-  type: String
-}
+typealias TransformedProperty =
+  String | Input("input:\(this.name)") | EnvironmentVariable("\(this.name)=\(value)")
 
-class NumberInput extends Input {
-  type = "text"
-  default: Number
+typealias InputDefinitions = Listing<Input>
+
+abstract class Input extends Property {
+  abstract name: String
+  abstract label: String
+
+  hidden type: String
 }
 
 class TextInput extends Input {
-  type = "text"
-  label: String
+  abstract name: String
+  abstract label: String
+  hidden type = "text"
+}
+
+class PasswordInput extends Input {
+  abstract name: String
+  abstract label: String
+  hidden type = "password"
+}
+
+class PortInput extends Input {
+  abstract name: String
+  abstract label: String
+  hidden type = "port"
+
+  default: UInt16
 }
 
 class Build {
   docker: Docker
-  env: Mapping<String, Property>
+  environmentVariables: EnvironmentVariablesDefinition
+}
+
+typealias EnvironmentVariablesDefinition = Listing<EnvironmentVariable>
+
+const function env(_name: String, _value: EnvironmentVariableValue): EnvironmentVariable = new {
+  name = _name
+  value = _value
+}
+
+typealias EnvironmentVariableValue = String | Number | Boolean | Input | DataSize
+
+class EnvironmentVariable extends Property {
+  name: String
+  value: EnvironmentVariableValue
 }
 
 class Docker {
-  image: Property
+  image: TransformedProperty
 }
+
+typealias Source = String

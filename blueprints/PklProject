@@ -13,10 +13,13 @@ package {
   exclude = new {
     "PklProject"
     "PklProject.deps.json"
+    "blueprints/icons/**"
     "package/**"
     "processor/**"
     "build/**"
     ".idea/**"
+    "*.exe"
+    "*.bin"
     ".**"
   }
 }
