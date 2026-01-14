@@ -2,6 +2,7 @@ package gg.kuken.feature.unit.http.mapper
 
 import gg.kuken.feature.blueprint.BlueprintService
 import gg.kuken.feature.blueprint.model.Blueprint
+import gg.kuken.feature.blueprint.model.ProcessedBlueprint.Asset
 import gg.kuken.feature.instance.model.Instance
 import gg.kuken.feature.unit.http.dto.UnitResponse
 
@@ -24,8 +25,6 @@ class UnitInstanceMapper(
         UnitResponse.Instance.Blueprint(
             id = blueprint.id.toHexDashString(),
             iconUrl =
-                blueprint.spec.remote
-                    ?.assets
-                    ?.iconUrl,
+                blueprint.spec.assets.getValue(Asset.ICON).source,
         )
 }

@@ -6,4 +6,10 @@ import kotlinx.serialization.Serializable
 data class HostPort(
     val host: String?,
     val port: UShort,
-)
+) {
+
+    override fun toString(): String = when {
+        host == null -> ":$port"
+        else -> "$host:$port"
+    }
+}

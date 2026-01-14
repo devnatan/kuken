@@ -9,5 +9,5 @@ data class Blueprint(
     val id: Uuid,
     val createdAt: Instant,
     val updatedAt: Instant,
-    val spec: BlueprintSpec,
+    val spec: ProcessedBlueprint,
 )

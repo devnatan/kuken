@@ -1,7 +1,6 @@
 package gg.kuken.feature.blueprint
 
 import gg.kuken.feature.blueprint.entity.BlueprintRepositoryImpl
-import gg.kuken.feature.blueprint.parser.BlueprintParser
 import gg.kuken.feature.blueprint.repository.BlueprintRepository
 import org.koin.dsl.module
 
@@ -26,13 +25,13 @@ val BlueprintDI =
                         parser = get(),
                     ),
                     RemoteBlueprintSpecProvider(
-                        parser = get(),
+                        processor = get(),
                     ),
                 ),
             )
         }
 
         factory {
-            BlueprintParser()
+            BlueprintProcessor()
         }
     }

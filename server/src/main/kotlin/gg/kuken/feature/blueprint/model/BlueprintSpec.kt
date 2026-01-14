@@ -1,5 +1,6 @@
 package gg.kuken.feature.blueprint.model
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -7,6 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.Transient
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -15,6 +17,8 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
+import kotlinx.serialization.hocon.HoconDecoder
+import kotlinx.serialization.json.JsonDecoder
 
 @Serializable
 data class BlueprintSpec(
@@ -45,13 +49,65 @@ data class BlueprintSpecRemote(
     )
 }
 
+sealed class ResolvableConfigValue {
+
+    data class Constant(val value: String) : ResolvableConfigValue()
+
+    data class Placeholder(val type: Type) : ResolvableConfigValue() {
+
+        enum class Type(val substitution: String) {
+
+            COMMAND_TEMPLATE("command"),
+            SERVER_PORT("port");
+        }
+    }
+}
+
 @Serializable
 data class BlueprintSpecBuild(
     val image: BlueprintSpecImage,
     val entrypoint: String,
+    @Serializable(with = EnvKVSerializer::class)
     val env: Map<String, String> = emptyMap(),
     @Transient val instance: BlueprintSpecInstance? = null,
-)
+) {
+
+    sealed class EnvironmentVariable {
+
+        data class Constant(val value: String) : EnvironmentVariable()
+
+        data class InputReplacement(val inputName: String) : EnvironmentVariable()
+    }
+
+    class EnvKVSerializer : KSerializer<Map<String, Any>> by MapSerializer(String.serializer(), EnvValueSerializer())
+
+    class EnvValueSerializer : KSerializer<Any> {
+        @OptIn(InternalSerializationApi::class)
+        override val descriptor: SerialDescriptor = buildSerialDescriptor(
+            serialName = "gg.kuken.feature.blueprint.model.BlueprintSpecBuild.EnvValueSerializer",
+            kind = PolymorphicKind.OPEN,
+        )
+
+        @OptIn(ExperimentalSerializationApi::class)
+        override fun deserialize(decoder: Decoder): Any {
+            // HoconDecoder is used for external blueprints imports
+            // StreamingDecoder is used for database blueprint reads
+            if (decoder is HoconDecoder) {
+                return decoder.decodeConfigValue { config, path ->
+                    println("Decoding config from $path: $config")
+                    config.getAnyRef(path)
+                }.toString()
+            }
+
+            decoder as JsonDecoder
+            return decoder.decodeJsonElement().toString()
+        }
+
+        override fun serialize(encoder: Encoder, value: Any) {
+            encoder.encodeString(value.toString())
+        }
+    }
+}
 
 @Serializable(with = BlueprintSpecImage.Serializer::class)
 sealed class BlueprintSpecImage {

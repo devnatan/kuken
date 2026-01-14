@@ -100,15 +100,11 @@ class DockerInstanceService(
         val generatedName =
             generateContainerName(
                 instanceId,
-                blueprint.spec.build
-                    ?.instance
-                    ?.name,
+                blueprint.spec.instance.nameFormat,
             )
         logger.debug("Instance {} runtime identifier is {}", instanceId, generatedName)
-        val mergedEnv =
-            blueprint.spec.build
-                ?.env
-                .orEmpty() + options.env
+
+        val mergedEnv = options.env
 
         val createResult =
             tryGenerateRuntime(

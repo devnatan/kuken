@@ -3,7 +3,7 @@ package gg.kuken.feature.blueprint
 import gg.kuken.feature.account.IdentityGeneratorService
 import gg.kuken.feature.blueprint.entity.BlueprintEntity
 import gg.kuken.feature.blueprint.model.Blueprint
-import gg.kuken.feature.blueprint.model.BlueprintSpec
+import gg.kuken.feature.blueprint.model.ProcessedBlueprint
 import gg.kuken.feature.blueprint.repository.BlueprintRepository
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -24,7 +24,6 @@ class BlueprintService(
         private val json: Json =
             Json {
                 coerceInputValues = false
-                prettyPrint = true
             }
     }
 
@@ -36,9 +35,9 @@ class BlueprintService(
 
     suspend fun importBlueprint(source: BlueprintSpecSource): Blueprint {
         logger.debug("Importing {}", source)
-        val spec = blueprintSpecProvider.provide(source)
+        val processed = blueprintSpecProvider.provide(source)
 
-        val encoded = json.encodeToString(spec).encodeToByteArray()
+        val encoded = json.encodeToString(processed).encodeToByteArray()
         val entity =
             blueprintRepository.create(
                 id = identityGeneratorService.generate(),
@@ -46,15 +45,15 @@ class BlueprintService(
                 createdAt = Clock.System.now(),
             )
 
-        return toModel(entity, spec)
+        return toModel(entity, processed)
     }
 
     @OptIn(ExperimentalSerializationApi::class)
     private fun toModel(
         entity: BlueprintEntity,
-        spec: BlueprintSpec? = null,
+        spec: ProcessedBlueprint? = null,
     ): Blueprint {
-        val spec = spec ?: json.decodeFromStream<BlueprintSpec>(entity.content.inputStream)
+        val spec = spec ?: json.decodeFromStream<ProcessedBlueprint>(entity.content.inputStream)
         return Blueprint(
             id = entity.id.value.toKotlinUuid(),
             createdAt = entity.createdAt,
