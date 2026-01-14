@@ -5,7 +5,11 @@ inputs: Mapping<String, Input>
 
 build: Build
 
-hidden refs: Refs
+refs: Refs
+
+class Refs {
+  port = "port"
+}
 
 typealias Property = String | Input
 
