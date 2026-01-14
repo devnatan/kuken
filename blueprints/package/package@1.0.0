@@ -1,0 +1,11 @@
+{
+  "name": "blueprints",
+  "packageUri": "package://raw.githubusercontent.com/devnatan/kuken/refs/heads/main/blueprints/package@1.0.0",
+  "version": "1.0.0",
+  "packageZipUrl": "https://raw.githubusercontent.com/devnatan/kuken/refs/heads/main/blueprints/package/package@1.0.0.zip",
+  "packageZipChecksums": {
+    "sha256": "5ea5cdbd8bef3f47c6869cd4e7d1ba311f63b4877a1da43c5596dd094c56e96b"
+  },
+  "dependencies": {},
+  "authors": []
+}

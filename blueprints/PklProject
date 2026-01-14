@@ -2,7 +2,8 @@ amends "pkl:Project"
 
 package {
   name = "blueprints"
-  baseUri = "package://kuken.io/blueprints/package"
+  baseUri = "package://raw.githubusercontent.com/devnatan/kuken/refs/heads/main/blueprints/package"
   version = "1.0.0"
-  packageZipUrl = "https://kuken.io/blueprints/\(name)/\(name)@\(version).zip"
+  packageZipUrl =
+    "https://raw.githubusercontent.com/devnatan/kuken/refs/heads/main/blueprints/package/package@\(version).zip"
 }
