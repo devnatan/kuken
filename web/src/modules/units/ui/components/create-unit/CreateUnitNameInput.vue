@@ -9,7 +9,14 @@ const model = defineModel<string>({ required: true })
 <template>
     <VFieldSet>
         <VLabel>Unit name</VLabel>
-        <VInput v-model="model" placeholder="Type your server name" required="true" type="text" />
+        <VInput
+            ref="input"
+            v-model="model"
+            autofocus
+            placeholder="Type your server name"
+            required="true"
+            type="text"
+        />
     </VFieldSet>
 </template>
 
