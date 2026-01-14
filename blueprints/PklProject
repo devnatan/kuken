@@ -10,4 +10,13 @@ package {
   license = "Apache-2.0"
   website = "https://kuken.io"
   documentation = "https://docs.kuken.io"
+  exclude = new {
+    "PklProject"
+    "PklProject.deps.json"
+    "package/**"
+    "processor/**"
+    "build/**"
+    ".idea/**"
+    ".**"
+  }
 }
