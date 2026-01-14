@@ -62,3 +62,9 @@ export function undefinedToNull<T>(value: T | undefined): T | null {
 export function nullToUndefined<T>(value: T | null): T | undefined {
     return isNull(value) ? undefined : value
 }
+
+export function assertIsDefined<T>(val: T | undefined | null): asserts val is T {
+    if (val === undefined || val === null) {
+        throw new Error("Value was not defined")
+    }
+}

@@ -9,8 +9,10 @@ import VTitle from "@/modules/platform/ui/components/typography/VTitle.vue"
 import Breadcrumb from "@/modules/platform/ui/components/Breadcrumb.vue"
 import CreateUnitNameInput from "@/modules/units/ui/components/create-unit/CreateUnitNameInput.vue"
 import CreateUnitBlueprintSelector from "@/modules/units/ui/components/create-unit/CreateUnitBlueprintSelector.vue"
-import { useRouter } from "vue-router"
+import { onBeforeRouteLeave, useRouter } from "vue-router"
 import type { Unit } from "@/modules/units/api/models/unit.model.ts"
+import CreateUnitConfigureBlueprint from "@/modules/units/ui/components/create-unit/CreateUnitConfigureBlueprint.vue"
+import { isNull } from "@/utils"
 
 const form = reactive({
     name: "",
@@ -29,15 +31,29 @@ const { isLoading, execute } = useAsyncState(unitsService.createUnit, null as un
     }
 })
 
+enum Steps {
+    Name,
+    SelectBlueprint,
+    ConfigureBlueprint
+}
+
 const steps = reactive({
-    current: "name",
-    all: ["name", "blueprint"]
+    current: Steps.Name,
+    all: [Steps.Name, Steps.SelectBlueprint, Steps.ConfigureBlueprint]
 })
 
+const firstStep = computed(() => steps.all[0])
 const lastStep = computed(() => steps.all[steps.all.length - 1])
 
-const buttonLabel = computed(() => {
+const goNextButtonLabel = computed(() => {
     return steps.current === unref(lastStep) ? "Create" : "Next"
+})
+const goBackButtonLabel = computed(() => {
+    return steps.current === unref(firstStep) ? null : "Back"
+})
+
+const isFormCompleted = computed(() => {
+    return !isNull(form.name) && !isNull(form.blueprint)
 })
 
 const canProceed = computed(() => {
@@ -45,24 +61,45 @@ const canProceed = computed(() => {
     console.log(steps.current)
     if (unref(isLoading)) return false
 
-    if (steps.current == "blueprint") {
+    if (steps.current == Steps.SelectBlueprint) {
         return form.blueprint.length > 0
     }
 
     return true
 })
 
+function goBack() {
+    steps.current = steps.all[steps.all.indexOf(steps.current) - 1]!
+}
+
+function goNext() {
+    steps.current = steps.all[steps.all.indexOf(steps.current) + 1]!
+}
+
+function done() {
+    execute(0, {
+        name: form.name,
+        blueprint: form.blueprint,
+        image: form.image
+    })
+}
+
 function proceed() {
     if (steps.current === unref(lastStep)) {
-        execute(0, {
-            name: form.name,
-            blueprint: form.blueprint,
-            image: form.image
-        })
+        done()
     } else {
-        steps.current = steps.all[steps.all.indexOf(steps.current) + 1]!
+        goNext()
     }
 }
+
+onBeforeRouteLeave((_, __, next) => {
+    if (steps.current !== Steps.Name) {
+        goBack()
+        return
+    }
+
+    next()
+})
 </script>
 
 <template>
@@ -71,22 +108,47 @@ function proceed() {
         <VTitle :centered="true">Create new server</VTitle>
         <div class="content">
             <VForm @submit.prevent="proceed">
-                <CreateUnitNameInput v-if="steps.current == 'name'" v-model="form.name" />
+                <CreateUnitNameInput
+                    v-if="steps.current == Steps.Name"
+                    :key="Steps.Name"
+                    v-model="form.name"
+                />
                 <CreateUnitBlueprintSelector
-                    v-if="steps.current == 'blueprint'"
-                    @selected="(blueprintId: string) => (form.blueprint = blueprintId)"
+                    v-else-if="steps.current == Steps.SelectBlueprint"
+                    :key="Steps.SelectBlueprint"
+                    v-model="form.blueprint"
                 />
-                <VButton
-                    :disabled="!canProceed"
-                    type="submit"
-                    variant="primary"
-                    v-text="buttonLabel"
+                <CreateUnitConfigureBlueprint
+                    v-else-if="steps.current == Steps.ConfigureBlueprint"
+                    :key="Steps.ConfigureBlueprint"
+                    :blueprint-id="form.blueprint"
                 />
+                <div class="buttons">
+                    <VButton
+                        v-if="goBackButtonLabel"
+                        class="back"
+                        variant="default"
+                        @click="goBack"
+                        v-text="goBackButtonLabel"
+                    />
+                    <VButton
+                        :disabled="!canProceed"
+                        class="next"
+                        type="submit"
+                        variant="primary"
+                        v-text="goNextButtonLabel"
+                    />
+                </div>
             </VForm>
         </div>
     </VContainer>
 </template>
 
+<style>
+h4 {
+    margin-bottom: 1.6rem;
+}
+</style>
 <style lang="scss" scoped>
 .container {
     padding: 48px;
@@ -103,9 +165,20 @@ function proceed() {
     transform: translateX(-50%);
 }
 
+.buttons {
+    display: flex;
+    flex-direction: row;
+}
+
 .button {
-    margin-top: 4.8rem;
+    margin-top: 3.2rem;
     width: 15%;
-    align-self: flex-end;
+
+    &.back {
+        margin-right: auto;
+    }
+    &.next {
+        margin-left: auto;
+    }
 }
 </style>
