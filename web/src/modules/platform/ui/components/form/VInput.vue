@@ -1,13 +1,13 @@
 <template>
     <input
         ref="input"
+        v-model="model"
         :class="{
             'input--onSurface': onSurface
         }"
         :disabled="disabled"
         :placeholder="placeholder"
         :readonly="disabled"
-        :value="modelValue"
         class="input"
         @input="onInputChange"
     />
@@ -22,8 +22,8 @@ const props = defineProps<{
     placeholder?: string
     onSurface?: boolean
     autoFocus?: boolean
-    modelValue?: string
 }>()
+const model = defineModel()
 
 function onInputChange(event: Event): void {
     emits("update:modelValue", (event.target as HTMLInputElement).value)

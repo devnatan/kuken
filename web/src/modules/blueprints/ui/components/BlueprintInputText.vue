@@ -14,10 +14,9 @@ const model = defineModel()
             {{ props.label }}
             <VInput
                 ref="input"
+                v-model="model"
                 :placeholder="props.placeholder"
                 :type="props.sensitive ? 'password' : 'text'"
-                :value="model"
-                autoFocus
                 required="true"
             />
         </VLabel>

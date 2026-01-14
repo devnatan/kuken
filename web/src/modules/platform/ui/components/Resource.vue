@@ -12,7 +12,7 @@
     <slot v-else key="content" :refresh="load" />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import EmptyState from "@/modules/platform/ui/components/EmptyState.vue"
 import LoadingState from "@/modules/platform/ui/components/LoadingState.vue"
 import VButton from "@/modules/platform/ui/components/button/VButton.vue"
@@ -51,14 +51,11 @@ function onDataLoaded(value: unknown) {
 
 const router = useRouter()
 function onError(errorArg: Error) {
-    console.log("props", props.redirectNotAllowed)
-    console.log("code", errorArg.code)
     if (
         errorArg.code &&
         errorArg.code === 2002 /* Insufficient permissions */ &&
         props.redirectNotAllowed
     ) {
-        console.log("redirect")
         router.replace({ name: "access-denied" })
         return
     }

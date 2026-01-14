@@ -1,5 +1,5 @@
 export type CreateUnitRequest = {
     name: string
-    image: string
     blueprint: string
+    inputs: { [name: string]: string }
 }

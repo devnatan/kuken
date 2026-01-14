@@ -1,12 +1,12 @@
 <template>
-    <ul class="tab-list" :aria-label="label" role="tablist">
+    <ul :aria-label="label" class="tab-list" role="tablist">
         <li v-for="(tab, idx) in tabs" :key="idx" role="presentation">
             <a
                 :aria-controls="tab.hash"
                 :aria-selected="tab.isActive"
+                :class="{ 'tab--active': tab.isActive }"
                 :href="tab.hash"
                 class="tab"
-                :class="{ 'tab--active': tab.isActive }"
                 role="tab"
                 @click="selectTab(tab.hash, $event)"
             >
@@ -19,10 +19,10 @@
 </template>
 
 <script lang="ts"></script>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { onMounted, provide, reactive, ref } from "vue"
 import { isUndefined } from "@/utils"
-import VIcon from "@/modules/platform/ui/components/icon/VIcon.vue"
+import VIcon from "@/modules/platform/ui/components/icons/VIcon.vue"
 import { TabsInjectionKey } from "@/modules/platform/ui/components/InjectionKeys"
 
 export type Tab = {

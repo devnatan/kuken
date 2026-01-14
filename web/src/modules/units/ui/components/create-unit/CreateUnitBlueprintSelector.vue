@@ -8,6 +8,7 @@ import {
 } from "@/modules/blueprints/api/models/blueprint.model.ts"
 import { isNull } from "@/utils"
 import { ProgressiveImage } from "vue-progressive-image"
+import VIcon from "@/modules/platform/ui/components/icons/VIcon.vue"
 
 const selected = defineModel()
 
@@ -31,8 +32,10 @@ function select(blueprint: Blueprint) {
     <h4>Select a blueprint</h4>
     <Resource :resource="resource" @loaded="(value: Blueprint[]) => (blueprintList = value)">
         <template v-if="blueprintList">
-            <ul v-for="blueprint in blueprintList" :key="blueprint.id" class="blueprintList">
+            <ul class="blueprintList">
                 <li
+                    v-for="blueprint in blueprintList"
+                    :key="blueprint.id"
                     :class="{ selected: isSelected(blueprint) }"
                     class="blueprint"
                     @click="select(blueprint)"
@@ -46,6 +49,9 @@ function select(blueprint: Blueprint) {
                         <p class="description">
                             Version {{ blueprint.spec.descriptor.version }} · Küken Official
                             Blueprint
+                            <span class="icon">
+                                <VIcon name="Verified" />
+                            </span>
                         </p>
                     </div>
                 </li>
@@ -55,6 +61,12 @@ function select(blueprint: Blueprint) {
 </template>
 
 <style lang="scss" scoped>
+.blueprintList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .blueprint {
     display: flex;
     flex-direction: row;
@@ -91,10 +103,21 @@ function select(blueprint: Blueprint) {
     flex-direction: column;
     padding: 8px 0;
     justify-content: center;
-    gap: 0px;
+    gap: 0;
 }
 
 .description {
     color: var(--kt-content-neutral);
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+
+    .icon {
+        min-width: 16px;
+        min-height: 16px;
+        max-height: 16px;
+        margin-left: 2px;
+        fill: #4b7bec;
+    }
 }
 </style>

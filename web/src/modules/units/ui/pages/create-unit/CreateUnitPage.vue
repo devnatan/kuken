@@ -2,7 +2,7 @@
 import unitsService from "@/modules/units/api/services/units.service.ts"
 import { useAsyncState } from "@vueuse/core"
 import VButton from "@/modules/platform/ui/components/button/VButton.vue"
-import { computed, reactive, unref } from "vue"
+import { computed, reactive } from "vue"
 import VForm from "@/modules/platform/ui/components/form/VForm.vue"
 import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
 import VTitle from "@/modules/platform/ui/components/typography/VTitle.vue"
@@ -17,7 +17,7 @@ import { isNull } from "@/utils"
 const form = reactive({
     name: "",
     blueprint: "",
-    image: "itzg/minecraft-server:latest"
+    inputs: {}
 })
 
 const router = useRouter()
@@ -46,10 +46,10 @@ const firstStep = computed(() => steps.all[0])
 const lastStep = computed(() => steps.all[steps.all.length - 1])
 
 const goNextButtonLabel = computed(() => {
-    return steps.current === unref(lastStep) ? "Create" : "Next"
+    return steps.current === lastStep.value ? "Create" : "Next"
 })
 const goBackButtonLabel = computed(() => {
-    return steps.current === unref(firstStep) ? null : "Back"
+    return steps.current === firstStep.value ? null : "Back"
 })
 
 const isFormCompleted = computed(() => {
@@ -57,9 +57,7 @@ const isFormCompleted = computed(() => {
 })
 
 const canProceed = computed(() => {
-    console.log(unref(isLoading))
-    console.log(steps.current)
-    if (unref(isLoading)) return false
+    if (isLoading.value) return false
 
     if (steps.current == Steps.SelectBlueprint) {
         return form.blueprint.length > 0
@@ -76,17 +74,9 @@ function goNext() {
     steps.current = steps.all[steps.all.indexOf(steps.current) + 1]!
 }
 
-function done() {
-    execute(0, {
-        name: form.name,
-        blueprint: form.blueprint,
-        image: form.image
-    })
-}
-
 function proceed() {
-    if (steps.current === unref(lastStep)) {
-        done()
+    if (steps.current === lastStep.value) {
+        execute(0, form)
     } else {
         goNext()
     }
@@ -121,6 +111,7 @@ onBeforeRouteLeave((_, __, next) => {
                 <CreateUnitConfigureBlueprint
                     v-else-if="steps.current == Steps.ConfigureBlueprint"
                     :key="Steps.ConfigureBlueprint"
+                    v-model="form.inputs"
                     :blueprint-id="form.blueprint"
                 />
                 <div class="buttons">
