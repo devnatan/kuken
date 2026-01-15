@@ -55,7 +55,7 @@ version: String(matches(Regex(#"^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?(\+[a-zA-Z0-9.]+)
 /// Examples:
 ///   - "https://www.postgresql.org"
 ///   - "https://github.com/itzg/docker-minecraft-server"
-///   - "https://kuken.io"
+///   - "https://Küken.io"
 ///
 /// @required
 url: WebUrl
@@ -170,7 +170,7 @@ typealias DisplayLabel =
 
 /// Property value that can reference user inputs for dynamic substitution.
 /// Enables both static values and runtime-resolved references.
-typealias DynamicProperty = String | UserInput | EnvironmentVariable
+typealias ResolvableProperty = String(!isEmpty) | Property
 
 /// Collection of user input definitions presented during application setup.
 /// Order determines display sequence in the UI.
@@ -181,16 +181,37 @@ typealias UserInputs = Listing<UserInput>
 typealias EnvironmentVariables = Listing<EnvironmentVariable>
 
 /// Supported value types for environment variables.
-/// Kuken handles type conversion to strings as needed by the container runtime.
-typealias EnvVarValue = String | Int | UInt | Boolean | UserInput | DataSize
+/// Küken handles type conversion to strings as needed by the container runtime.
+typealias EnvVarValue = Char | String | Number | Boolean | Duration | DataSize | UserInput
 
 // ============================================================================
 // ABSTRACT BASE CLASSES
 // ============================================================================
+abstract class Base {
+  /// Runtime values that are only available during blueprint instantiation.
+  /// References provide access to system-generated values that don't exist when writing the blueprint,
+  /// such as instance names, generated IDs, or assigned ports. Use refs to inject these dynamic runtime
+  /// values into your configuration.
+  ///
+  /// **Example:** `${refs.instance.name}` resolves to the actual instance name at deployment time.
+  fixed refs: RuntimeRefs = module.refs
+}
+
+function parameters(text: VarArgs<String>): String = List(text).join("")
+
+function param(property: Property, value: (String) -> String): String =
+  property.ref.value().ifNonNull((result) -> value.apply(result as String)) as String
 
 /// Marker interface for all property types in the blueprint.
 /// Provides type safety for polymorphic property handling.
-abstract class Property
+abstract class Property {
+  name: String
+
+  hidden ref: Ref = internalPropertyRef("input.\(name).value")
+}
+
+function using(_value: ResolvableProperty, _input: (String) -> String) =
+  if (_value.ref.isDefined()) _input.apply(_value.ref.value()) else ""
 
 // ============================================================================
 // APPLICATION ASSETS
@@ -211,24 +232,36 @@ class AppAssets {
 // ============================================================================
 // RUNTIME REFERENCES
 // ============================================================================
-
 /// Runtime values that are only available during blueprint instantiation.
 /// References provide access to system-generated values that don't exist when writing the blueprint,
 /// such as instance names, generated IDs, or assigned ports. Use refs to inject these dynamic runtime
 /// values into your configuration.
 ///
 /// **Example:** `${refs.instance.name}` resolves to the actual instance name at deployment time.
-refs: RuntimeRefs
+const refs: RuntimeRefs
+
+@Unlisted
+local const function internalPropertyRef(_key: String): Ref = new Ref {
+  key = "__REF__\(_key)__"
+}
+
+class Ref {
+  key: String
+
+  function isDefined(): Boolean = !value().isEmpty
+
+  function value(): String = read("kuken:\(key)") as String
+}
 
 /// Runtime reference values injected by Küken during instance creation.
 /// These values are generated or assigned by the system and made available as placeholders
 /// that get resolved when the blueprint is instantiated into a runtime.
 class RuntimeRefs {
   /// Instance-specific runtime values generated during deployment.
-  instance: InstanceRefs = new {}
+  const instance: InstanceRefs
 
   /// Network-related runtime values assigned by Küken.
-  network: NetworkRefs = new {}
+  const network: NetworkRefs
 }
 
 /// Instance-level runtime values available during deployment.
@@ -236,11 +269,11 @@ class RuntimeRefs {
 class InstanceRefs {
   /// Unique identifier assigned to this instance.
   /// Can be used for tagging, logging, or internal references.
-  id: String = "instance.id"
+  const id: Ref = internalPropertyRef("instance.id")
 
   /// Generated unique name for this instance.
   /// Useful for container names, volume prefixes, or network identifiers.
-  name: String = "instance.name"
+  const name: Ref = internalPropertyRef("instance.name")
 }
 
 /// Network-related runtime values assigned during deployment.
@@ -249,7 +282,7 @@ class NetworkRefs {
   /// Primary port assigned to this instance.
   /// Resolves to the actual port number allocated by Küken, useful when auto-assigning ports
   /// or when the port depends on other runtime conditions.
-  port: String = "network.port"
+  const port: Ref = internalPropertyRef("network.port")
 }
 
 // ============================================================================
@@ -260,12 +293,43 @@ class NetworkRefs {
 /// Each input defines validation rules, display properties, and default values where applicable.
 inputs: UserInputs
 
+const function selectorInput(_name: InputId, _label: DisplayLabel) = new SelectInput {
+  name = _name
+  label = _label
+}
+
+const function textInput(_name: InputId, _label: DisplayLabel) = new TextInput {
+  name = _name
+  label = _label
+}
+
+const function dataSizeInput(_name: InputId, _label: DisplayLabel) = new DataSizeInput {
+  name = _name
+  label = _label
+}
+
+const function passwordInput(_name: InputId, _label: DisplayLabel) = new PasswordInput {
+  name = _name
+  label = _label
+}
+
+const function portInput(_name: InputId, _label: DisplayLabel, _default: PortNumber) = new PortInput {
+  name = _name
+  label = _label
+  default = _default
+}
+
+const function checkboxInput(_name: InputId, _label: DisplayLabel) = new CheckboxInput {
+  name = _name
+  label = _label
+}
+
 /// Base class for all user input types.
 /// Subclasses provide type-specific validation and UI rendering hints.
 abstract class UserInput extends Property {
   /// Unique programmatic identifier in kebab-case.
   /// Used in environment variable references and property interpolation.
-  abstract name: InputId
+  name: InputId
 
   /// Human-readable display text shown to users.
   /// Should clearly describe the input's purpose without requiring technical knowledge.
@@ -273,7 +337,7 @@ abstract class UserInput extends Property {
 
   /// Input type identifier set automatically by subclasses.
   /// Used internally for UI rendering and validation.
-  hidden type: String
+  fixed type: String
 }
 
 /// Plain text input field for non-sensitive configuration values.
@@ -289,12 +353,15 @@ abstract class UserInput extends Property {
 class TextInput extends UserInput {
   abstract name: InputId
   abstract label: DisplayLabel
-  hidden type: String = "text"
+  fixed type: String = "text"
+
+  /// Default text value if user doesn't specify one.
+  default: String?
 }
 
 /// Password input field with masked character display.
 /// Use for passwords, API keys, secret tokens, or any sensitive credentials.
-/// Values are masked in the UI and should be stored securely by Kuken.
+/// Values are masked in the UI and should be stored securely by Küken.
 ///
 /// **Example:**
 /// ```pkl
@@ -306,7 +373,7 @@ class TextInput extends UserInput {
 class PasswordInput extends UserInput {
   abstract name: InputId
   abstract label: DisplayLabel
-  hidden type: String = "password"
+  fixed type: String = "password"
 }
 
 /// Network port number input with automatic range validation.
@@ -324,11 +391,47 @@ class PasswordInput extends UserInput {
 class PortInput extends UserInput {
   abstract name: InputId
   abstract label: DisplayLabel
-  hidden type: String = "port"
+  fixed type: String = "port"
 
   /// Default port number if user doesn't specify one.
   /// Should be a commonly used port that's unlikely to conflict with other services.
   default: PortNumber
+}
+
+class SelectInput extends UserInput {
+  abstract name: InputId
+  abstract label: DisplayLabel
+  fixed type: String = "select"
+
+  /// Default text value if user doesn't specify one.
+  default: String?
+  items: Listing<String>
+}
+
+class CheckboxInput extends UserInput {
+  abstract name: InputId
+  abstract label: DisplayLabel
+  fixed type: String = "checkbox"
+
+  default: Boolean?
+}
+
+class DataSizeInput extends UserInput {
+  abstract name: InputId
+  abstract label: DisplayLabel
+  fixed type: String = "datasize"
+
+  /// Default text value if user doesn't specify one.
+  default: DataSize?
+}
+
+// ============================================================================
+// INSTANCE SETTINGS
+// ============================================================================
+instance: InstanceSettings
+
+class InstanceSettings extends Base {
+  startup: ResolvableProperty
 }
 
 // ============================================================================
@@ -336,12 +439,12 @@ class PortInput extends UserInput {
 // ============================================================================
 
 /// Build configuration defining container image and runtime environment.
-/// Kuken processes this to pull images, configure variables, and start containers with proper settings.
+/// Küken processes this to pull images, configure variables, and start containers with proper settings.
 build: BuildConfig
 
 /// Complete build specification for the application container.
 /// Combines Docker image selection with environment variable configuration.
-class BuildConfig {
+class BuildConfig extends Base {
   /// Docker container image specification.
   docker: DockerConfig
 
@@ -352,12 +455,12 @@ class BuildConfig {
 
 /// Docker container configuration specifying which image to use.
 /// The image can be static, reference a user input, or use string interpolation.
-class DockerConfig {
+class DockerConfig extends Base {
   /// Docker image reference to use for this application.
   /// Can be a static string like `"nginx:alpine"`, a direct input reference, or interpolated like `"postgres:${VersionInput}"`.
   ///
   /// **Best practices:** Pin to specific versions for stability and consider using official images when available.
-  image: DynamicProperty(!isEmpty)
+  image: ResolvableProperty
 }
 
 /// Environment variable definition for container configuration.
@@ -371,4 +474,9 @@ class EnvironmentVariable extends Property {
   /// Numbers and booleans are automatically converted to strings. DataSize values are converted to bytes.
   /// User input references are resolved at runtime.
   value: EnvVarValue
+}
+
+const function env(_name: EnvVarName, _value: EnvVarValue): EnvironmentVariable = new {
+  name = _name
+  value = _value
 }
