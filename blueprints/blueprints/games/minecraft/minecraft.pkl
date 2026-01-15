@@ -9,6 +9,10 @@ name = "Minecraft: Java Edition"
 version = "1.0.0"
 url = "https://kuken.io"
 
+assets {
+  icon = "https://kuken.io/blueprints/icons/minecraft-java-edition.png"
+}
+
 // ============================================================================
 // INPUT DEFINITIONS
 // ============================================================================
@@ -67,4 +71,8 @@ build {
     new { name = "RCON_PASSWORD"; value = RconPassword }
     new { name = "RCON_PORT"; value = RconPort }
   }
+}
+
+instance {
+  startup = ""
 }

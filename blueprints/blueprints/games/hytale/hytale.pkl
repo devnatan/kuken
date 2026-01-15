@@ -6,6 +6,10 @@ name = "Hytale"
 version = "1.0.0"
 url = "https://kuken.io"
 
+assets {
+  icon = "https://kuken.io/blueprints/icons/hytale.png"
+}
+
 // ============================================================================
 // INPUT DEFINITIONS
 // ============================================================================
