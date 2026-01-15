@@ -1,7 +1,7 @@
 package gg.kuken.feature.blueprint.http.dto
 
 import gg.kuken.feature.blueprint.model.Blueprint
-import gg.kuken.feature.blueprint.model.ProcessedBlueprint
+import gg.kuken.feature.blueprint.processor.ResolvedBlueprint
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -12,7 +12,7 @@ internal data class BlueprintResponse(
     val id: Uuid,
     @SerialName("created-at") val createdAt: Instant,
     @SerialName("updated-at") val updatedAt: Instant,
-    @SerialName("spec") val spec: ProcessedBlueprint,
+    @SerialName("spec") val spec: ResolvedBlueprint,
 ) {
     constructor(blueprint: Blueprint) : this(
         id = blueprint.id,

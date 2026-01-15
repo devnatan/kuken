@@ -6,8 +6,7 @@ import gg.kuken.core.docker.DockerNetworkService
 import gg.kuken.feature.account.IdentityGeneratorService
 import gg.kuken.feature.blueprint.BlueprintService
 import gg.kuken.feature.blueprint.model.Blueprint
-import gg.kuken.feature.blueprint.model.ProcessedBlueprint
-import gg.kuken.feature.instance.DockerInstanceService.GenerateRuntimeResult
+import gg.kuken.feature.blueprint.processor.Resolvable
 import gg.kuken.feature.instance.data.entity.InstanceEntity
 import gg.kuken.feature.instance.data.repository.InstanceRepository
 import gg.kuken.feature.instance.model.CreateInstanceOptions
@@ -28,7 +27,6 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.serializer
 import me.devnatan.dockerkt.DockerClient
 import me.devnatan.dockerkt.models.PortBinding
 import me.devnatan.dockerkt.models.container.hostConfig
@@ -96,59 +94,45 @@ class DockerInstanceService(
 
     @OptIn(InternalSerializationApi::class)
     private fun performSubstitutions(
-        property: ProcessedBlueprint.Property,
+        property: Resolvable<*>,
         options: CreateInstanceOptions,
-    ): String =
-        when (property) {
-            is ProcessedBlueprint.Property.Constant -> {
-                property.value
+    ): String = when (property) {
+        is Resolvable.EnvVarRef -> property.envVarName
+        is Resolvable.InputRef -> {
+            val input =
+                options.inputs[property.inputName]
+                    ?: error("Missing required input ${property.inputName} to render Docker Image")
+
+            input
+        }
+
+        is Resolvable.Interpolated -> {
+            logger.debug("Resolving dynamic property...: ${property.template}")
+
+            check(property.parts.isNotEmpty()) {
+                "Dynamic property provided but no dependencies found"
             }
 
-            is ProcessedBlueprint.Property.Dynamic -> {
-                logger.debug("Resolving dynamic property ${property.literal}...")
-                check(property.dependencies.isNotEmpty()) {
-                    "Dynamic property provided but no dependencies found"
-                }
-
-                var literal = property.literal
-                property.dependencies
-                    .groupBy { it::class.serializer().descriptor.serialName }
-                    .forEach { (typeName, dependencies) ->
-                        check(dependencies.size == 1) {
-                            "Multiple dependencies are not supported"
-                        }
-
-                        for (dependency in dependencies) {
-                            literal = literal.replace("%{$typeName}", performSubstitutions(dependency, options))
-                        }
+            var literal = property.template
+            property.parts
+                .groupBy { it.toTemplateString() }
+                .forEach { (template, dependencies) ->
+                    check(dependencies.size == 1) {
+                        "Multiple dependencies are not supported"
                     }
 
-                literal
-            }
-
-            is ProcessedBlueprint.Property.EnvironmentVariable -> {
-                property.env
-            }
-
-            is ProcessedBlueprint.Property.Input -> {
-                val input =
-                    options.inputs[property.name]
-                        ?: error("Missing required input ${property.name} to render Docker Image")
-
-                input
-            }
-
-            is ProcessedBlueprint.Property.Placeholder -> {
-                when (property.type) {
-                    ProcessedBlueprint.Property.Placeholder.Type.COMMAND_TEMPLATE -> property.expr
-                    ProcessedBlueprint.Property.Placeholder.Type.SERVER_PORT -> options.address.port.toString()
+                    for (dependency in dependencies) {
+                        literal = literal.replace(template, performSubstitutions(dependency, options))
+                    }
                 }
-            }
 
-            ProcessedBlueprint.Property.Unresolved -> {
-                error("Unresolved property type")
-            }
+            literal
         }
+
+        is Resolvable.Literal -> property.value.toString()
+        is Resolvable.RuntimeRef -> "<no ref>"
+        Resolvable.Null -> "null"
+    }
 
     override suspend fun createInstance(
         blueprintId: Uuid,
@@ -163,13 +147,12 @@ class DockerInstanceService(
         val generatedName =
             generateContainerName(
                 instanceId,
-                blueprint.spec.instance.nameFormat
-                    .ifEmpty { null },
+                "kk-{id}",
             )
         logger.debug("Instance {} runtime identifier is {}", instanceId, generatedName)
 
         val env =
-            blueprint.spec.build.env
+            blueprint.spec.build.environmentVariables
                 .map { (key, property) ->
                     key to performSubstitutions(property, options)
                 }.toMap()

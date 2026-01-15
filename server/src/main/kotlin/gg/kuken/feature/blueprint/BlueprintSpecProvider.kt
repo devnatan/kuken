@@ -1,6 +1,6 @@
 package gg.kuken.feature.blueprint
 
-import gg.kuken.feature.blueprint.model.ProcessedBlueprint
+import gg.kuken.feature.blueprint.processor.ResolvedBlueprint
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -10,7 +10,7 @@ import java.nio.channels.UnresolvedAddressException
 interface BlueprintSpecProvider {
     val providerId: String
 
-    suspend fun provide(source: BlueprintSpecSource): ProcessedBlueprint
+    suspend fun provide(source: BlueprintSpecSource): ResolvedBlueprint
 }
 
 data class CombinedBlueprintSpecProvider(
@@ -19,7 +19,7 @@ data class CombinedBlueprintSpecProvider(
     override val providerId: String
         get() = providers.joinToString(" + ", transform = BlueprintSpecProvider::providerId)
 
-    override suspend fun provide(source: BlueprintSpecSource): ProcessedBlueprint {
+    override suspend fun provide(source: BlueprintSpecSource): ResolvedBlueprint {
         for (provider in providers) {
             try {
                 return provider.provide(source)
@@ -38,7 +38,7 @@ class RemoteBlueprintSpecProvider(
     private val httpClient: HttpClient = HttpClient()
     override val providerId: String get() = "remote"
 
-    override suspend fun provide(source: BlueprintSpecSource): ProcessedBlueprint {
+    override suspend fun provide(source: BlueprintSpecSource): ResolvedBlueprint {
         if (source !is BlueprintSpecSource.Remote) {
             throw UnsupportedBlueprintSpecSource()
         }
@@ -53,7 +53,7 @@ class RemoteBlueprintSpecProvider(
         val contents: String = response.body()
         return processor.process(
             input = contents,
-            source = ProcessedBlueprint.Source.externalUrl(source.url),
+            source = "url://${source.url}",
         )
     }
 }
@@ -63,7 +63,7 @@ class LocalBlueprintSpecProvider(
 ) : BlueprintSpecProvider {
     override val providerId: String get() = "local"
 
-    override suspend fun provide(source: BlueprintSpecSource): ProcessedBlueprint {
+    override suspend fun provide(source: BlueprintSpecSource): ResolvedBlueprint {
         if (source !is BlueprintSpecSource.Local) {
             throw UnsupportedBlueprintSpecSource()
         }
@@ -72,7 +72,7 @@ class LocalBlueprintSpecProvider(
         val contents = file.readText()
         return parser.process(
             input = contents,
-            source = ProcessedBlueprint.Source.fileSystem(file.absolutePath),
+            source = "file://${file.absolutePath}",
         )
     }
 }

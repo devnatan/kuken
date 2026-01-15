@@ -1,4 +1,4 @@
-import io.ktor.plugin.OpenApiPreview
+import io.ktor.plugin.*
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 
 plugins {
@@ -45,6 +45,9 @@ dependencies {
     implementation(libs.postgresql)
     implementation(libs.h2)
     implementation(libs.lettuce)
+    implementation("org.pkl-lang:pkl-codegen-kotlin:0.30.2")
+    implementation("org.pkl-lang:pkl-config-kotlin:0.30.2")
+    implementation("org.pkl-lang:pkl-config-java:0.30.2")
     testImplementation(libs.ktx.coroutines.test)
     testImplementation(kotlin("test"))
 }

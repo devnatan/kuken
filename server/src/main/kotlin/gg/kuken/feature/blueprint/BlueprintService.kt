@@ -3,7 +3,7 @@ package gg.kuken.feature.blueprint
 import gg.kuken.feature.account.IdentityGeneratorService
 import gg.kuken.feature.blueprint.entity.BlueprintEntity
 import gg.kuken.feature.blueprint.model.Blueprint
-import gg.kuken.feature.blueprint.model.ProcessedBlueprint
+import gg.kuken.feature.blueprint.processor.ResolvedBlueprint
 import gg.kuken.feature.blueprint.repository.BlueprintRepository
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -51,9 +51,9 @@ class BlueprintService(
     @OptIn(ExperimentalSerializationApi::class)
     private fun toModel(
         entity: BlueprintEntity,
-        spec: ProcessedBlueprint? = null,
+        spec: ResolvedBlueprint? = null,
     ): Blueprint {
-        val spec = spec ?: json.decodeFromStream<ProcessedBlueprint>(entity.content.inputStream)
+        val spec = spec ?: json.decodeFromStream<ResolvedBlueprint>(entity.content.inputStream)
         return Blueprint(
             id = entity.id.value.toKotlinUuid(),
             createdAt = entity.createdAt,
