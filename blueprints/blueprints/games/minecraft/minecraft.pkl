@@ -14,47 +14,38 @@ url = "https://kuken.io"
 // ============================================================================
 
 /// Docker image tag/version for the Minecraft server container.
-/// Common values include `"latest"`, `"java17"`, or specific versions like `"2024.1.0-java21"`.
-local DockerImageTag = new TextInput {
-  name = "docker-image-tag"
-  label = "Docker Image Tag"
-}
+local DockerImageVersion = textInput("docker-image-tag", "Docker Image Version")
 
 /// RCON password for remote server management.
 /// RCON allows command execution without direct console access, essential for automated management and integration tools.
-local RconPassword = new PasswordInput {
-  name = "rcon-password"
-  label = "RCON Password"
-}
+local RconPassword = passwordInput("rcon-password", "RCON Password")
 
 /// Network port for RCON connections.
 /// Standard Minecraft RCON port is 25575. Change if running multiple servers or if the port conflicts with other services.
-local RconPort = new PortInput {
-  name = "rcon-port"
-  label = "RCON Port"
-  default = 25575
-}
+local RconPort = portInput("rcon-port", "RCON Port", 25575)
 
 /// Maximum memory allocation for the Java server process.
-/// Specify as `"2G"`, `"4096M"`, etc. Recommended minimum is 1GB for vanilla servers with few players.
-/// Leave 1-2GB for OS and Docker overhead.
-local MaxMemory = new TextInput {
-  name = "max-memory"
-  label = "Maximum Memory"
-}
+local MaxMemory = dataSizeInput("max-memory", "Maximum Memory")
 
 /// Minecraft version to run on the server.
 /// Use `"LATEST"` for the newest release, specific versions like `"1.20.4"`, or `"SNAPSHOT"` for testing builds.
-local GameVersion = new TextInput {
-  name = "game-version"
-  label = "Minecraft Version"
-}
+local GameVersion = textInput("game-version", "Minecraft Version")
 
 /// Server type/distribution to run.
 /// Options include `"VANILLA"` (default), `"PAPER"` (optimized), `"SPIGOT"`, `"FORGE"`, or `"FABRIC"`.
-local ServerType = new TextInput {
-  name = "server-type"
-  label = "Server Type"
+local ServerType = textInput("server-type", "Server Type")
+
+// ============================================================================
+// USER INPUTS
+// ============================================================================
+
+inputs {
+  DockerImageVersion
+  GameVersion
+  ServerType
+  MaxMemory
+  RconPassword
+  RconPort
 }
 
 // ============================================================================
@@ -63,31 +54,17 @@ local ServerType = new TextInput {
 
 build {
   docker {
-    image = "itzg/minecraft-server:\(DockerImageTag)"
+    image = "itzg/minecraft-server:\(DockerImageVersion)"
   }
 
   environmentVariables {
     // Automatically accept the Minecraft EULA, required for server startup.
     new { name = "EULA"; value = true }
+    new { name = "ENABLE_RCON"; value = true }
     new { name = "TYPE"; value = ServerType }
     new { name = "VERSION"; value = GameVersion }
-    new { name = "ENABLE_RCON"; value = true }
     new { name = "MEMORY"; value = MaxMemory }
-    new { name = "SERVER_PORT"; value = 25565 }
     new { name = "RCON_PASSWORD"; value = RconPassword }
     new { name = "RCON_PORT"; value = RconPort }
   }
-}
-
-// ============================================================================
-// USER INPUTS
-// ============================================================================
-
-inputs {
-  DockerImageTag
-  GameVersion
-  ServerType
-  MaxMemory
-  RconPassword
-  RconPort
 }
