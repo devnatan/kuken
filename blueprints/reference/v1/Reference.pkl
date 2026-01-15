@@ -1,78 +1,374 @@
+// ============================================================================
+// Küken BLUEPRINT REFERENCE SCHEMA
+// ============================================================================
+
+///
+/// This module defines the complete configuration schema for Küken application
+/// blueprints. Blueprints describe containerized applications with their inputs,
+/// build configuration, environment variables, and metadata.
+///
+/// A Blueprint serves as a template that Küken uses to:
+///   - Generate user configuration interfaces
+///   - Build Docker containers with proper configuration
+///   - Manage environment variables and secrets
+///   - Handle port mappings and networking
+///
+/// See <https://kuken.io/docs/blueprints>
+/// @version 1.0.0
+/// ============================================================================
 @ModuleInfo { minPklVersion = "0.30.2" }
 module io.kuken.Blueprint
 
-name: String
-version: String
-url: Source
+// ============================================================================
+// MODULE DESCRIPTOR
+// ============================================================================
 
-assets: Assets?
-inputs: InputDefinitions
-build: Build
-refs: Refs
+/// The canonical name of the application or service.
+/// This should be the official product name in title case.
+///
+/// **Example:** `"Minecraft: Java Edition"`, `"PostgreSQL Database"`
+name: String(
+  !isEmpty
+    && length >= 3
+    && length <= 100,
+)
 
-class Assets {
+/// Semantic version of this blueprint definition following semver 2.0.0 specification.
+/// This tracks blueprint changes, not the application version itself.
+///
+/// **Format:** `MAJOR.MINOR.PATCH[-prerelease][+build]`
+///
+/// **Example:** `"1.0.0"`, `"2.1.3-beta.1"`, `"1.2.0+20240115"`
+///
+/// See <https://semver.org> for more details.
+version: String(matches(Regex(#"^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?(\+[a-zA-Z0-9.]+)?$"#)))
+
+/// Official website or documentation URL for the application.
+///
+/// This should point to:
+///   - The official product homepage, OR
+///   - Official documentation, OR
+///   - GitHub/GitLab repository for open source projects
+///
+/// Must be a valid HTTPS URL (HTTP allowed for localhost development).
+///
+/// Examples:
+///   - "https://www.postgresql.org"
+///   - "https://github.com/itzg/docker-minecraft-server"
+///   - "https://kuken.io"
+///
+/// @required
+url: WebUrl
+
+// ============================================================================
+// TYPE DEFINITIONS - PRIMITIVES
+// ============================================================================
+
+/// A valid URL or file path reference used throughout the blueprint.
+///
+/// Supported schemes:
+///  * [WebURL]s
+///  * file://  - Local filesystem paths
+///  * url://   - Generic URL placeholder
+///
+typealias Source =
+  WebUrl
+    | String(
+      !isEmpty
+        && (
+          startsWith("file://")
+            || startsWith("url://")
+        ),
+    )
+
+/// Web-only URL reference that excludes local file paths.
+/// Used for public-facing URLs like documentation and official websites.
+typealias WebUrl =
+  String(
+    !isEmpty
+      && (startsWith("https://") || startsWith("http://")),
+  )
+
+/// A valid Docker image reference with optional tag or digest.
+///
+/// Format patterns:
+/// * Simple: "nginx"
+/// * With tag: "nginx:latest", "postgres:15.2"
+/// * With registry: "docker.io/library/nginx:alpine"
+/// * With digest: "nginx@sha256:abc123..."
+/// * Private registry: "myregistry.com:5000/myapp:v1.0.0"
+///
+/// Constraints:
+/// * Must contain valid Docker image name characters
+/// * Tag (after ':') is alphanumeric with dots, dashes, underscores
+/// * Total length limited to 255 characters (Docker limitation)
+///
+/// Examples:
+/// * "itzg/minecraft-server:latest"
+/// * "postgres:15.2-alpine"
+/// * "redis:7-alpine"
+/// * "ghcr.io/company/app:v2.1.0"
+///
+/// See <https://docs.docker.com/engine/reference/commandline/tag/> for more details.
+typealias DockerImageReference =
+  String(
+    !isEmpty
+      && length <= 255
+      && matches(
+        Regex(
+          #"^[a-z0-9]+(([._-]|__|[-]*)[a-z0-9]+)*(:[a-z0-9]+(([._-]|__|[-]*)[a-z0-9]+)*)?(/[a-z0-9]+(([._-]|__|[-]*)[a-z0-9]+)*(:[a-z0-9]+(([._-]|__|[-]*)[a-z0-9]+)*)?)*(@sha256:[a-f0-9]{64})?$"#,
+        ),
+      ),
+  )
+
+/// POSIX-compliant environment variable name in UPPER_SNAKE_CASE.
+/// Must start with uppercase letter or underscore, containing only uppercase letters, numbers, and underscores.
+///
+/// **Example:** `"DATABASE_URL"`, `"MAX_CONNECTIONS"`, `"_INTERNAL_DEBUG"`
+typealias EnvVarName =
+  String(
+    !isEmpty
+      && length <= 255
+      && matches(Regex(#"^[A-Z_][A-Z0-9_]*$"#)),
+  )
+
+/// Valid TCP/UDP port number in the range 1-65535.
+///
+/// Remember: Ports 1-1023 are system ports requiring elevated privileges.
+typealias PortNumber =
+  UInt16(
+    this >= 1
+      && this <= 65535,
+  )
+
+/// Valid input identifier in kebab-case format.
+/// Used for programmatic references to user inputs throughout the blueprint.
+///
+/// **Example:** `"database-password"`, `"rcon-port"`, `"max-memory"`
+typealias InputId =
+  String(
+    !isEmpty
+      && length >= 2
+      && length <= 64
+      && matches(Regex(#"^[a-z][a-z0-9-]*$"#)),
+  )
+
+/// Human-readable label for UI display in title case or sentence case.
+/// Shown to users in the setup interface.
+///
+/// **Example:** `"Database Password"`, `"RCON Port"`, `"Maximum Memory Allocation"`
+typealias DisplayLabel =
+  String(
+    !isEmpty
+      && length >= 3
+      && length <= 100,
+  )
+
+// ============================================================================
+// TYPE DEFINITIONS - COMPOSITE
+// ============================================================================
+
+/// Property value that can reference user inputs for dynamic substitution.
+/// Enables both static values and runtime-resolved references.
+typealias DynamicProperty = String | UserInput | EnvironmentVariable
+
+/// Collection of user input definitions presented during application setup.
+/// Order determines display sequence in the UI.
+typealias UserInputs = Listing<UserInput>
+
+/// Collection of environment variables passed to the container at runtime.
+/// Can contain static values or references to user inputs.
+typealias EnvironmentVariables = Listing<EnvironmentVariable>
+
+/// Supported value types for environment variables.
+/// Kuken handles type conversion to strings as needed by the container runtime.
+typealias EnvVarValue = String | Int | UInt | Boolean | UserInput | DataSize
+
+// ============================================================================
+// ABSTRACT BASE CLASSES
+// ============================================================================
+
+/// Marker interface for all property types in the blueprint.
+/// Provides type safety for polymorphic property handling.
+abstract class Property
+
+// ============================================================================
+// APPLICATION ASSETS
+// ============================================================================
+
+/// Optional visual assets for the application.
+/// Enhances the user experience in Küken's catalog and dashboards.
+assets: AppAssets?
+
+/// Container for application visual resources.
+/// Currently supports application icons with plans for additional asset types.
+class AppAssets {
+  /// Application icon displayed in the Küken interface.
+  /// Should be a square PNG, SVG, or WebP image, 256x256 pixels maximum.
   icon: Source
 }
 
-class Refs {
-  port = "port"
+// ============================================================================
+// RUNTIME REFERENCES
+// ============================================================================
+
+/// Runtime values that are only available during blueprint instantiation.
+/// References provide access to system-generated values that don't exist when writing the blueprint,
+/// such as instance names, generated IDs, or assigned ports. Use refs to inject these dynamic runtime
+/// values into your configuration.
+///
+/// **Example:** `${refs.instance.name}` resolves to the actual instance name at deployment time.
+refs: RuntimeRefs
+
+/// Runtime reference values injected by Küken during instance creation.
+/// These values are generated or assigned by the system and made available as placeholders
+/// that get resolved when the blueprint is instantiated into a runtime.
+class RuntimeRefs {
+  /// Instance-specific runtime values generated during deployment.
+  instance: InstanceRefs = new {}
+
+  /// Network-related runtime values assigned by Küken.
+  network: NetworkRefs = new {}
 }
 
-abstract class Property
+/// Instance-level runtime values available during deployment.
+/// These references resolve to properties of the specific instance being created.
+class InstanceRefs {
+  /// Unique identifier assigned to this instance.
+  /// Can be used for tagging, logging, or internal references.
+  id: String = "instance.id"
 
-typealias TransformedProperty =
-  String | Input("input:\(this.name)") | EnvironmentVariable("\(this.name)=\(value)")
+  /// Generated unique name for this instance.
+  /// Useful for container names, volume prefixes, or network identifiers.
+  name: String = "instance.name"
+}
 
-typealias InputDefinitions = Listing<Input>
+/// Network-related runtime values assigned during deployment.
+/// These references provide access to ports and network configuration determined at runtime.
+class NetworkRefs {
+  /// Primary port assigned to this instance.
+  /// Resolves to the actual port number allocated by Küken, useful when auto-assigning ports
+  /// or when the port depends on other runtime conditions.
+  port: String = "network.port"
+}
 
-abstract class Input extends Property {
-  abstract name: String
-  abstract label: String
+// ============================================================================
+// USER INPUT DEFINITIONS
+// ============================================================================
 
+/// User-configurable inputs presented during application setup.
+/// Each input defines validation rules, display properties, and default values where applicable.
+inputs: UserInputs
+
+/// Base class for all user input types.
+/// Subclasses provide type-specific validation and UI rendering hints.
+abstract class UserInput extends Property {
+  /// Unique programmatic identifier in kebab-case.
+  /// Used in environment variable references and property interpolation.
+  abstract name: InputId
+
+  /// Human-readable display text shown to users.
+  /// Should clearly describe the input's purpose without requiring technical knowledge.
+  abstract label: DisplayLabel
+
+  /// Input type identifier set automatically by subclasses.
+  /// Used internally for UI rendering and validation.
   hidden type: String
 }
 
-class TextInput extends Input {
-  abstract name: String
-  abstract label: String
-  hidden type = "text"
+/// Plain text input field for non-sensitive configuration values.
+/// Use for usernames, email addresses, version strings, server names, or other visible text.
+///
+/// **Example:**
+/// ```pkl
+/// local ServerName = new TextInput {
+///   name = "server-name"
+///   label = "Server Name"
+/// }
+/// ```
+class TextInput extends UserInput {
+  abstract name: InputId
+  abstract label: DisplayLabel
+  hidden type: String = "text"
 }
 
-class PasswordInput extends Input {
-  abstract name: String
-  abstract label: String
-  hidden type = "password"
+/// Password input field with masked character display.
+/// Use for passwords, API keys, secret tokens, or any sensitive credentials.
+/// Values are masked in the UI and should be stored securely by Kuken.
+///
+/// **Example:**
+/// ```pkl
+/// local AdminPassword = new PasswordInput {
+///   name = "admin-password"
+///   label = "Administrator Password"
+/// }
+/// ```
+class PasswordInput extends UserInput {
+  abstract name: InputId
+  abstract label: DisplayLabel
+  hidden type: String = "password"
 }
 
-class PortInput extends Input {
-  abstract name: String
-  abstract label: String
-  hidden type = "port"
+/// Network port number input with automatic range validation.
+/// Use for HTTP/HTTPS ports, database connections, API endpoints, or custom service ports.
+/// Validates port range and provides appropriate numeric input UI.
+///
+/// **Example:**
+/// ```pkl
+/// local HttpPort = new PortInput {
+///   name = "http-port"
+///   label = "HTTP Port"
+///   default = 8080
+/// }
+/// ```
+class PortInput extends UserInput {
+  abstract name: InputId
+  abstract label: DisplayLabel
+  hidden type: String = "port"
 
-  default: UInt16
+  /// Default port number if user doesn't specify one.
+  /// Should be a commonly used port that's unlikely to conflict with other services.
+  default: PortNumber
 }
 
-class Build {
-  docker: Docker
-  environmentVariables: EnvironmentVariablesDefinition
+// ============================================================================
+// BUILD CONFIGURATION
+// ============================================================================
+
+/// Build configuration defining container image and runtime environment.
+/// Kuken processes this to pull images, configure variables, and start containers with proper settings.
+build: BuildConfig
+
+/// Complete build specification for the application container.
+/// Combines Docker image selection with environment variable configuration.
+class BuildConfig {
+  /// Docker container image specification.
+  docker: DockerConfig
+
+  /// Environment variables passed to the container at runtime.
+  /// Can include static values, user inputs, or a combination of both.
+  environmentVariables: EnvironmentVariables
 }
 
-typealias EnvironmentVariablesDefinition = Listing<EnvironmentVariable>
-
-const function env(_name: String, _value: EnvironmentVariableValue): EnvironmentVariable = new {
-  name = _name
-  value = _value
+/// Docker container configuration specifying which image to use.
+/// The image can be static, reference a user input, or use string interpolation.
+class DockerConfig {
+  /// Docker image reference to use for this application.
+  /// Can be a static string like `"nginx:alpine"`, a direct input reference, or interpolated like `"postgres:${VersionInput}"`.
+  ///
+  /// **Best practices:** Pin to specific versions for stability and consider using official images when available.
+  image: DynamicProperty(!isEmpty)
 }
 
-typealias EnvironmentVariableValue = String | Number | Boolean | Input | DataSize
-
+/// Environment variable definition for container configuration.
+/// Variables are set before container startup and available to the application process.
+/// Can reference user inputs for dynamic configuration.
 class EnvironmentVariable extends Property {
-  name: String
-  value: EnvironmentVariableValue
-}
+  /// Environment variable name in UPPER_SNAKE_CASE following POSIX conventions.
+  name: EnvVarName
 
-class Docker {
-  image: TransformedProperty
+  /// Variable value supporting multiple types.
+  /// Numbers and booleans are automatically converted to strings. DataSize values are converted to bytes.
+  /// User input references are resolved at runtime.
+  value: EnvVarValue
 }
-
-typealias Source = String

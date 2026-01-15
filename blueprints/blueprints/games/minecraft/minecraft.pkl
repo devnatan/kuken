@@ -1,4 +1,7 @@
-module io.kuken.minecraft
+/// # Minecraft: Java Edition Blueprint
+///
+/// Küken blueprint for deploying Minecraft Java Edition servers using the [itzg/minecraft-server](https://github.com/itzg/docker-minecraft-server) Docker image.
+module io.kuken.minecraft.Minecraft
 
 amends "https://kuken.io/blueprints/reference/v1/Reference.pkl"
 
@@ -6,42 +9,85 @@ name = "Minecraft: Java Edition"
 version = "1.0.0"
 url = "https://kuken.io"
 
-build {
-  docker {
-    image = "itzg/minecraft-server:\(DockerImageVersion)"
-  }
+// ============================================================================
+// INPUT DEFINITIONS
+// ============================================================================
 
-  environmentVariables {
-    env("EULA", true)
-    env("TYPE", "VANILLA")
-    env("VERSION", "LATEST")
-    env("ENABLE_RCON", true)
-    env("MEMORY", 1024.mb)
-    env("SERVER_PORT", 25565)
-    env("RCON_PASSWORD", RconPassword)
-    env("RCON_PORT", RconPort)
-  }
+/// Docker image tag/version for the Minecraft server container.
+/// Common values include `"latest"`, `"java17"`, or specific versions like `"2024.1.0-java21"`.
+local DockerImageTag = new TextInput {
+  name = "docker-image-tag"
+  label = "Docker Image Tag"
 }
 
-local DockerImageVersion = new TextInput("image") {
-  label = "Docker Image version"
+/// RCON password for remote server management.
+/// RCON allows command execution without direct console access, essential for automated management and integration tools.
+local RconPassword = new PasswordInput {
+  name = "rcon-password"
+  label = "RCON Password"
 }
 
-local RconPassword = new PasswordInput("rcon-password") {
-  label = "RCON password"
-}
-
-local RconPort = new PortInput("rcon-port") {
-  label = "RCON port"
+/// Network port for RCON connections.
+/// Standard Minecraft RCON port is 25575. Change if running multiple servers or if the port conflicts with other services.
+local RconPort = new PortInput {
+  name = "rcon-port"
+  label = "RCON Port"
   default = 25575
 }
 
-inputs {
-  RconPassword
-  RconPort
+/// Maximum memory allocation for the Java server process.
+/// Specify as `"2G"`, `"4096M"`, etc. Recommended minimum is 1GB for vanilla servers with few players.
+/// Leave 1-2GB for OS and Docker overhead.
+local MaxMemory = new TextInput {
+  name = "max-memory"
+  label = "Maximum Memory"
 }
 
-local const function env(_name: String, _value: EnvironmentVariableValue): EnvironmentVariable = new {
-  name = _name
-  value = _value
+/// Minecraft version to run on the server.
+/// Use `"LATEST"` for the newest release, specific versions like `"1.20.4"`, or `"SNAPSHOT"` for testing builds.
+local GameVersion = new TextInput {
+  name = "game-version"
+  label = "Minecraft Version"
+}
+
+/// Server type/distribution to run.
+/// Options include `"VANILLA"` (default), `"PAPER"` (optimized), `"SPIGOT"`, `"FORGE"`, or `"FABRIC"`.
+local ServerType = new TextInput {
+  name = "server-type"
+  label = "Server Type"
+}
+
+// ============================================================================
+// BUILD CONFIGURATION
+// ============================================================================
+
+build {
+  docker {
+    image = "itzg/minecraft-server:\(DockerImageTag)"
+  }
+
+  environmentVariables {
+    // Automatically accept the Minecraft EULA, required for server startup.
+    new { name = "EULA"; value = true }
+    new { name = "TYPE"; value = ServerType }
+    new { name = "VERSION"; value = GameVersion }
+    new { name = "ENABLE_RCON"; value = true }
+    new { name = "MEMORY"; value = MaxMemory }
+    new { name = "SERVER_PORT"; value = 25565 }
+    new { name = "RCON_PASSWORD"; value = RconPassword }
+    new { name = "RCON_PORT"; value = RconPort }
+  }
+}
+
+// ============================================================================
+// USER INPUTS
+// ============================================================================
+
+inputs {
+  DockerImageTag
+  GameVersion
+  ServerType
+  MaxMemory
+  RconPassword
+  RconPort
 }

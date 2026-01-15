@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "packageZipUrl": "https://raw.githubusercontent.com/devnatan/kuken/refs/heads/main/blueprints/package/package@1.0.0.zip",
   "packageZipChecksums": {
-    "sha256": "ce662fde8f423c07a5d80832e661376e204bc6697be76b9072a173f016980c83"
+    "sha256": "160a628337513b937774b870263ee41ec87573488f20c4d231125c1797f5f098"
   },
   "dependencies": {},
   "sourceCode": "https://github.com/devnatan/kuken/blueprints/blueprints",
