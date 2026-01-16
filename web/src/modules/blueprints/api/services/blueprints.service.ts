@@ -18,7 +18,7 @@ export default {
 
     async importBlueprint(url: string): Promise<ImportBlueprintResponse> {
         return httpService
-            .post("/blueprints/import", { url, type: "remote" })
+            .post("/blueprints/import", { source: url })
             .then((res: AxiosResponse) => res.data as Blueprint)
     }
 }
