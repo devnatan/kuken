@@ -11,20 +11,6 @@ assets {
 }
 
 // ============================================================================
-// APLICATION RESOURCES & HOOKS
-// ============================================================================
-
-local InstallScript = file("install.sh")
-
-resources {
-  InstallScript
-}
-
-hooks {
-  onInstall = InstallScript
-}
-
-// ============================================================================
 // USER-DEFINED INPUT DEFINITIONS
 // ============================================================================
 
@@ -79,6 +65,7 @@ build {
   environmentVariables {
     new { name = "HYTALE_AUTH_MODE"; value = AuthMode }
     new { name = "HYTALE_ACCEPT_EARLY_PLUGINS"; value = AcceptEarlyPlugins }
+    new { name = "DISABLE_SENTRY"; value = DisableSentry }
     new { name = "USE_AOT_CACHE"; value = UseAOTCache }
     new { name = "HYTALE_ALLOW_OP"; value = AllowOperators }
     new { name = "INSTALL_SOURCEQUERY_PLUGIN"; value = InstallSourceQueryPlugin }
@@ -101,4 +88,18 @@ instance {
     """
     java \(authMode) \(allowOperators) \(useAotCache) \(acceptEarlyPlugins) \(disableSentry) -Xms128 --assets Assets.zip --bind 0.0.0.0:\(refs.network.port) -jar Server/HytaleServer.jar
     """
+}
+
+// ============================================================================
+// APLICATION RESOURCES & HOOKS
+// ============================================================================
+
+local InstallScript = file("install.sh")
+
+resources {
+  InstallScript
+}
+
+hooks {
+  onInstall = InstallScript
 }
