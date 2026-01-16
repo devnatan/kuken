@@ -45,7 +45,6 @@ dependencies {
     implementation(libs.postgresql)
     implementation(libs.h2)
     implementation(libs.lettuce)
-    implementation("org.pkl-lang:pkl-codegen-kotlin:0.30.2")
     implementation("org.pkl-lang:pkl-config-kotlin:0.30.2") {
         exclude(group = "org.pkl-lang", module = "pkl-config-java-all")
     }
