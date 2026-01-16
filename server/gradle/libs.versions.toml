@@ -10,7 +10,7 @@ log4j = "2.25.3"
 ktor = "3.3.3"
 postgresql = "42.7.8"
 h2 = "2.4.240"
-docker-kotlin = "0.12.4"
+docker-kotlin = "0.13.0"
 bcprov = "1.83"
 validator = "9.1.0.Final"
 hocon = "1.4.5"
@@ -54,6 +54,8 @@ validator = { module = "org.hibernate.validator:hibernate-validator", version.re
 validator-processor = { module = "org.hibernate.validator:hibernate-validator-annotation-processor", version.ref = "validator" }
 hocon = { module = "com.typesafe:config", version.ref = "hocon" }
 lettuce = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 
 [bundles]
 exposed = ["exposed-core", "exposed-dao", "exposed-datetime", "exposed-jdbc"]
@@ -72,6 +74,8 @@ ktor = ["ktor-server-core",
     "ktor-server-auth-jwt",
     "ktor-server-openapi",
     "ktor-server-swagger",
+    "ktor-client-core",
+    "ktor-client-cio"
 ]
 
 [plugins]
