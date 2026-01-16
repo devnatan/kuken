@@ -22,7 +22,7 @@ jobs:
           - os: ubuntu-latest
             artifact-name: kuken-server-linux-amd64
             archive-ext: tar.gz
-          - os: ubuntu-latest-arm64
+          - os: ubuntu-24.04-arm
             artifact-name: kuken-server-linux-arm64
             archive-ext: tar.gz
           - os: windows-latest
