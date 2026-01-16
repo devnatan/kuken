@@ -78,15 +78,21 @@ ktor {
 graalvmNative {
     binaries {
         named("main") {
+
             fallback.set(false)
             verbose.set(true)
 
             buildArgs.add("--initialize-at-build-time=kotlin")
-            buildArgs.add("--initialize-at-build-time=org.pkl.core")
-            buildArgs.add("--initialize-at-build-time=com.oracle.truffle")
-            buildArgs.add("--initialize-at-build-time=org.graalvm.polyglot")
+
+            buildArgs.add("--initialize-at-run-time=org.pkl")
+            buildArgs.add("--initialize-at-run-time=org.pkl.core")
+            buildArgs.add("--initialize-at-run-time=org.pkl.config")
+            buildArgs.add("--initialize-at-run-time=org.graalvm.polyglot")
+            buildArgs.add("--initialize-at-run-time=com.oracle.truffle")
 
             buildArgs.add("--initialize-at-run-time=kotlin.uuid.SecureRandomHolder")
+            buildArgs.add("--initialize-at-run-time=kotlinx.coroutines")
+            buildArgs.add("--initialize-at-run-time=io.netty")
             buildArgs.add("--initialize-at-run-time=org.bouncycastle")
 
             buildArgs.add("--initialize-at-run-time=io.netty.channel.epoll.Epoll")
