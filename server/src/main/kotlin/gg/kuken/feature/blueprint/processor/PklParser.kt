@@ -29,16 +29,16 @@ object UniversalPklParser {
     fun <T> parseValue(value: Any?): Resolvable<T> =
         when (value) {
             is String -> parseString(value)
-            is Int -> Resolvable.Literal(value as T)
-            is Long -> Resolvable.Literal(value as T)
-            is Double -> Resolvable.Literal(value as T)
-            is Float -> Resolvable.Literal(value as T)
-            is Boolean -> Resolvable.Literal(value as T)
+            is Int -> Resolvable.Literal(value.toString())
+            is Long -> Resolvable.Literal(value.toString())
+            is Double -> Resolvable.Literal(value.toString())
+            is Float -> Resolvable.Literal(value.toString())
+            is Boolean -> Resolvable.Literal(value.toString())
             is PObject -> parseObject(value)
-            is DataSize -> Resolvable.Literal(value.value.toLong() as T)
+            is DataSize -> Resolvable.Literal(value.value.toLong().toString())
             null -> Resolvable.Null
-            else -> Resolvable.Literal(value.toString() as T)
-        }
+            else -> Resolvable.Literal(value.toString())
+        } as Resolvable<T>
 
     @Suppress("UNCHECKED_CAST")
     private fun <T> parseString(value: String): Resolvable<T> {
@@ -47,7 +47,7 @@ object UniversalPklParser {
         val envVarMatches = ENV_VAR_PATTERN.findAll(value).toList()
 
         if (inputMatches.isEmpty() && refMatches.isEmpty() && envVarMatches.isEmpty()) {
-            return Resolvable.Literal(value as T)
+            return Resolvable.Literal(value) as Resolvable<T>
         }
 
         val trimmed = value.trim()

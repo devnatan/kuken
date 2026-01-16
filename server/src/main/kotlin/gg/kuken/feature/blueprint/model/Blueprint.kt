@@ -10,5 +10,6 @@ data class Blueprint(
     val id: Uuid,
     val createdAt: Instant,
     val updatedAt: Instant,
+    val origin: String,
     val spec: ResolvedBlueprint,
 )

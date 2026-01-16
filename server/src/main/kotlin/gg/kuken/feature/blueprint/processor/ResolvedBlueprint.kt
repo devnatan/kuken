@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 data class ResolvedBlueprint(
     val metadata: BlueprintMetadata,
     val assets: AppAssets? = null,
+    val resources: List<AppResource>,
+    val hooks: AppHooks,
     val inputs: List<UserInput>,
     val build: BuildConfig,
     val instanceSettings: InstanceSettings?,
@@ -19,6 +21,19 @@ data class BlueprintMetadata(
     val url: String,
 )
 
+typealias AppResourceName = String
+
+@Serializable
+data class AppResource(
+    val name: AppResourceName = "",
+    val source: String,
+)
+
+@Serializable
+data class AppHooks(
+    val onInstall: AppResource? = null,
+)
+
 @Serializable
 data class AppAssets(
     val icon: String,
@@ -29,54 +44,58 @@ data class InstanceSettings(
     val startup: Resolvable<String>,
 )
 
+typealias InputName = String
+typealias InputLabel = String
+
 @Serializable
 sealed class UserInput {
-    abstract val name: Resolvable<String>
-    abstract val label: Resolvable<String>
+    abstract val name: InputName
+    abstract val label: InputLabel
 }
 
 @Serializable
 @SerialName("text")
 data class TextInput(
-    override val name: Resolvable<String>,
-    override val label: Resolvable<String>,
+    override val name: InputName,
+    override val label: InputLabel,
 ) : UserInput()
 
 @Serializable
 @SerialName("password")
 data class PasswordInput(
-    override val name: Resolvable<String>,
-    override val label: Resolvable<String>,
+    override val name: InputName,
+    override val label: InputLabel,
 ) : UserInput()
 
 @Serializable
 @SerialName("port")
 data class PortInput(
-    override val name: Resolvable<String>,
-    override val label: Resolvable<String>,
+    override val name: InputName,
+    override val label: InputLabel,
     val default: Resolvable<Int>,
 ) : UserInput()
 
 @Serializable
 @SerialName("checkbox")
 data class CheckboxInput(
-    override val name: Resolvable<String>,
-    override val label: Resolvable<String>,
+    override val name: InputName,
+    override val label: InputLabel,
     val default: Resolvable<Boolean>,
 ) : UserInput()
 
 @Serializable
 @SerialName("select")
 data class SelectInput(
-    override val name: Resolvable<String>,
-    override val label: Resolvable<String>,
+    override val name: InputName,
+    override val label: InputLabel,
+    val items: List<String>,
 ) : UserInput()
 
 @Serializable
 @SerialName("datasize")
 data class DataSizeInput(
-    override val name: Resolvable<String>,
-    override val label: Resolvable<String>,
+    override val name: InputName,
+    override val label: InputLabel,
 ) : UserInput()
 
 @Serializable

@@ -37,6 +37,7 @@ private fun RoutingContext.buildUnitCreateOptions(request: CreateUnitRequest): U
         name = request.name,
         blueprintId = request.blueprint,
         inputs = request.inputs,
+        env = request.env,
         actorId = call.getCurrentAccount().id,
         externalId = request.externalId,
     )

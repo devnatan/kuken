@@ -17,6 +17,7 @@ import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
 object BlueprintTable : UUIDTable("blueprints") {
+    val origin = varchar("origin", 255)
     val createdAt = timestamp("created_at")
     val updatedAt = timestamp("updated_at")
     val content = blob("content")
@@ -27,6 +28,7 @@ class BlueprintEntity(
 ) : UUIDEntity(id) {
     companion object : UUIDEntityClass<BlueprintEntity>(BlueprintTable)
 
+    var origin: String by BlueprintTable.origin
     var createdAt: Instant by BlueprintTable.createdAt
     var updatedAt: Instant by BlueprintTable.updatedAt
     var content: ExposedBlob by BlueprintTable.content
@@ -53,12 +55,14 @@ class BlueprintRepositoryImpl(
 
     override suspend fun create(
         id: Uuid,
+        origin: String,
         spec: ByteArray,
         createdAt: Instant,
     ): BlueprintEntity =
         suspendTransaction(db = database) {
             BlueprintEntity.new(id.toJavaUuid()) {
                 content = ExposedBlob(spec)
+                this.origin = origin
                 this.createdAt = createdAt
                 this.updatedAt = createdAt
             }

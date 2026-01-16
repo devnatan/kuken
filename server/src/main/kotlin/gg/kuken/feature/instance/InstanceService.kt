@@ -11,15 +11,12 @@ interface InstanceService {
 
     suspend fun getInstanceContainerId(instanceId: Uuid): String
 
-    suspend fun createInstance(
-        blueprintId: Uuid,
-        options: CreateInstanceOptions,
-    ): Instance
+    suspend fun createInstance(options: CreateInstanceOptions): Instance
 
     suspend fun runInstanceCommand(
         instanceId: Uuid,
         commandToRun: String,
-    ): Int
+    ): Int?
 
     suspend fun startInstance(instanceId: Uuid)
 

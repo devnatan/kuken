@@ -11,9 +11,9 @@ sealed class Resolvable<out T> {
 
     @Serializable
     @SerialName("literal")
-    data class Literal<T>(
-        val value: T,
-    ) : Resolvable<T>()
+    data class Literal(
+        val value: String,
+    ) : Resolvable<String>()
 
     @Serializable
     @SerialName("input")
@@ -40,6 +40,8 @@ sealed class Resolvable<out T> {
         val parts: List<Resolvable<*>>,
     ) : Resolvable<String>()
 
+    fun isEager(): Boolean = this is Literal || this is Null
+
     fun toTemplateString(): String =
         when (this) {
             Null -> {
@@ -47,7 +49,7 @@ sealed class Resolvable<out T> {
             }
 
             is Literal -> {
-                value.toString()
+                value
             }
 
             is InputRef -> {

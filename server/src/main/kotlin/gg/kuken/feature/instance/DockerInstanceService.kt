@@ -6,7 +6,15 @@ import gg.kuken.core.docker.DockerNetworkService
 import gg.kuken.feature.account.IdentityGeneratorService
 import gg.kuken.feature.blueprint.BlueprintService
 import gg.kuken.feature.blueprint.model.Blueprint
+import gg.kuken.feature.blueprint.processor.BlueprintResolutionContext
+import gg.kuken.feature.blueprint.processor.CheckboxInput
+import gg.kuken.feature.blueprint.processor.DataSizeInput
+import gg.kuken.feature.blueprint.processor.PasswordInput
+import gg.kuken.feature.blueprint.processor.PortInput
 import gg.kuken.feature.blueprint.processor.Resolvable
+import gg.kuken.feature.blueprint.processor.ResolvedBlueprint
+import gg.kuken.feature.blueprint.processor.SelectInput
+import gg.kuken.feature.blueprint.processor.TextInput
 import gg.kuken.feature.instance.data.entity.InstanceEntity
 import gg.kuken.feature.instance.data.repository.InstanceRepository
 import gg.kuken.feature.instance.model.CreateInstanceOptions
@@ -22,6 +30,7 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
@@ -30,6 +39,8 @@ import kotlinx.serialization.InternalSerializationApi
 import me.devnatan.dockerkt.DockerClient
 import me.devnatan.dockerkt.models.PortBinding
 import me.devnatan.dockerkt.models.container.hostConfig
+import me.devnatan.dockerkt.models.exec.ExecStartOptions
+import me.devnatan.dockerkt.models.exec.ExecStartResult
 import me.devnatan.dockerkt.models.portBindings
 import me.devnatan.dockerkt.resource.container.ContainerNotFoundException
 import me.devnatan.dockerkt.resource.container.create
@@ -37,7 +48,11 @@ import me.devnatan.dockerkt.resource.container.remove
 import me.devnatan.dockerkt.resource.exec.create
 import me.devnatan.dockerkt.resource.exec.start
 import me.devnatan.dockerkt.resource.image.ImageNotFoundException
+import me.devnatan.dockerkt.resource.volume.create
 import org.apache.logging.log4j.LogManager
+import java.io.File
+import kotlin.random.Random
+import kotlin.random.nextUInt
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 import kotlin.uuid.toKotlinUuid
@@ -52,7 +67,105 @@ class DockerInstanceService(
     private val eventDispatcher: EventDispatcher,
 ) : InstanceService,
     CoroutineScope by CoroutineScope(Default + CoroutineName("DockerInstanceService")) {
-    private val logger = LogManager.getLogger(DockerInstanceService::class.java)
+    companion object {
+        private val logger = LogManager.getLogger(DockerInstanceService::class.java)
+
+        @OptIn(InternalSerializationApi::class)
+        fun performSubstitutions(
+            property: Resolvable<*>,
+            blueprint: ResolvedBlueprint,
+            resolutionContext: BlueprintResolutionContext,
+        ): String? =
+            when (property) {
+                is Resolvable.EnvVarRef -> {
+                    resolutionContext.env[property.envVarName].orEmpty()
+                }
+
+                is Resolvable.InputRef -> {
+                    val definition = blueprint.inputs.firstOrNull { it.name == property.inputName }
+                    val defaultValue: String? =
+                        when (definition) {
+                            is CheckboxInput -> {
+                                performSubstitutions(
+                                    property = definition.default,
+                                    blueprint = blueprint,
+                                    resolutionContext = resolutionContext,
+                                ) ?: "false"
+                            }
+
+                            is DataSizeInput -> {
+                                null
+                            }
+
+                            is PasswordInput -> {
+                                null
+                            }
+
+                            is PortInput -> {
+                                performSubstitutions(definition.default, blueprint, resolutionContext)
+                            }
+
+                            is SelectInput -> {
+                                null
+                            }
+
+                            is TextInput -> {
+                                null
+                            }
+
+                            null -> {
+                                null
+                            }
+                        }
+
+                    val input =
+                        resolutionContext.inputs[property.inputName]
+                            ?: defaultValue
+                            ?: error("Missing required input ${property.inputName}")
+
+                    input
+                }
+
+                is Resolvable.Interpolated -> {
+                    logger.debug("Resolving dynamic property...: ${property.template}")
+
+                    check(property.parts.isNotEmpty()) {
+                        "Dynamic property provided but no dependencies found"
+                    }
+
+                    var literal = property.template
+                    property.parts
+                        .groupBy { it.toTemplateString() }
+                        .forEach { (template, dependencies) ->
+                            check(dependencies.size == 1) {
+                                "Multiple dependencies are not supported"
+                            }
+
+                            for (dependency in dependencies) {
+                                val substitution =
+                                    performSubstitutions(dependency, blueprint, resolutionContext)
+                                        ?: continue
+
+                                literal = literal.replace(template, substitution)
+                            }
+                        }
+
+                    literal
+                }
+
+                is Resolvable.Literal -> {
+                    if (property.value == "null") null else property.value
+                }
+
+                is Resolvable.RuntimeRef -> {
+                    null
+                }
+
+                Resolvable.Null -> {
+                    null
+                }
+            }
+    }
 
     override suspend fun getInstance(instanceId: Uuid): Instance {
         val instance = instanceRepository.findById(instanceId) ?: throw InstanceNotFoundException()
@@ -92,56 +205,37 @@ class DockerInstanceService(
         return containerId
     }
 
-    @OptIn(InternalSerializationApi::class)
-    private fun performSubstitutions(
-        property: Resolvable<*>,
-        options: CreateInstanceOptions,
-    ): String = when (property) {
-        is Resolvable.EnvVarRef -> property.envVarName
-        is Resolvable.InputRef -> {
-            val input =
-                options.inputs[property.inputName]
-                    ?: error("Missing required input ${property.inputName} to render Docker Image")
+    override suspend fun createInstance(options: CreateInstanceOptions): Instance {
+        val blueprintId = options.blueprint
 
-            input
-        }
-
-        is Resolvable.Interpolated -> {
-            logger.debug("Resolving dynamic property...: ${property.template}")
-
-            check(property.parts.isNotEmpty()) {
-                "Dynamic property provided but no dependencies found"
-            }
-
-            var literal = property.template
-            property.parts
-                .groupBy { it.toTemplateString() }
-                .forEach { (template, dependencies) ->
-                    check(dependencies.size == 1) {
-                        "Multiple dependencies are not supported"
-                    }
-
-                    for (dependency in dependencies) {
-                        literal = literal.replace(template, performSubstitutions(dependency, options))
-                    }
-                }
-
-            literal
-        }
-
-        is Resolvable.Literal -> property.value.toString()
-        is Resolvable.RuntimeRef -> "<no ref>"
-        Resolvable.Null -> "null"
-    }
-
-    override suspend fun createInstance(
-        blueprintId: Uuid,
-        options: CreateInstanceOptions,
-    ): Instance {
         logger.debug("Creating instance from {}: {}", blueprintId, options)
         val blueprint = blueprintService.getBlueprint(blueprintId)
-        val image: String = performSubstitutions(blueprint.spec.build.docker.image, options)
-        var options = options.copy(image = image)
+        val resolutionContext =
+            BlueprintResolutionContext(
+                inputs = options.inputs,
+                env = options.env,
+            )
+
+        val env =
+            blueprint.spec.build.environmentVariables
+                .map { env -> env.name to performSubstitutions(env.value, blueprint.spec, resolutionContext) }
+                .filter { (_, value) -> value != null }
+                .associate { (key, value) -> key to value!! }
+
+        val image: String =
+            requireNotNull(
+                performSubstitutions(
+                    property = blueprint.spec.build.docker.image,
+                    blueprint = blueprint.spec,
+                    resolutionContext = resolutionContext,
+                ),
+            )
+        val workingDir =
+            dockerClient.images
+                .inspect(image)
+                .config.workingDir ?: error("Working directory not set")
+
+        val options = options.copy(env = env)
 
         val instanceId = identityGeneratorService.generate()
         val generatedName =
@@ -151,18 +245,14 @@ class DockerInstanceService(
             )
         logger.debug("Instance {} runtime identifier is {}", instanceId, generatedName)
 
-        val env =
-            blueprint.spec.build.environmentVariables
-                .map { (key, property) ->
-                    key to performSubstitutions(property, options)
-                }.toMap()
-
-        options = options.copy(env = env)
-
+        val installationVolume = install(workingDir, blueprint.spec)
         val createResult =
             tryGenerateRuntime(
                 instanceId = instanceId,
                 options = options,
+                volume = installationVolume,
+                image = image,
+                workingDir = workingDir,
                 generatedName = generatedName,
             )
 
@@ -172,14 +262,20 @@ class DockerInstanceService(
 
     private suspend fun tryGenerateRuntime(
         instanceId: Uuid,
-        options: CreateInstanceOptions,
+        image: String,
         generatedName: String,
+        volume: String,
+        workingDir: String,
+        options: CreateInstanceOptions,
     ): GenerateRuntimeResult {
         logger.debug("Generating runtime for instance {}", instanceId)
         val result =
             generateAndConnectRuntime(
                 instanceId = instanceId,
                 options = options,
+                image = image,
+                volume = volume,
+                workingDir = workingDir,
                 name = generatedName,
             )
 
@@ -193,7 +289,7 @@ class DockerInstanceService(
 
             is GenerateRuntimeResult.MissingDockerImage -> {
                 launch {
-                    pullDockerImage(options.image!!).collect { pullStatus ->
+                    pullDockerImage(image).collect { pullStatus ->
                         logger.debug(
                             "Updating instance {} with new status due to Docker image pull: {}",
                             instanceId,
@@ -204,7 +300,7 @@ class DockerInstanceService(
                         }
 
                         if (pullStatus == InstanceStatus.ImagePullCompleted) {
-                            tryGenerateRuntime(instanceId, options, generatedName)
+                            tryGenerateRuntime(instanceId, image, generatedName, volume, workingDir, options)
                         }
                     }
                 }
@@ -268,6 +364,9 @@ class DockerInstanceService(
     private suspend fun generateAndConnectRuntime(
         instanceId: Uuid,
         name: String,
+        image: String,
+        volume: String,
+        workingDir: String,
         options: CreateInstanceOptions,
     ): GenerateRuntimeResult {
         // TODO Allow random port assigned (options.port == null)
@@ -279,6 +378,9 @@ class DockerInstanceService(
                 createRuntime(
                     instanceId = instanceId,
                     name = name,
+                    image = image,
+                    volume = volume,
+                    workingDir = workingDir,
                     options = options,
                 )
             } catch (_: ImageNotFoundException) {
@@ -357,18 +459,102 @@ class DockerInstanceService(
             nodeId = instance.nodeId,
         )
 
+    private suspend fun install(
+        workingDir: String,
+        blueprint: ResolvedBlueprint,
+    ): String {
+        val resourcesDir = File(".kuken/resources")
+        val onInstall = blueprint.hooks.onInstall ?: return "/home/container"
+
+        logger.debug("Preparing installation...")
+        val file = File(resourcesDir, onInstall.name)
+
+        logger.debug("Installation file: ${file.absolutePath}")
+
+        var createdContainer: String? = null
+
+        println("Blueprint image working directory: $workingDir")
+
+        val volume =
+            dockerClient.volumes.create {
+                name = "kuken-volume-${Random.nextUInt()}"
+            }
+
+        try {
+            dockerClient.images.pull("alpine:latest").collect()
+
+            createdContainer =
+                dockerClient.containers.create {
+                    name = "kuken-installer-${Random.nextUInt()}"
+                    image = "alpine:latest"
+                    entrypoint = listOf("tail", "-f", "/dev/null")
+                    hostConfig {
+                        binds = listOf("${volume.name}:/mnt/server")
+                    }
+                }
+            dockerClient.containers.start(createdContainer)
+
+            dockerClient.containers.copyDirectoryTo(
+                container = createdContainer,
+                sourcePath = file.parentFile.absolutePath,
+                destinationPath = "/tmp",
+            )
+
+            val makeExecutable =
+                dockerClient.exec.create(createdContainer) {
+                    command = listOf("chmod", "+x", "/tmp/${file.name}")
+                }
+            dockerClient.exec.start(makeExecutable)
+
+            val execute =
+                dockerClient.exec.create(createdContainer) {
+                    attachStdout = true
+                    attachStderr = true
+                    command = listOf("/tmp/${file.name}")
+                }
+            val result =
+                dockerClient.exec.start(
+                    execute,
+                    ExecStartOptions(
+                        stream = true,
+                        demux = false,
+                    ),
+                )
+
+            logger.debug("Exec result: {}", result)
+            require(result is ExecStartResult.Stream)
+
+            logger.debug("--- SCRIPT OUTPUT ---")
+            result.output.collect {
+                println(it)
+            }
+            logger.debug("--- SCRIPT OUTPUT ---")
+        } finally {
+            if (createdContainer != null) {
+                dockerClient.containers.remove(createdContainer) { force = true }
+            }
+        }
+
+        return volume.name
+    }
+
     private suspend fun createRuntime(
         instanceId: Uuid,
         name: String,
+        image: String,
+        volume: String,
+        workingDir: String,
         options: CreateInstanceOptions,
     ): String {
-        logger.debug("Creating runtime {} (image: {})...", instanceId, options.image)
+        logger.debug("Creating runtime {} (image: {})...", instanceId, image)
         requireNotNull(options.address.port) { "Port cannot be null" }
 
         return dockerClient.containers.create {
             this@create.name = name
-            this@create.image = options.image
+            this@create.image = image
             labels = mapOf("gg.kuken.instance.id" to instanceId.toString())
+
+            // TODO Assign and replace reference values
             env =
                 options.env
                     .mapValues { (_, value) ->
@@ -380,6 +566,7 @@ class DockerInstanceService(
             hostConfig {
                 portBindings(options.address.port) {
                     add(PortBinding(options.address.host, options.address.port))
+                    binds = listOf("$volume:$workingDir")
                 }
             }
         }
@@ -509,7 +696,7 @@ class DockerInstanceService(
     override suspend fun runInstanceCommand(
         instanceId: Uuid,
         commandToRun: String,
-    ): Int {
+    ): Int? {
         val container = getInstanceContainerId(instanceId)
         val execId =
             dockerClient.exec.create(container) {

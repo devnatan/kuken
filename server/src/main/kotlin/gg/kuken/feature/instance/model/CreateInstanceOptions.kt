@@ -1,8 +1,12 @@
 package gg.kuken.feature.instance.model
 
+import gg.kuken.feature.blueprint.processor.BlueprintResolutionContextEnv
+import gg.kuken.feature.blueprint.processor.BlueprintResolutionContextInputs
+import kotlin.uuid.Uuid
+
 data class CreateInstanceOptions(
     val address: HostPort,
-    val image: String?,
-    val inputs: Map<String, String>,
-    val env: Map<String, String>,
+    val blueprint: Uuid,
+    val inputs: BlueprintResolutionContextInputs,
+    val env: BlueprintResolutionContextEnv,
 )

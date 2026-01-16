@@ -1,8 +1,9 @@
 package gg.kuken.feature.blueprint.http.routes
 
 import gg.kuken.feature.blueprint.BlueprintService
-import gg.kuken.feature.blueprint.BlueprintSpecSource
 import gg.kuken.feature.blueprint.http.BlueprintRoutes
+import gg.kuken.feature.blueprint.http.dto.ProcessBlueprintRequest
+import gg.kuken.feature.blueprint.processor.BlueprintResolutionContext
 import gg.kuken.http.HttpError
 import gg.kuken.http.util.ValidationErrorResponse
 import gg.kuken.http.util.ValidationException
@@ -13,14 +14,21 @@ import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 import org.pkl.core.PklException
 
-fun Route.importBlueprint() {
+fun Route.processBlueprint() {
     val blueprintService by inject<BlueprintService>()
 
-    post<BlueprintRoutes.Import> {
-        val source = call.receiveValid<BlueprintSpecSource>()
+    post<BlueprintRoutes.Process> { params ->
+        val payload = call.receiveValid<ProcessBlueprintRequest>()
         val blueprint =
             try {
-                blueprintService.importBlueprint(source)
+                blueprintService.processBlueprint(
+                    blueprintId = params.blueprintId,
+                    resolutionContext =
+                        BlueprintResolutionContext(
+                            inputs = payload.inputs,
+                            env = payload.env,
+                        ),
+                )
             } catch (e: PklException) {
                 throw ValidationException(
                     data =

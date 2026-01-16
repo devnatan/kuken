@@ -31,12 +31,11 @@ internal class UnitService(
         val generatedId = identityGeneratorService.generate()
         val instance =
             instanceService.createInstance(
-                blueprintId = payload.blueprintId,
                 options =
                     CreateInstanceOptions(
-                        image = null,
+                        blueprint = payload.blueprintId,
                         inputs = payload.inputs,
-                        env = mapOf(),
+                        env = payload.env,
                         address = HostPort(null, 25565u),
                     ),
             )

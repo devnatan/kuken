@@ -1,5 +1,7 @@
 package gg.kuken.feature.unit.http.dto
 
+import gg.kuken.feature.blueprint.processor.BlueprintResolutionContextEnv
+import gg.kuken.feature.blueprint.processor.BlueprintResolutionContextInputs
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
@@ -17,6 +19,7 @@ internal data class CreateUnitRequest(
     val name: String = "",
     @field:NotNull(message = "Blueprint id must be provided.")
     val blueprint: Uuid,
-    val inputs: Map<String, String> = emptyMap(),
+    val inputs: BlueprintResolutionContextInputs = emptyMap(),
+    val env: BlueprintResolutionContextEnv = emptyMap(),
     val externalId: String? = null,
 )

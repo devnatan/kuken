@@ -11,6 +11,7 @@ interface BlueprintRepository {
 
     suspend fun create(
         id: Uuid,
+        origin: String,
         spec: ByteArray,
         createdAt: Instant,
     ): BlueprintEntity

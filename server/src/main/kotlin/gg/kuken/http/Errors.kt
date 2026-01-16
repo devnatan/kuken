@@ -1,6 +1,6 @@
 package gg.kuken.http
 
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import kotlinx.serialization.Serializable
 
 class HttpException(
@@ -25,6 +25,7 @@ data class HttpError(
         val UnknownAccount = error(1001, "Unknown account")
         val UnknownUnit = error(1002, "Unknown unit")
         val UnknownBlueprint = error(1011, "Unknown blueprint")
+        val BlueprintParse = error(1012, "Unable to import blueprint")
 
         val FailedToParseRequestBody = error(3002, "Failed to handle request")
 

@@ -15,6 +15,7 @@ val BlueprintDI =
                 blueprintRepository = get(),
                 blueprintSpecProvider = get(),
                 identityGeneratorService = get(),
+                dockerClient = get(),
             )
         }
 

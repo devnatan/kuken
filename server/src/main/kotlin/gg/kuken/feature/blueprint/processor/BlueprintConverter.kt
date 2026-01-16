@@ -27,10 +27,8 @@ class BlueprintConverter : AutoCloseable {
             ).build()
     var objectCache: ObjectCache = ObjectCache()
 
-    fun convertFromText(pklFileText: String): ResolvedBlueprint {
-        val moduleSource = ModuleSource.text(pklFileText)
-        val module = evaluator.evaluate(moduleSource)
-
+    fun convert(source: ModuleSource): ResolvedBlueprint {
+        val module = evaluator.evaluate(source)
         return convertModule(module)
     }
 
@@ -63,6 +61,40 @@ class BlueprintConverter : AutoCloseable {
             )
 
         val assets = module.getPropertyOrNull("assets")?.takeUnless { it is PNull }?.let { convertAssets(it) }
+        var resources =
+            module
+                .getPropertyOrNull("resources")
+                ?.takeUnless { it is PNull }
+                ?.let {
+                    val list = it as List<PObject>
+                    list.map { obj -> AppResource(name = "", source = obj.getProperty("source") as String) }
+                }.orEmpty()
+
+        val hooks =
+            module
+                .getPropertyOrNull("hooks")
+                ?.takeUnless { it is PNull }
+                ?.let {
+                    val obj = it as PObject
+
+                    var installResource =
+                        obj
+                            .getProperty("onInstall")
+                            ?.takeUnless { it is PNull }
+                            ?.let { (it as PObject).get("source") as String }
+                            .let { source -> resources.firstOrNull { v -> v.source == source } }
+
+                    if (installResource != null) {
+                        installResource = AppResource(name = "install", source = installResource.source)
+                        resources = resources.filterNot { v -> v.source == installResource.source } +
+                            listOf(installResource)
+                    }
+
+                    AppHooks(
+                        onInstall = installResource,
+                    )
+                }
+
         val build = convertBuildConfig(buildObj, envVars)
 
         val instanceSettings =
@@ -81,6 +113,8 @@ class BlueprintConverter : AutoCloseable {
             inputs = inputs,
             build = build,
             instanceSettings = instanceSettings,
+            resources = resources,
+            hooks = hooks ?: AppHooks(),
         )
     }
 
@@ -88,8 +122,8 @@ class BlueprintConverter : AutoCloseable {
 
     private fun convertUserInput(inputObj: PObject): UserInput {
         val type = inputObj.getProperty("type") as String
-        val name: Resolvable<String> = UniversalPklParser.parseValue(inputObj.getProperty("name"))
-        val label: Resolvable<String> = UniversalPklParser.parseValue(inputObj.getProperty("label"))
+        val name = inputObj.getProperty("name") as String
+        val label = inputObj.getProperty("label") as String
 
         return when (type) {
             "text" -> {
@@ -113,7 +147,8 @@ class BlueprintConverter : AutoCloseable {
             }
 
             "select" -> {
-                SelectInput(name, label)
+                val items = inputObj.getProperty("items") as List<String>
+                SelectInput(name, label, items)
             }
 
             "datasize" -> {
