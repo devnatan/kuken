@@ -22,6 +22,9 @@ jobs:
           - os: ubuntu-latest
             artifact-name: kuken-server-linux-amd64
             archive-ext: tar.gz
+          - os: ubuntu-latest-arm64
+            artifact-name: kuken-server-linux-arm64
+            archive-ext: tar.gz
           - os: windows-latest
             artifact-name: kuken-server-windows-amd64
             archive-ext: zip
@@ -62,14 +65,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew buildFatJar
 
-      - name: Build Native Image (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew nativeCompile
-
-      - name: Build Native Image (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Build Native Image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew nativeCompile
@@ -94,4 +90,3 @@ jobs:
         with:
           name: ${{ matrix.artifact-name }}
           path: server/build/native/nativeCompile/
-
