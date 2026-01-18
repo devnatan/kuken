@@ -9,4 +9,9 @@ sealed interface InstanceEvent {
     data class InstanceStartedEvent(
         val instanceId: Uuid,
     ) : InstanceEvent
+
+    @Serializable
+    data class InstanceStoppedEvent(
+        val instanceId: Uuid,
+    ) : InstanceEvent
 }

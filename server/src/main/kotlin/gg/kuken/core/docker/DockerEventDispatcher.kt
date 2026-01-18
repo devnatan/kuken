@@ -11,15 +11,18 @@ import me.devnatan.dockerkt.models.system.EventAction
 import me.devnatan.dockerkt.models.system.EventActor
 import me.devnatan.dockerkt.models.system.EventType
 import me.devnatan.dockerkt.resource.system.events
+import org.slf4j.LoggerFactory
 import kotlin.uuid.Uuid
 
 class DockerEventDispatcher(
-    dispatcher: EventDispatcherImpl = EventDispatcherImpl(),
+    delegate: EventDispatcherImpl = EventDispatcherImpl(),
     val dockerClient: DockerClient,
-) : EventDispatcher by dispatcher {
+) : EventDispatcher by delegate {
+    private val log = LoggerFactory.getLogger(DockerEventDispatcher::class.java)
+
     init {
         launch(
-            context = CoroutineName("DockerEventDispatcher#consumer"),
+            context = CoroutineName("DockerEventDispatcher"),
         ) {
             dockerClient.system
                 .events {
@@ -30,14 +33,18 @@ class DockerEventDispatcher(
     }
 
     private suspend fun interceptDockerEvent(event: Event) {
-        when (event.action) {
-            EventAction.Start -> dispatch(InstanceEvent.InstanceStartedEvent(event.actor.getInstanceId()))
-            else -> Unit
+        val localEvent =
+            when (event.action) {
+                EventAction.Start -> event.actor.getInstanceId()?.let(InstanceEvent::InstanceStartedEvent)
+                EventAction.Stop -> event.actor.getInstanceId()?.let(InstanceEvent::InstanceStoppedEvent)
+                else -> Unit
+            }
+
+        if (localEvent != null) {
+            log.info("Dispatching Docker event ${event.type}#${event.action}: $localEvent")
+            dispatch(localEvent)
         }
     }
 
-    private fun EventActor.getInstanceId(): Uuid =
-        requireNotNull(attributes["gg.kuken.instance.id"]?.let(Uuid.Companion::parse)) {
-            "Instance id not found in event actor attributes: $attributes"
-        }
+    private fun EventActor.getInstanceId(): Uuid? = attributes["gg.kuken.instance.id"]?.let(Uuid.Companion::parse)
 }
