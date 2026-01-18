@@ -8,7 +8,7 @@ import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 @Serializable
-internal data class BlueprintResponse(
+data class BlueprintResponse(
     val id: Uuid,
     @SerialName("created-at") val createdAt: Instant,
     @SerialName("updated-at") val updatedAt: Instant,
