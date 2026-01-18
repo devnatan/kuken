@@ -1,5 +1,5 @@
 <template>
-    <Resource :resource="resource" @loaded="(value) => (blueprint = value)">
+    <Resource :resource="resource" @loaded="(value: Blueprint) => (blueprint = value)">
         <template v-if="blueprint">
             <VContainer>
                 <VCol :size="5">
@@ -7,14 +7,14 @@
                         <div class="header">
                             <div
                                 :style="{
-                                    backgroundImage: `url(${resolveBlueprintSource(blueprint.spec.assets.icon?.source!)})`
+                                    backgroundImage: `url(${resolveBlueprintSource(blueprint.spec.assets?.icon)})`
                                 }"
                                 class="icon"
                             />
                             <div class="text">
-                                <h4 class="title">{{ blueprint.spec.descriptor.name }}</h4>
+                                <h4 class="title">{{ blueprint.spec.metadata.name }}</h4>
                                 <p class="description">
-                                    Version {{ blueprint.spec.descriptor.version }} · Küken Official
+                                    Version {{ blueprint.spec.metadata.version }} · Küken Official
                                     Blueprint
                                 </p>
                             </div>
@@ -88,7 +88,7 @@ const resource = () => blueprintsService.getBlueprint(props.blueprintId)
 const blueprint = ref<Blueprint | null>(null)
 
 useHead({
-    title: () => (blueprint.value ? `${blueprint.value.spec.descriptor.name} - Game Directory` : "")
+    title: () => (blueprint.value ? `${blueprint.value.spec.metadata.name} - Game Directory` : "")
 })
 </script>
 <style lang="scss">
