@@ -42,6 +42,12 @@ local InstallSourceQueryPlugin =
 /// The port that the Source Query plugin will use to respond to A2S requests.
 /// This should be different from the main server port. Defaults to the game port + 1.
 local SourceQueryPort = portInput("source-query-plugin", "Source Query Port", 1)
+local SourceQueryPort =
+  portInput(
+    "source-query-plugin",
+    "Source Query Port",
+    refs.network.port + 1,
+  )
 
 inputs {
   AuthMode
