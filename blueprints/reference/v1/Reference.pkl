@@ -308,6 +308,8 @@ class InstanceRefs {
   /// Generated unique name for this instance.
   /// Useful for container names, volume prefixes, or network identifiers.
   const name: String = internalPropertyRef("instance.name").value()
+
+  const command: String = "${refs.instance.command}"
 }
 
 /// Network-related runtime values assigned during deployment.
