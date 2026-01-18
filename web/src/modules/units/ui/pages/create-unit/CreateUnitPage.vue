@@ -12,24 +12,20 @@ import CreateUnitBlueprintSelector from "@/modules/units/ui/components/create-un
 import { onBeforeRouteLeave, useRouter } from "vue-router"
 import type { Unit } from "@/modules/units/api/models/unit.model.ts"
 import CreateUnitConfigureBlueprint from "@/modules/units/ui/components/create-unit/CreateUnitConfigureBlueprint.vue"
-import { isNull } from "@/utils"
+import { useHead } from "@unhead/vue"
+
+useHead({
+    title: "Create new server"
+})
 
 const form = reactive({
     name: "",
     blueprint: "",
-    inputs: {}
+    inputs: {},
+    env: {}
 })
 
 const router = useRouter()
-const { isLoading, execute } = useAsyncState(unitsService.createUnit, null as unknown as Unit, {
-    immediate: false,
-    onSuccess: (payload: Unit) => {
-        window.location.href = router.resolve({
-            name: "instance.console",
-            params: { instanceId: payload.instance.id }
-        }).href
-    }
-})
 
 enum Steps {
     Name,
@@ -49,11 +45,40 @@ const goNextButtonLabel = computed(() => {
     return steps.current === lastStep.value ? "Create" : "Next"
 })
 const goBackButtonLabel = computed(() => {
-    return steps.current === firstStep.value ? null : "Back"
+    return steps.current === firstStep.value ? "Cancel" : "Back"
 })
 
-const isFormCompleted = computed(() => {
-    return !isNull(form.name) && !isNull(form.blueprint)
+function goBack() {
+    const currentIndex = steps.all.indexOf(steps.current)
+    if (currentIndex === 0) {
+        router.back()
+        return
+    }
+
+    steps.current = steps.all[currentIndex - 1]!
+}
+
+function goNext() {
+    steps.current = steps.all[steps.all.indexOf(steps.current) + 1]!
+}
+
+onBeforeRouteLeave((_, __, next) => {
+    if (steps.current !== Steps.Name) {
+        goBack()
+        return
+    }
+
+    next()
+})
+
+const { isLoading, execute } = useAsyncState(unitsService.createUnit, null as unknown as Unit, {
+    immediate: false,
+    onSuccess: (payload: Unit) => {
+        window.location.href = router.resolve({
+            name: "instance.console",
+            params: { instanceId: payload.instance.id }
+        }).href
+    }
 })
 
 const canProceed = computed(() => {
@@ -66,14 +91,6 @@ const canProceed = computed(() => {
     return true
 })
 
-function goBack() {
-    steps.current = steps.all[steps.all.indexOf(steps.current) - 1]!
-}
-
-function goNext() {
-    steps.current = steps.all[steps.all.indexOf(steps.current) + 1]!
-}
-
 function proceed() {
     if (steps.current === lastStep.value) {
         execute(0, form)
@@ -81,15 +98,6 @@ function proceed() {
         goNext()
     }
 }
-
-onBeforeRouteLeave((_, __, next) => {
-    if (steps.current !== Steps.Name) {
-        goBack()
-        return
-    }
-
-    next()
-})
 </script>
 
 <template>
@@ -135,11 +143,6 @@ onBeforeRouteLeave((_, __, next) => {
     </VContainer>
 </template>
 
-<style>
-h4 {
-    margin-bottom: 1.6rem;
-}
-</style>
 <style lang="scss" scoped>
 .container {
     padding: 48px;
@@ -150,7 +153,8 @@ h4 {
 .content {
     display: flex;
     flex-direction: column;
-    max-width: 40%;
+    min-width: 40%;
+    width: fit-content;
     position: relative;
     left: 50%;
     transform: translateX(-50%);
