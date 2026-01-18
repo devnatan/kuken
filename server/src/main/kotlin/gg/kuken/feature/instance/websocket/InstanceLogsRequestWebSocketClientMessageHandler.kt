@@ -5,10 +5,14 @@ import gg.kuken.websocket.WebSocketClientMessageContext
 import gg.kuken.websocket.WebSocketClientMessageHandler
 import gg.kuken.websocket.WebSocketOpCodes
 import gg.kuken.websocket.respond
+import gg.kuken.websocket.respondAsync
 import gg.kuken.websocket.uuid
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
+import kotlinx.serialization.Serializable
 import me.devnatan.dockerkt.DockerClient
+import me.devnatan.dockerkt.models.Frame
+import me.devnatan.dockerkt.models.Stream
 import me.devnatan.dockerkt.resource.container.ContainerNotFoundException
 import me.devnatan.dockerkt.resource.container.logs
 
@@ -43,21 +47,39 @@ class InstanceLogsRequestWebSocketClientMessageHandler(
         dockerClient.containers
             .logs(containerId) {
                 follow = true
-                showTimestamps = false
+                showTimestamps = true
                 stdout = true
                 stderr = true
             }.onStart {
-                respond(
+                respondAsync(
                     op = WebSocketOpCodes.InstanceLogsRequestStarted,
-                    data = mapOf("running" to isContainerRunning),
+                    data = mapOf("running" to isContainerRunning.toString()),
                 )
             }.onCompletion {
-                respond(WebSocketOpCodes.InstanceLogsRequestFinished)
+                respondAsync<Unit>(WebSocketOpCodes.InstanceLogsRequestFinished)
             }.collect { frame ->
-                respond(
+                respondAsync(
                     op = WebSocketOpCodes.InstanceLogsRequestFrame,
-                    data = frame,
+                    data = toLog(frame),
                 )
             }
     }
+
+    private fun toLog(frame: Frame) =
+        with(frame) {
+            LogFrame(
+                value = value.substringAfter(" "),
+                timestamp = value.substringBefore(" "),
+                length = length,
+                stream = stream,
+            )
+        }
+
+    @Serializable
+    data class LogFrame(
+        val value: String,
+        val timestamp: String,
+        val length: Int,
+        val stream: Stream,
+    )
 }
