@@ -18,18 +18,12 @@ assets {
 // ============================================================================
 
 /// Docker image tag/version for the Minecraft server container.
-local DockerImageVersion = textInput("docker-image-tag", "Docker Image Version")
-
-/// RCON password for remote server management.
-/// RCON allows command execution without direct console access, essential for automated management and integration tools.
-local RconPassword = passwordInput("rcon-password", "RCON Password")
-
-/// Network port for RCON connections.
-/// Standard Minecraft RCON port is 25575. Change if running multiple servers or if the port conflicts with other services.
-local RconPort = portInput("rcon-port", "RCON Port", 25575)
-
-/// Maximum memory allocation for the Java server process.
-local MaxMemory = dataSizeInput("max-memory", "Maximum Memory")
+local JavaVersion =
+  selectInput(
+    "java-version",
+    "Java Version",
+    List("stable", "java25", "java21", "java17", "java11", "java8"),
+  )
 
 /// Minecraft version to run on the server.
 /// Use `"LATEST"` for the newest release, specific versions like `"1.20.4"`, or `"SNAPSHOT"` for testing builds.
@@ -44,7 +38,7 @@ local ServerType = textInput("server-type", "Server Type")
 // ============================================================================
 
 inputs {
-  DockerImageVersion
+  JavaVersion
   GameVersion
   ServerType
   MaxMemory
@@ -58,7 +52,7 @@ inputs {
 
 build {
   docker {
-    image = "itzg/minecraft-server:\(DockerImageVersion)"
+    image = "itzg/minecraft-server:\(JavaVersion)"
   }
 
   environmentVariables {
