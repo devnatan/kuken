@@ -175,8 +175,14 @@ object UniversalPklParser {
 
         if (lastIndex < value.length) {
             val text = value.substring(lastIndex)
+
             if (text.isNotEmpty()) {
-                parts.add(Resolvable.Literal(text))
+                // We do not catch trailing {} it in Inputs regex
+                if (text == " }") {
+                    template = template.removeSuffix(text)
+                } else {
+                    parts.add(Resolvable.Literal(text))
+                }
             }
         }
 
