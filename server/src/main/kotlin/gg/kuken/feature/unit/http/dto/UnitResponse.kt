@@ -1,5 +1,6 @@
 package gg.kuken.feature.unit.http.dto
 
+import gg.kuken.feature.blueprint.http.dto.BlueprintResponse
 import gg.kuken.feature.instance.model.HostPort
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -23,12 +24,6 @@ data class UnitResponse(
         val status: String,
         val nodeId: String,
         val created: Instant,
-        val blueprint: Blueprint,
-    ) {
-        @Serializable
-        data class Blueprint(
-            val id: String,
-            val iconUrl: String?,
-        )
-    }
+        val blueprint: BlueprintResponse,
+    )
 }
