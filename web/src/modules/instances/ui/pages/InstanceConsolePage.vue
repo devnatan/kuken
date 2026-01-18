@@ -1,7 +1,7 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import websocketService from "@/modules/platform/api/services/websocket.service.ts"
 import { WebSocketOpCodes } from "@/modules/platform/api/models/websocket.response.ts"
-import { computed, nextTick, onMounted, onUnmounted, reactive, ref, unref, watch } from "vue"
+import { computed, nextTick, onMounted, onUnmounted, ref, unref, useTemplateRef, watch } from "vue"
 import { useElementSize, useScroll } from "@vueuse/core"
 import VInput from "@/modules/platform/ui/components/form/VInput.vue"
 import VForm from "@/modules/platform/ui/components/form/VForm.vue"
@@ -14,7 +14,7 @@ interface Frame {
         code: number
         name: "STDOUT" | "STDERR"
     }
-    timestamp?: number
+    timestamp: string
 }
 
 const props = defineProps<{ instanceId: string }>()
@@ -23,8 +23,7 @@ const maxFrames = 10000
 const isPaused = ref(false)
 const command = ref("")
 
-// --- Scrolling ---
-const scrollerRef = ref<HTMLElement>()
+const scrollerRef = useTemplateRef("scrollerRef")
 const autoScroll = ref(true)
 
 const { y: scrollTop, arrivedState } = useScroll(scrollerRef, {
@@ -48,7 +47,11 @@ const visibleRange = computed(() => {
 })
 
 const visibleItems = computed(() => {
-    return searchResults.value.slice(visibleRange.value.start, visibleRange.value.end)
+    return searchResults.value
+        .slice(visibleRange.value.start, visibleRange.value.end)
+        .map((item) => {
+            return { ...item, value: ansiToHtml(item.value) }
+        })
 })
 
 const totalHeight = computed(() => {
@@ -65,7 +68,6 @@ const scrollToBottom = () => {
     }
 }
 
-// Watch scroll position to detect if at bottom
 watch(
     () => arrivedState.bottom,
     (isAtBottom) => {
@@ -76,9 +78,6 @@ watch(
 // --- Frames ---
 const addFrame = (frame: Frame) => {
     if (isPaused.value) return
-
-    // Add timestamp to frame
-    frame.timestamp = Date.now()
 
     frames.value.push(frame)
 
@@ -118,7 +117,6 @@ const filteredFrames = computed(() => {
     return frames.value.filter((f) => f.stream.name === filterStream.value)
 })
 
-// --- Search ---
 const searchQuery = ref("")
 const searchResults = computed(() => {
     if (!searchQuery.value.trim()) return filteredFrames.value
@@ -136,14 +134,14 @@ const highlightSearch = (text: string) => {
 }
 
 async function sendCommand() {
-    const input = unref(command)
+    const input = unref(command.value)
+    command.value = ""
 
     const { exitCode } = await instancesService.runInstanceCommand(props.instanceId, input)
 
     console.log(`Exit code for ${input}: ${exitCode}`)
 }
 
-// --- WebSocket Listener ---
 const isConnected = ref(false)
 const logsEnded = ref(false)
 const fetechedWhileStopped = ref(false)
@@ -161,11 +159,13 @@ const handleLogsEnd = () => {
 const setupListeners = () => {
     unsubscribeStart = websocketService.listen(
         WebSocketOpCodes.InstanceLogsRequestStarted,
-        (payload: { running: boolean }) => {
+        (payload?: { running: boolean }) => {
             isConnected.value = true
 
-            console.log("Fetching messages: is server running?", payload.running)
-            fetechedWhileStopped.value = !payload.running
+            if (payload?.running) {
+                console.log("Fetching messages: is server running?", payload.running)
+                fetechedWhileStopped.value = !payload.running
+            }
         }
     )
 
@@ -201,19 +201,105 @@ onUnmounted(() => {
     unsubscribeInstanceStart?.()
 })
 
-// --- Finally ---
 watch([searchQuery, filterStream], () => {
+    if (searchQuery.value.trim() === "") {
+        return
+    }
+
     scrollTop.value = 0
     if (scrollerRef.value) {
         scrollerRef.value.scrollTop = 0
     }
 })
+
+const ansiToHtml = (text: string) => {
+    const ansiCodes: { [key: string]: string } = {
+        "0": "reset",
+        "39": "color: inherit",
+        "1": "font-weight: bold",
+        "2": "opacity: 0.7",
+        "3": "font-style: italic",
+        "4": "text-decoration: underline",
+        "30": "color: #6b7280",
+        "31": "color: #fca5a5",
+        "32": "color: #86efac",
+        "33": "color: #fde68a",
+        "34": "color: #93c5fd",
+        "35": "color: #f0abfc",
+        "36": "color: #a5f3fc",
+        "37": "color: #e5e7eb",
+        "40": "background-color: #374151; color: #e5e7eb",
+        "41": "background-color: #fecaca; color: #7f1d1d",
+        "42": "background-color: #bbf7d0; color: #14532d",
+        "43": "background-color: #fef3c7; color: #713f12",
+        "44": "background-color: #bfdbfe; color: #1e3a8a",
+        "45": "background-color: #f5d0fe; color: #701a75",
+        "46": "background-color: #cffafe; color: #164e63",
+        "47": "background-color: #f3f4f6; color: #1f2937",
+        "49": "background-color: inherit",
+        "90": "color: #9ca3af",
+        "91": "color: #fecaca",
+        "92": "color: #bbf7d0",
+        "93": "color: #fef3c7",
+        "94": "color: #bfdbfe",
+        "95": "color: #f5d0fe",
+        "96": "color: #cffafe",
+        "97": "color: #f3f4f6",
+        "100": "background-color: #6b7280; color: #f9fafb",
+        "101": "background-color: #fca5a5; color: #7f1d1d",
+        "102": "background-color: #86efac; color: #14532d",
+        "103": "background-color: #fde68a; color: #713f12",
+        "104": "background-color: #93c5fd; color: #1e3a8a",
+        "105": "background-color: #f0abfc; color: #701a75",
+        "106": "background-color: #a5f3fc; color: #164e63",
+        "107": "background-color: #e5e7eb; color: #1f2937"
+    }
+
+    let html = text
+    let openSpans = 0
+
+    html = html.replace(/\x1b\[(\d+(?:;\d+)*)m/g, (_, codes) => {
+        const codeList = codes.split(";")
+        let styles = []
+        let result = ""
+
+        for (const code of codeList) {
+            if (code === "0") {
+                result += "</span>".repeat(openSpans)
+                openSpans = 0
+            } else if (ansiCodes[code] && ansiCodes[code] !== "reset") {
+                styles.push(ansiCodes[code])
+            }
+        }
+
+        if (styles.length > 0) {
+            result += `<span style="${styles.join("; ")}">`
+            openSpans++
+        }
+
+        return result
+    })
+
+    if (openSpans > 0) {
+        html += "</span>".repeat(openSpans)
+    }
+
+    html = html.replace(/&(?!#?\w+;)/g, "&amp;")
+
+    return html
+}
 </script>
 
 <template>
     <div class="console-container">
         <div class="console-toolbar">
             <div class="toolbar-left">
+                <input
+                    v-model="searchQuery"
+                    class="search-input"
+                    placeholder="Search..."
+                    type="text"
+                />
                 <span class="frame-count">
                     {{ searchResults.length }} / {{ frames.length }} lines
                 </span>
@@ -221,11 +307,11 @@ watch([searchQuery, filterStream], () => {
 
             <div class="toolbar-right">
                 <div
-                    class="connection-status"
                     :class="{
                         disconnected: fetechedWhileStopped || !isConnected,
                         ended: logsEnded
                     }"
+                    class="connection-status"
                 >
                     <span class="status-dot"></span>
                     <template v-if="logsEnded"> Logs Ended </template>
@@ -241,48 +327,57 @@ watch([searchQuery, filterStream], () => {
             <div class="fade-overlay fade-top"></div>
 
             <div v-if="searchResults.length > 0" ref="scrollerRef" class="console-output">
-                <div class="virtual-scroller-spacer" :style="{ height: `${totalHeight}px` }">
+                <div :style="{ height: `${totalHeight}px` }" class="virtual-scroller-spacer">
                     <div
-                        class="virtual-scroller-content"
                         :style="{ transform: `translateY(${offsetY}px)` }"
+                        class="virtual-scroller-content"
                     >
-                        <div
-                            v-for="(item, idx) in visibleItems"
-                            :key="visibleRange.start + idx"
-                            :class="['console-line', `stream-${item.stream.name.toLowerCase()}`]"
-                        >
-                            <span class="line-number">{{ visibleRange.start + idx + 1 }}</span>
-                            <!-- <span class="line-stream">[{{ item.stream.name }}]</span> -->
-                            <span class="line-content" v-html="highlightSearch(item.value)"></span>
-                        </div>
+                        <TransitionGroup name="slide-up">
+                            <div
+                                v-for="(item, idx) in visibleItems"
+                                :key="visibleRange.start + idx"
+                                :class="[
+                                    'console-line',
+                                    `stream-${item.stream.name.toLowerCase()}`
+                                ]"
+                            >
+                                <span class="line-number">{{ visibleRange.start + idx + 1 }}</span>
+                                <span
+                                    class="line-content"
+                                    v-html="highlightSearch(item.value)"
+                                ></span>
+                            </div>
+                        </TransitionGroup>
                     </div>
                 </div>
             </div>
-
-            <div class="fade-overlay fade-bottom"></div>
+            <div ref="dummy" />
 
             <div v-if="searchResults.length === 0" class="console-empty">
                 <template v-if="logsEnded"> Log stream completed </template>
                 <template v-else-if="searchQuery"> No matching logs found... </template>
                 <template v-else> Waiting for logs... </template>
             </div>
+
+            <div class="fade-overlay fade-bottom"></div>
         </div>
 
-        <VForm @submit.prevent="sendCommand">
-            <VInput placeholder="Type something..." v-model="command" />
+        <VForm class="command" @submit.prevent="sendCommand">
+            <VInput v-model="command" placeholder="Type something..." />
         </VForm>
     </div>
 </template>
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=DM+Mono&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap");
 
 .console-container {
     display: flex;
     flex-direction: column;
     height: 100%;
     color: #d4d4d4;
-    font-family: "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+    font-family: "JetBrains Mono", monospace;
     font-size: 14px;
 }
 
@@ -328,11 +423,6 @@ watch([searchQuery, filterStream], () => {
     cursor: not-allowed;
 }
 
-.console-toolbar button.active {
-    background: #0e639c;
-    border-color: #0e639c;
-}
-
 @keyframes pulse {
     0%,
     100% {
@@ -345,13 +435,13 @@ watch([searchQuery, filterStream], () => {
 
 .search-input {
     padding: 6px 12px;
-    background: #3e3e42;
-    border: 1px solid #555;
-    color: #d4d4d4;
-    border-radius: 4px;
-    font-size: 12px;
-    min-width: 200px;
+    background: rgba(0, 0, 0, 0.12);
+    font-family: "JetBrains Mono", "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+    color: #d1d5db;
+    border-radius: 8px;
+    min-width: 240px;
     transition: border-color 0.2s;
+    height: 38px;
 }
 
 .search-input:focus {
@@ -359,24 +449,20 @@ watch([searchQuery, filterStream], () => {
     border-color: #0e639c;
 }
 
-.search-input::placeholder {
-    color: #858585;
-}
-
 .frame-count {
-    font-size: 12px;
-    color: #858585;
     white-space: nowrap;
+    margin-left: 12px;
+    color: #d1d5db;
 }
 
 .connection-status {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 12px;
+    padding: 6px 16px;
     background: #2d4a2d;
     border: 1px solid #4a7c4a;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 12px;
     color: #8cd98c;
     font-weight: 500;
@@ -432,7 +518,7 @@ watch([searchQuery, filterStream], () => {
     position: absolute;
     left: 0;
     right: 10px;
-    height: 40px;
+    height: 24px;
     pointer-events: none;
     z-index: 10;
     transition: opacity 0.3s;
@@ -494,46 +580,58 @@ watch([searchQuery, filterStream], () => {
     min-height: 24px;
     align-items: center;
     scroll-snap-align: start;
+
+    &:first-child {
+        margin-top: 16px;
+    }
+
+    &:last-child {
+        margin-bottom: 16px;
+    }
 }
 
 .console-line:hover {
     background-color: rgba(0, 0, 0, 0.2);
 }
 
+/*noinspection CssUnusedSymbol*/
+.slide-up-enter-active,
+.slide-up-leave-active {
+    transition: all 0.15s ease-out;
+}
+
+/*noinspection CssUnusedSymbol*/
+.slide-up-enter-from {
+    opacity: 0;
+    transform: translateY(-30px);
+}
+
+/*noinspection CssUnusedSymbol*/
+.slide-up-leave-to {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
 .line-number {
     min-width: 50px;
-    color: #858585;
+    color: rgba(255, 255, 255, 0.18);
     text-align: right;
     padding-right: 12px;
     user-select: none;
     flex-shrink: 0;
-}
-
-.line-stream {
-    min-width: 80px;
-    padding-right: 12px;
-    font-weight: bold;
-    flex-shrink: 0;
-}
-
-.stream-stdout .line-stream {
-    color: #4ec9b0;
-}
-
-.stream-stderr .line-stream {
-    color: #f48771;
+    align-self: baseline;
 }
 
 .line-content {
     flex: 1;
-    color: #d4d4d4;
+    color: #cbd5e1;
 }
 
 .line-content :deep(mark) {
-    background: #f9a825;
-    color: #000;
-    padding: 2px 4px;
+    background-color: #fbbf24;
+    color: #1f2937;
     border-radius: 2px;
+    padding: 1px 2px;
 }
 
 .console-empty {
@@ -542,9 +640,10 @@ watch([searchQuery, filterStream], () => {
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
-    color: #858585;
+    color: #cbd5e1;
+    opacity: 0.54;
     padding: 40px;
-    font-size: 16px;
+    font-size: 30px;
     pointer-events: none;
     z-index: 5;
 }
@@ -569,5 +668,21 @@ watch([searchQuery, filterStream], () => {
 .console-output {
     scrollbar-width: thin;
     scrollbar-color: #424242 #1e1e1e;
+}
+
+.command input {
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.12);
+    font-family: "JetBrains Mono", "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+    color: #d1d5db;
+    border-radius: 0;
+    transition: border-color 0.2s;
+    height: 48px;
+
+    &::placeholder {
+        font-family: "JetBrains Mono", "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+        font-style: normal;
+        color: inherit;
+    }
 }
 </style>

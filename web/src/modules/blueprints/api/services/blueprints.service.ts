@@ -1,7 +1,11 @@
-import type { Blueprint } from "@/modules/blueprints/api/models/blueprint.model"
+import type { Blueprint, BlueprintSpec } from "@/modules/blueprints/api/models/blueprint.model"
 import httpService from "@/modules/platform/api/services/http.service"
 import type { AxiosResponse } from "axios"
-import type { ImportBlueprintResponse } from "@/modules/blueprints/api/models/import.model.ts"
+import type {
+    ImportBlueprintResponse,
+    ProcessBlueprintResponse
+} from "@/modules/blueprints/api/models/import.model.ts"
+import type { ProcessBlueprintRequest } from "@/modules/blueprints/api/models/process.model.ts"
 
 export default {
     async listReadyToUseBlueprints(): Promise<Blueprint[]> {
@@ -20,5 +24,14 @@ export default {
         return httpService
             .post("/blueprints/import", { source: url })
             .then((res: AxiosResponse) => res.data as Blueprint)
+    },
+
+    async processBlueprint(
+        blueprintId: string,
+        options: ProcessBlueprintRequest
+    ): Promise<ProcessBlueprintResponse> {
+        return httpService
+            .post(`/blueprints/${blueprintId}/process`, options)
+            .then((res: AxiosResponse) => res.data as BlueprintSpec)
     }
 }

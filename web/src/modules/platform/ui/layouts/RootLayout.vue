@@ -23,8 +23,9 @@ import TheHeader from "@/modules/platform/ui/components/TheHeader.vue"
     display: flex;
     flex-grow: 1;
     flex-direction: column;
-    overflow: auto;
+    overflow-y: hidden;
     background-color: #d85f34;
+    height: 100%;
 }
 
 .content {
@@ -32,5 +33,6 @@ import TheHeader from "@/modules/platform/ui/components/TheHeader.vue"
     border-radius: 20px;
     margin: 0 16px 16px 16px;
     height: 100%;
+    overflow-y: auto;
 }
 </style>
