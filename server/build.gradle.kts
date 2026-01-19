@@ -25,6 +25,23 @@ application {
     mainClass.set("gg.kuken.LauncherKt")
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.graalvm.polyglot") {
+            useVersion("24.2.2")
+            because("PKL 0.30.2 requires GraalVM 24.x components for native-image compatibility")
+        }
+        if (requested.group == "org.graalvm.truffle") {
+            useVersion("24.2.2")
+            because("PKL 0.30.2 requires GraalVM 24.x components for native-image compatibility")
+        }
+        if (requested.group == "org.graalvm.sdk") {
+            useVersion("24.2.2")
+            because("PKL 0.30.2 requires GraalVM 24.x components for native-image compatibility")
+        }
+    }
+}
+
 dependencies {
     annotationProcessor(libs.validator.processor)
     implementation(libs.validator)
@@ -45,9 +62,17 @@ dependencies {
     implementation(libs.postgresql)
     implementation(libs.h2)
     implementation(libs.lettuce)
-    implementation("org.pkl-lang:pkl-codegen-kotlin:0.30.2")
-    implementation("org.pkl-lang:pkl-config-kotlin:0.30.2")
-    implementation("org.pkl-lang:pkl-config-java:0.30.2")
+    implementation("org.pkl-lang:pkl-config-kotlin:0.30.2") {
+        exclude(group = "org.pkl-lang", module = "pkl-config-java-all")
+    }
+    implementation("org.pkl-lang:pkl-config-java:0.30.2") {
+        exclude(group = "org.pkl-lang", module = "pkl-config-java-all")
+    }
+    implementation("org.pkl-lang:pkl-core:0.30.2") {
+        exclude(group = "org.pkl-lang", module = "pkl-config-java-all")
+    }
+    implementation("org.graalvm.polyglot:polyglot:24.2.2")
+    implementation("org.graalvm.truffle:truffle-api:24.2.2")
     testImplementation(libs.ktx.coroutines.test)
     testImplementation(kotlin("test"))
 }
@@ -74,11 +99,20 @@ ktor {
 graalvmNative {
     binaries {
         named("main") {
+
             fallback.set(false)
             verbose.set(true)
 
             buildArgs.add("--initialize-at-build-time=kotlin")
+
             buildArgs.add("--initialize-at-run-time=kotlin.uuid.SecureRandomHolder")
+            buildArgs.add("--initialize-at-run-time=org.pkl")
+            buildArgs.add("--initialize-at-run-time=org.pkl.core")
+            buildArgs.add("--initialize-at-run-time=org.pkl.config")
+            buildArgs.add("--initialize-at-run-time=org.graalvm.polyglot")
+            buildArgs.add("--initialize-at-run-time=com.oracle.truffle")
+
+            buildArgs.add("--initialize-at-run-time=io.netty")
             buildArgs.add("--initialize-at-run-time=org.bouncycastle")
 
             buildArgs.add("--initialize-at-run-time=io.netty.channel.epoll.Epoll")
