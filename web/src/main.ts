@@ -13,6 +13,11 @@ import hljs from "highlight.js/lib/core"
 import json from "highlight.js/lib/languages/json"
 import hljsVuePlugin from "@highlightjs/vue-plugin"
 import VueVirtualScroller from "vue-virtual-scroller"
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css"
+import localizedFormat from "dayjs/plugin/localizedFormat"
+import dayjs from "dayjs"
+
+dayjs.extend(localizedFormat)
 
 hljs.registerLanguage("json", json)
 
