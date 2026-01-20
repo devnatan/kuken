@@ -13,5 +13,16 @@ export default {
         return httpService
             .post(`instances/${instanceId}/command`, { command })
             .then((res: AxiosResponse) => res.data)
+    },
+
+    async getLogs(
+        instanceId: string,
+        limit: number
+    ): Promise<{ frames: Frame[]; hasMore: boolean }> {
+        return httpService
+            .get(`instances/${instanceId}/logs`, { params: { limit } })
+            .then((res: AxiosResponse) => res.data)
+    },
+
     }
 } as const
