@@ -1,6 +1,5 @@
 import type { RouteRecordRaw } from "vue-router"
 import { importPage } from "@/router.ts"
-import InstanceConsoleLayout from "@/modules/instances/ui/layouts/InstanceConsoleLayout.vue"
 
 export const InstancesRoutes: Array<RouteRecordRaw> = [
     {
@@ -26,7 +25,7 @@ export const InstancesRoutes: Array<RouteRecordRaw> = [
                 component: importPage("instances", "InstanceConsole"),
                 meta: {
                     title: "Console",
-                    layout: InstanceConsoleLayout
+                    layout: null
                 }
             }
         ]
