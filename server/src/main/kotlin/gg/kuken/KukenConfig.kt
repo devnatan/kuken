@@ -1,6 +1,8 @@
 package gg.kuken
 
 import kotlinx.serialization.Serializable
+import java.io.File
+import java.nio.file.Path
 
 @Serializable
 data class KukenConfig(
@@ -38,5 +40,10 @@ data class KukenConfig(
         data class Network(
             val name: String,
         )
+    }
+
+    companion object {
+        @JvmStatic
+        fun tempDir(vararg path: String): Path = File(path.joinToString(File.separator)).toPath()
     }
 }
