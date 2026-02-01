@@ -1,6 +1,7 @@
 import { fileURLToPath, URL } from "node:url"
 import { defineConfig, splitVendorChunkPlugin } from "vite"
 import vue from "@vitejs/plugin-vue"
+
 // @ts-ignore
 import pkg from "./package.json"
 

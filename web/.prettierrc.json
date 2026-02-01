@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/prettierrc",
   "semi": false,
-  "tabWidth": 4,
+  "tabWidth": 2,
   "singleQuote": false,
   "printWidth": 100,
   "trailingComma": "none"
