@@ -6,9 +6,14 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
 
 @Serializable
+data class ResolveBlueprintInputDefinitions(
+    val inputs: List<UserInput>,
+    val startup: Resolvable<String>,
+)
+
+@Serializable
 data class ResolvedBlueprint(
     val metadata: BlueprintMetadata,
-    val assets: AppAssets? = null,
     val resources: List<AppResource>,
     val hooks: AppHooks,
     val inputs: List<UserInput>,
@@ -21,6 +26,8 @@ data class BlueprintMetadata(
     val name: String,
     val version: String,
     val url: String,
+    val author: String,
+    val assets: AppAssets,
 )
 
 typealias AppResourceName = String
@@ -44,7 +51,7 @@ data class AppAssets(
 @Serializable
 data class InstanceSettings(
     val startup: Resolvable<String>,
-    val commandExecutor: InstanceSettingsCommandExecutor,
+    val commandExecutor: InstanceSettingsCommandExecutor?,
 )
 
 @Serializable
@@ -74,6 +81,7 @@ typealias InputLabel = String
 sealed class UserInput {
     abstract val name: InputName
     abstract val label: InputLabel
+    abstract val description: String?
 }
 
 @Serializable
@@ -81,6 +89,7 @@ sealed class UserInput {
 data class TextInput(
     override val name: InputName,
     override val label: InputLabel,
+    override val description: String?,
 ) : UserInput()
 
 @Serializable
@@ -88,6 +97,7 @@ data class TextInput(
 data class PasswordInput(
     override val name: InputName,
     override val label: InputLabel,
+    override val description: String?,
 ) : UserInput()
 
 @Serializable
@@ -95,7 +105,8 @@ data class PasswordInput(
 data class PortInput(
     override val name: InputName,
     override val label: InputLabel,
-    val default: Resolvable<Int>,
+    override val description: String?,
+    val default: Int?,
 ) : UserInput()
 
 @Serializable
@@ -103,7 +114,8 @@ data class PortInput(
 data class CheckboxInput(
     override val name: InputName,
     override val label: InputLabel,
-    val default: Resolvable<Boolean>,
+    override val description: String?,
+    val default: Boolean,
 ) : UserInput()
 
 @Serializable
@@ -111,7 +123,8 @@ data class CheckboxInput(
 data class SelectInput(
     override val name: InputName,
     override val label: InputLabel,
-    val items: List<String>,
+    override val description: String?,
+    val items: Map<String, String>,
 ) : UserInput()
 
 @Serializable
@@ -119,6 +132,7 @@ data class SelectInput(
 data class DataSizeInput(
     override val name: InputName,
     override val label: InputLabel,
+    override val description: String?,
 ) : UserInput()
 
 @Serializable

@@ -8,30 +8,29 @@ import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+private const val FILE_PROTOCOL = "file://"
+private const val INTERNET_SECURE_PROTOCOL = "https://"
+private const val INTERNET_INSECURE_PROTOCOL = "http://"
+
 @Serializable(with = BlueprintSpecSource.Serializer::class)
 sealed class BlueprintSpecSource {
     abstract val uri: String
 
-    abstract fun replacing(path: String): BlueprintSpecSource
-
     @Serializable
     @SerialName("local")
     data class Local(
-        val filePath: String,
+        override val uri: String,
     ) : BlueprintSpecSource() {
-        override val uri: String get() = "file://$filePath"
-
-        override fun replacing(path: String): BlueprintSpecSource = Local(filePath = path.substringBeforeLast('/') + "/" + path)
+        val filePath: String get() = uri.substringAfter(FILE_PROTOCOL)
     }
 
     @Serializable
     @SerialName("remote")
     data class Remote(
-        val url: String,
+        private val _url: String,
+        private val secure: Boolean,
     ) : BlueprintSpecSource() {
-        override val uri: String get() = url
-
-        override fun replacing(path: String): BlueprintSpecSource = Remote(url = url.substringBeforeLast('/') + "/" + path)
+        override val uri: String get() = _url
     }
 
     class Serializer : KSerializer<BlueprintSpecSource> {
@@ -47,15 +46,28 @@ sealed class BlueprintSpecSource {
 
         override fun deserialize(decoder: Decoder): BlueprintSpecSource {
             val raw = decoder.decodeString()
-            val protocol = raw.substringBefore("://")
-            require(protocol.isNotBlank()) { "Protocol can't be blank" }
+            return when {
+                raw.startsWith(FILE_PROTOCOL) -> {
+                    Local(raw)
+                }
 
-            val substring = raw.substringAfter("$protocol://")
+                raw.startsWith(INTERNET_SECURE_PROTOCOL) -> {
+                    Remote(
+                        _url = raw,
+                        secure = true,
+                    )
+                }
 
-            return when (protocol) {
-                "file" -> Local(substring)
-                "http", "https" -> Remote(substring)
-                else -> error("Unsupported protocol: $protocol")
+                raw.startsWith(INTERNET_INSECURE_PROTOCOL) -> {
+                    Remote(
+                        _url = raw,
+                        secure = false,
+                    )
+                }
+
+                else -> {
+                    error("Unsupported protocol: $raw")
+                }
             }
         }
     }

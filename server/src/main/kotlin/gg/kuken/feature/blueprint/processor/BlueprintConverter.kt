@@ -1,35 +1,55 @@
 package gg.kuken.feature.blueprint.processor
 
+import org.pkl.core.EvaluatorBuilder
 import org.pkl.core.ModuleSource
 import org.pkl.core.PModule
 import org.pkl.core.PNull
 import org.pkl.core.PObject
 import org.pkl.core.resource.ResourceReader
 import java.lang.AutoCloseable
-import java.net.URI
-import java.util.Optional
 
 class BlueprintConverter : AutoCloseable {
-    private val evaluator =
-        org.pkl.core.EvaluatorBuilder
-            .preconfigured()
-            .setAllowedResources(listOf(Regex("^kuken:.+$").toPattern()))
-            .addResourceReader(
-                object : ResourceReader {
-                    override fun getUriScheme(): String = "kuken"
+    companion object {
+        private val evaluatorBuilder =
+            EvaluatorBuilder
+                .preconfigured()
+                .setAllowedResources(listOf(Regex("^kuken:.+$").toPattern()))
+    }
 
-                    override fun read(uri: URI?): Optional<in Any> = Optional.of("<unresolved:$uri>")
-
-                    override fun hasHierarchicalUris(): Boolean = false
-
-                    override fun isGlobbable(): Boolean = false
-                },
-            ).build()
     var objectCache: ObjectCache = ObjectCache()
 
-    fun convert(source: ModuleSource): ResolvedBlueprint {
-        val module = evaluator.evaluate(source)
-        return convertModule(module)
+    fun eval(
+        source: ModuleSource,
+        readers: List<ResourceReader>,
+    ): PModule {
+        check(readers.isNotEmpty()) { "Resource readers cannot be null" }
+
+        val evaluator =
+            evaluatorBuilder
+                .addResourceReaders(readers)
+                .build()
+
+        return evaluator.evaluate(source)
+    }
+
+    fun convert(
+        source: ModuleSource,
+        readers: List<ResourceReader>,
+    ): ResolvedBlueprint = convertModule(eval(source, readers))
+
+    fun convertPartial(
+        source: ModuleSource,
+        readers: List<ResourceReader>,
+    ): ResolveBlueprintInputDefinitions {
+        val module = eval(source, readers)
+        val inputs = collectInputs(module.getProperty("inputs") as List<PObject>)
+        val startup =
+            module
+                .getProperty("instance")
+                .let { instance -> instance as PObject }
+                .let { instance -> UniversalPklParser.parseValue<String>(instance.getProperty("startup")) }
+
+        return ResolveBlueprintInputDefinitions(inputs, startup)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -38,7 +58,7 @@ class BlueprintConverter : AutoCloseable {
         val inputs = collectInputs(inputsObj)
 
         val buildObj = module.getProperty("build") as PObject
-        val envVarsObj = (buildObj.getProperty("environmentVariables") as List<PObject>)
+        val envVarsObj = (buildObj.getProperty("env") as Map<String, Any>)
         val envVars = collectEnvVars(envVarsObj)
 
         objectCache =
@@ -53,14 +73,16 @@ class BlueprintConverter : AutoCloseable {
                 envVars = envVars.associateBy { it.name },
             )
 
+        val assets = module.getPropertyOrNull("assets").let(::convertAssets)
         val metadata =
             BlueprintMetadata(
                 name = module.getProperty("name") as String,
                 version = module.getProperty("version") as String,
                 url = module.getProperty("url") as String,
+                author = module.getProperty("author") as String,
+                assets = assets,
             )
 
-        val assets = module.getPropertyOrNull("assets")?.takeUnless { it is PNull }?.let { convertAssets(it) }
         var resources =
             module
                 .getPropertyOrNull("resources")
@@ -105,7 +127,7 @@ class BlueprintConverter : AutoCloseable {
                 ?.let { instance ->
                     val startup = UniversalPklParser.parseValue<String>(instance.getProperty("startup"))
                     val commandExecutor =
-                        instance.getProperty("command").let { it as PObject }.let {
+                        instance.getProperty("command")?.takeUnless { it is PNull }?.let { it as PObject }?.let {
                             when (val type = it.getProperty("type")) {
                                 "rcon" -> {
                                     val port = UniversalPklParser.parseValue<Int>(it.getProperty("port"))
@@ -134,7 +156,6 @@ class BlueprintConverter : AutoCloseable {
 
         return ResolvedBlueprint(
             metadata = metadata,
-            assets = assets,
             inputs = inputs,
             build = build,
             instanceSettings = instanceSettings,
@@ -148,36 +169,35 @@ class BlueprintConverter : AutoCloseable {
     private fun convertUserInput(inputObj: PObject): UserInput {
         val type = inputObj.getProperty("type") as String
         val name = inputObj.getProperty("name") as String
+        val description = (inputObj.getPropertyOrNull("description") as? String).orEmpty()
         val label = inputObj.getProperty("label") as String
 
         return when (type) {
             "text" -> {
-                TextInput(name, label)
+                TextInput(name, label, description)
             }
 
             "password" -> {
-                PasswordInput(name, label)
+                PasswordInput(name, label, description)
             }
 
             "port" -> {
-                val default: Resolvable<Int> =
-                    UniversalPklParser.parseValue(inputObj.getProperty("default"))
-                PortInput(name, label, default)
+                val default = inputObj.getProperty("default") as? Int
+                PortInput(name, label, description, default)
             }
 
             "checkbox" -> {
-                val default: Resolvable<Boolean> =
-                    UniversalPklParser.parseValue(inputObj.getProperty("default"))
-                CheckboxInput(name, label, default)
+                val default = inputObj.getProperty("default") as Boolean
+                CheckboxInput(name, label, description, default)
             }
 
             "select" -> {
-                val items = inputObj.getProperty("items") as List<String>
-                SelectInput(name, label, items)
+                val items = inputObj.getProperty("items") as Map<String, String>
+                SelectInput(name, label, description, items)
             }
 
             "datasize" -> {
-                DataSizeInput(name, label)
+                DataSizeInput(name, description, label)
             }
 
             else -> {
@@ -186,14 +206,13 @@ class BlueprintConverter : AutoCloseable {
         }
     }
 
-    private fun collectEnvVars(envVarsObj: List<PObject>): List<EnvironmentVariable> {
+    private fun collectEnvVars(envVarsObj: Map<String, Any>): List<EnvironmentVariable> {
         val envVars = mutableListOf<EnvironmentVariable>()
 
-        for (element in envVarsObj) {
-            val name = element.getProperty("name") as String
-            val valueObj: Resolvable<String> = UniversalPklParser.parseValue(element.getProperty("value"))
+        for ((name, value) in envVarsObj) {
+            val parsedValue: Resolvable<String> = UniversalPklParser.parseValue(value)
 
-            envVars.add(EnvironmentVariable(name, valueObj))
+            envVars.add(EnvironmentVariable(name, parsedValue))
         }
 
         return envVars
@@ -221,6 +240,5 @@ class BlueprintConverter : AutoCloseable {
     }
 
     override fun close() {
-        evaluator.close()
     }
 }

@@ -4,7 +4,8 @@ import org.pkl.core.DataSize
 import org.pkl.core.PObject
 
 private const val NEW_KEYWORD = "new "
-private const val INTERNAL_REFERENCE = "__REF__"
+private const val RUNTIME_REF_DELIMITERS = "__"
+private const val RUNTIME_REF_IDENTIFIER = RUNTIME_REF_DELIMITERS + "REF" + RUNTIME_REF_DELIMITERS
 
 object UniversalPklParser {
     private val INPUT_PATTERN =
@@ -25,10 +26,16 @@ object UniversalPklParser {
             RegexOption.MULTILINE,
         )
 
+    private val CONDITION_PROP_PATTERN =
+        Regex(
+            """new\s+ConditionProperty\s*\{\s*name\s*=\s*"([^"]+)"\s*;\s*value\s*=\s*"([^"]+)"\s*}""",
+            RegexOption.MULTILINE,
+        )
+
     @Suppress("UNCHECKED_CAST")
     fun <T> parseValue(value: Any?): Resolvable<T> =
         when (value) {
-            is String -> parseString(value)
+            is String -> parseString(value.replace("\n ", "").trim())
             is Int -> Resolvable.Literal(value.toString())
             is Long -> Resolvable.Literal(value.toString())
             is Double -> Resolvable.Literal(value.toString())
@@ -45,37 +52,43 @@ object UniversalPklParser {
         val inputMatches = INPUT_PATTERN.findAll(value).toList()
         val refMatches = REF_PATTERN.findAll(value).toList()
         val envVarMatches = ENV_VAR_PATTERN.findAll(value).toList()
+        val condMatches = CONDITION_PROP_PATTERN.findAll(value).toList()
 
-        if (inputMatches.isEmpty() && refMatches.isEmpty() && envVarMatches.isEmpty()) {
+        if (inputMatches.isEmpty() && refMatches.isEmpty() && envVarMatches.isEmpty() && condMatches.isEmpty()) {
             return Resolvable.Literal(value) as Resolvable<T>
         }
 
         val trimmed = value.trim()
-
-        if (inputMatches.size == 1 && refMatches.isEmpty() && envVarMatches.isEmpty() &&
-            trimmed.startsWith(NEW_KEYWORD)
-        ) {
-            val inputName = inputMatches[0].groupValues[2]
-            return Resolvable.InputRef(inputName) as Resolvable<T>
-        }
-
-        if (refMatches.size == 1 && inputMatches.isEmpty() && envVarMatches.isEmpty() &&
-            trimmed.startsWith(
-                INTERNAL_REFERENCE,
-            )
-        ) {
+        if (refMatches.size == 1 && trimmed.startsWith(RUNTIME_REF_IDENTIFIER)) {
             val refPath = refMatches[0].groupValues[1]
             return Resolvable.RuntimeRef(refPath) as Resolvable<T>
         }
 
-        if (envVarMatches.size == 1 && inputMatches.isEmpty() && refMatches.isEmpty() &&
-            trimmed.startsWith(NEW_KEYWORD)
-        ) {
-            val envVarName = envVarMatches[0].groupValues[1]
-            return Resolvable.EnvVarRef(envVarName) as Resolvable<T>
+        if (trimmed.startsWith(NEW_KEYWORD)) {
+            if (inputMatches.size == 1 && refMatches.isEmpty() && envVarMatches.isEmpty() && condMatches.isEmpty()) {
+                val inputName = inputMatches[0].groupValues[2]
+                return Resolvable.InputRef(inputName) as Resolvable<T>
+            }
+
+            if (envVarMatches.size == 1 && inputMatches.isEmpty() && refMatches.isEmpty() && condMatches.isEmpty()) {
+                val envVarName = envVarMatches[0].groupValues[1]
+                return Resolvable.EnvVarRef(envVarName) as Resolvable<T>
+            }
+
+            if (condMatches.size == 1 && inputMatches.isEmpty() && refMatches.isEmpty() && envVarMatches.isEmpty()) {
+                val inputName = condMatches[0].groupValues[1]
+                val value = condMatches[0].groupValues[2]
+                return Resolvable.ConditionalRef(inputName, value) as Resolvable<T>
+            }
         }
 
-        return parseInterpolated(value, inputMatches, refMatches, envVarMatches) as Resolvable<T>
+        return parseInterpolated(
+            value,
+            inputMatches,
+            refMatches,
+            envVarMatches,
+            condMatches,
+        ) as Resolvable<T>
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -93,7 +106,7 @@ object UniversalPklParser {
                 Resolvable.EnvVarRef(envVarName) as Resolvable<T>
             }
 
-            obj.toString().contains("__REFS__") -> {
+            className == "Ref" -> {
                 val refPath = extractRefPath(obj)
                 Resolvable.RuntimeRef(refPath) as Resolvable<T>
             }
@@ -110,6 +123,7 @@ object UniversalPklParser {
         inputMatches: List<MatchResult>,
         refMatches: List<MatchResult>,
         envVarMatches: List<MatchResult>,
+        condMatches: List<MatchResult>,
     ): Resolvable.Interpolated {
         val parts = mutableListOf<Resolvable<*>>()
 
@@ -118,6 +132,7 @@ object UniversalPklParser {
                 addAll(inputMatches.map { Match(it, MatchType.INPUT, it.range) })
                 addAll(refMatches.map { Match(it, MatchType.REF, it.range) })
                 addAll(envVarMatches.map { Match(it, MatchType.ENV_VAR, it.range) })
+                addAll(condMatches.map { Match(it, MatchType.CONDITIONAL, it.range) })
             }.sortedBy { it.range.first }
 
         var lastIndex = 0
@@ -142,6 +157,14 @@ object UniversalPklParser {
                     template =
                         template.replaceRange(match.range, $$"${env:$${match.match.groupValues[1]}}")
                 }
+
+                MatchType.CONDITIONAL -> {
+                    template =
+                        template.replaceRange(
+                            match.range,
+                            $$"${cond:$${match.match.groupValues[1]}:$${match.match.groupValues[2]}}",
+                        )
+                }
             }
         }
 
@@ -160,13 +183,19 @@ object UniversalPklParser {
                 }
 
                 MatchType.REF -> {
-                    val refPath = match.match.groupValues[1] + match.match.groupValues[2]
-                    parts.add(Resolvable.RuntimeRef(refPath))
+                    val refPath = match.match.groupValues[2]
+                    parts.add(Resolvable.RuntimeRef(refPath.removeSurrounding(prefix = ":", suffix = "__")))
                 }
 
                 MatchType.ENV_VAR -> {
                     val envVarName = match.match.groupValues[1]
                     parts.add(Resolvable.EnvVarRef(envVarName))
+                }
+
+                MatchType.CONDITIONAL -> {
+                    val inputName = match.match.groupValues[1]
+                    val value = match.match.groupValues[2]
+                    parts.add(Resolvable.ConditionalRef(inputName, value))
                 }
             }
 
@@ -192,8 +221,9 @@ object UniversalPklParser {
     private fun extractRefPath(obj: PObject): String {
         val str = obj.toString()
         return str
-            .substringAfter(INTERNAL_REFERENCE)
-            .substringBefore("__")
+            .substringAfter(RUNTIME_REF_IDENTIFIER)
+            .substringBefore(RUNTIME_REF_DELIMITERS) // delimiters
+            .substringAfter(":") // reference type
     }
 
     private data class Match(
@@ -206,6 +236,7 @@ object UniversalPklParser {
         INPUT,
         REF,
         ENV_VAR,
+        CONDITIONAL,
     }
 }
 

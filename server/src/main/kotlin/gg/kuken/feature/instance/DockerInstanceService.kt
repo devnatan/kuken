@@ -1,20 +1,21 @@
 package gg.kuken.feature.instance
 
 import gg.kuken.KukenConfig
-import gg.kuken.core.EventDispatcher
 import gg.kuken.core.docker.DockerNetworkService
 import gg.kuken.feature.account.IdentityGeneratorService
+import gg.kuken.feature.blueprint.BlueprintProcessor
 import gg.kuken.feature.blueprint.BlueprintService
-import gg.kuken.feature.blueprint.model.Blueprint
+import gg.kuken.feature.blueprint.BlueprintSpecProvider
 import gg.kuken.feature.blueprint.processor.AppResource
 import gg.kuken.feature.blueprint.processor.BlueprintResolutionContext
 import gg.kuken.feature.blueprint.processor.CheckboxInput
 import gg.kuken.feature.blueprint.processor.DataSizeInput
-import gg.kuken.feature.blueprint.processor.InstanceSettingsCommandExecutor
+import gg.kuken.feature.blueprint.processor.InstanceBlueprintResourceReader
 import gg.kuken.feature.blueprint.processor.PasswordInput
 import gg.kuken.feature.blueprint.processor.PortInput
 import gg.kuken.feature.blueprint.processor.Resolvable
 import gg.kuken.feature.blueprint.processor.ResolvedBlueprint
+import gg.kuken.feature.blueprint.processor.ResolvedBlueprintRefs
 import gg.kuken.feature.blueprint.processor.SelectInput
 import gg.kuken.feature.blueprint.processor.TextInput
 import gg.kuken.feature.instance.data.entity.InstanceEntity
@@ -60,6 +61,9 @@ import kotlin.time.Clock
 import kotlin.uuid.Uuid
 import kotlin.uuid.toKotlinUuid
 
+private const val LOCAL_RESOURCES_DIR = ".kuken/resources"
+private const val DEFAULT_DOCKER_CONTAINER_WORKING_DIR = "/home/container"
+
 class DockerInstanceService(
     private val dockerClient: DockerClient,
     private val instanceRepository: InstanceRepository,
@@ -67,7 +71,8 @@ class DockerInstanceService(
     private val identityGeneratorService: IdentityGeneratorService,
     private val kukenConfig: KukenConfig,
     private val dockerNetworkService: DockerNetworkService,
-    private val eventDispatcher: EventDispatcher,
+    private val blueprintSpecProvider: BlueprintSpecProvider,
+    private val blueprintProcessor: BlueprintProcessor,
 ) : InstanceService,
     CoroutineScope by CoroutineScope(Default + CoroutineName("DockerInstanceService")) {
     companion object {
@@ -84,16 +89,16 @@ class DockerInstanceService(
                     resolutionContext.env[property.envVarName].orEmpty()
                 }
 
+                is Resolvable.ConditionalRef -> {
+                    null
+                }
+
                 is Resolvable.InputRef -> {
                     val definition = blueprint.inputs.firstOrNull { it.name == property.inputName }
                     val defaultValue: String? =
                         when (definition) {
                             is CheckboxInput -> {
-                                performSubstitutions(
-                                    property = definition.default,
-                                    blueprint = blueprint,
-                                    resolutionContext = resolutionContext,
-                                ) ?: "false"
+                                definition.default.toString()
                             }
 
                             is DataSizeInput -> {
@@ -105,7 +110,7 @@ class DockerInstanceService(
                             }
 
                             is PortInput -> {
-                                performSubstitutions(definition.default, blueprint, resolutionContext)
+                                (definition.default ?: false).toString()
                             }
 
                             is SelectInput -> {
@@ -157,11 +162,17 @@ class DockerInstanceService(
                 }
 
                 is Resolvable.Literal -> {
-                    if (property.value == "null") null else property.value
+                    if (property.value == null.toString()) null else property.value
                 }
 
                 is Resolvable.RuntimeRef -> {
-                    null
+                    val refT = ResolvedBlueprintRefs.entries.first { it.key == property.refPath }
+                    when (refT) {
+                        ResolvedBlueprintRefs.INSTANCE_ID -> resolutionContext.instanceId.toString()
+                        ResolvedBlueprintRefs.INSTANCE_NAME -> resolutionContext.instanceName
+                        ResolvedBlueprintRefs.NETWORK_HOST -> resolutionContext.address.host.toString()
+                        ResolvedBlueprintRefs.NETWORK_PORT -> resolutionContext.address.port.toString()
+                    }
                 }
 
                 Resolvable.Null -> {
@@ -213,34 +224,54 @@ class DockerInstanceService(
 
         logger.debug("Creating instance from {}: {}", blueprintId, options)
         val blueprint = blueprintService.getBlueprint(blueprintId)
+        val instanceId = identityGeneratorService.generate()
+        val generatedName = generateContainerName(instanceId, "kk-{id}")
+
         val resolutionContext =
             BlueprintResolutionContext(
+                instanceId = instanceId,
+                instanceName = generatedName,
                 inputs = options.inputs,
                 env = options.env,
+                address = options.address,
+            )
+
+        val resourceReader =
+            InstanceBlueprintResourceReader(
+                inputValues = options.inputs,
+                refProvider = { key ->
+                    when (key) {
+                        ResolvedBlueprintRefs.INSTANCE_ID -> instanceId
+                        ResolvedBlueprintRefs.INSTANCE_NAME -> generatedName
+                        ResolvedBlueprintRefs.NETWORK_HOST -> options.address.host
+                        ResolvedBlueprintRefs.NETWORK_PORT -> options.address.port.toString()
+                    }
+                },
+            )
+        val processedBlueprint =
+            blueprintProcessor.process(
+                input = blueprintSpecProvider.provide(blueprint.origin),
+                readers = listOf(resourceReader),
             )
 
         val env =
-            blueprint.spec.build.environmentVariables
-                .map { env -> env.name to performSubstitutions(env.value, blueprint.spec, resolutionContext) }
+            processedBlueprint.build.environmentVariables
+                .map { env -> env.name to performSubstitutions(env.value, processedBlueprint, resolutionContext) }
                 .filter { (_, value) -> value != null }
                 .associate { (key, value) -> key to value!! }
 
         val options = options.copy(env = env)
 
-        val instanceId = identityGeneratorService.generate()
-        val generatedName =
-            generateContainerName(
-                instanceId,
-                "kk-{id}",
-            )
         logger.debug("Instance {} runtime identifier is {}", instanceId, generatedName)
 
         val image =
             requireNotNull(
-                performSubstitutions(blueprint.spec.build.docker.image, blueprint.spec, resolutionContext),
-            ) {
-                "Docker image cannot be null"
-            }
+                performSubstitutions(
+                    property = processedBlueprint.build.docker.image,
+                    blueprint = processedBlueprint,
+                    resolutionContext = resolutionContext,
+                ),
+            ) { "Docker image cannot be null" }
 
         val createResult =
             tryGenerateRuntime(
@@ -248,11 +279,11 @@ class DockerInstanceService(
                 options = options,
                 image = image,
                 generatedName = generatedName,
-                onInstall = blueprint.spec.hooks.onInstall,
+                onInstall = processedBlueprint.hooks.onInstall,
             )
 
         logger.debug("Instance {} creation result: {}", instanceId, createResult)
-        return handleInitialInstanceCreationResult(createResult, instanceId, blueprint)
+        return handleInitialInstanceCreationResult(createResult, instanceId, blueprint.id)
     }
 
     private suspend fun tryGenerateRuntime(
@@ -311,13 +342,13 @@ class DockerInstanceService(
     private suspend fun handleInitialInstanceCreationResult(
         result: GenerateRuntimeResult,
         instanceId: Uuid,
-        blueprint: Blueprint,
+        blueprintId: Uuid,
     ): Instance =
         when (result) {
             is GenerateRuntimeResult.Done -> {
                 registerInstance(
                     instanceId = instanceId,
-                    blueprintId = blueprint.id,
+                    blueprintId = blueprintId,
                     status = InstanceStatus.Created,
                     containerId = result.runtimeIdentifier,
                     address = result.address,
@@ -327,7 +358,7 @@ class DockerInstanceService(
             is GenerateRuntimeResult.RuntimeCreationFailed -> {
                 registerInstance(
                     instanceId = instanceId,
-                    blueprintId = blueprint.id,
+                    blueprintId = blueprintId,
                     status = InstanceStatus.Unavailable,
                     containerId = null,
                     address = result.address,
@@ -337,7 +368,7 @@ class DockerInstanceService(
             is GenerateRuntimeResult.NetworkConnectFailed -> {
                 registerInstance(
                     instanceId = instanceId,
-                    blueprintId = blueprint.id,
+                    blueprintId = blueprintId,
                     status = InstanceStatus.NetworkAssignmentFailed,
                     containerId = result.runtimeIdentifier,
                     address = result.address,
@@ -347,7 +378,7 @@ class DockerInstanceService(
             is GenerateRuntimeResult.MissingDockerImage -> {
                 registerInstance(
                     instanceId = instanceId,
-                    blueprintId = blueprint.id,
+                    blueprintId = blueprintId,
                     status = InstanceStatus.ImagePullNeeded,
                     containerId = null,
                     address = result.address,
@@ -437,34 +468,21 @@ class DockerInstanceService(
                 }
         }
 
-    private suspend fun toInstance(instance: InstanceEntity): Instance =
-        Instance(
-            id = instance.id.value.toKotlinUuid(),
-            status = InstanceStatus.getByLabel(instance.status),
-            updatePolicy = ImageUpdatePolicy.getById(instance.updatePolicy),
-            containerId = instance.containerId,
-            address = HostPort(host = instance.host, port = instance.port!!),
-            runtime = buildRuntime(instance.containerId!!),
-            blueprintId = instance.blueprintId.toKotlinUuid(),
-            createdAt = instance.createdAt,
-            nodeId = instance.nodeId,
-        )
-
     private suspend fun installInstance(
         workingDir: String,
         onInstall: AppResource?,
     ): String {
         if (onInstall == null) {
             logger.debug("Skipping instance installation, no install hook was set")
-            return "/home/container"
+            return DEFAULT_DOCKER_CONTAINER_WORKING_DIR
         }
 
-        val resourcesDir = File(".kuken/resources")
+        val resourcesDir = File(LOCAL_RESOURCES_DIR)
 
         logger.debug("Preparing installation...")
-        val file = File(resourcesDir, onInstall.name)
+        val installScriptFile = File(resourcesDir, onInstall.name)
 
-        logger.debug("Installation file: ${file.absolutePath}")
+        logger.debug("Installation file: ${installScriptFile.absolutePath}")
 
         var createdContainer: String? = null
 
@@ -491,13 +509,13 @@ class DockerInstanceService(
 
             dockerClient.containers.copyDirectoryTo(
                 container = createdContainer,
-                sourcePath = file.parentFile.absolutePath,
+                sourcePath = installScriptFile.parentFile.absolutePath,
                 destinationPath = "/tmp",
             )
 
             val makeExecutable =
                 dockerClient.exec.create(createdContainer) {
-                    command = listOf("chmod", "+x", "/tmp/${file.name}")
+                    command = listOf("chmod", "+x", "/tmp/${installScriptFile.name}")
                 }
             dockerClient.exec.start(makeExecutable)
 
@@ -505,7 +523,7 @@ class DockerInstanceService(
                 dockerClient.exec.create(createdContainer) {
                     attachStdout = true
                     attachStderr = true
-                    command = listOf("/tmp/${file.name}")
+                    command = listOf("/tmp/${installScriptFile.name}")
                 }
             val result =
                 dockerClient.exec.start(
@@ -524,6 +542,16 @@ class DockerInstanceService(
                 println(it)
             }
             logger.debug("--- SCRIPT OUTPUT ---")
+
+            val chmod =
+                dockerClient.exec.create(createdContainer) {
+                    command = listOf("chmod", "-R", "777", "/mnt/server")
+                    attachStdout = true
+                }
+
+            val chmodResult = dockerClient.exec.start(chmod)
+
+            logger.debug("CHMOD result: {}", chmodResult)
         } finally {
             if (createdContainer != null) {
                 dockerClient.containers.remove(createdContainer) { force = true }
@@ -557,11 +585,9 @@ class DockerInstanceService(
                 labels = mapOf("gg.kuken.instance.id" to instanceId.toString())
 
                 // TODO Assign and replace reference values
-                env =
-                    options.env
-                        .mapValues { (_, value) ->
-                            value.replace("{addr.port}", options.address.port.toString())
-                        }.map { (key, value) -> "$key=$value" }
+                // tty = true
+                // openStdin = true
+                env = options.env.map { (key, value) -> "$key=$value" }
 
                 // TODO Allow random port assigned (options.port == null)
                 //      https://github.com/DevNatan/docker-kotlin?tab=readme-ov-file#create-and-start-a-container-with-auto-assigned-port-bindings
@@ -575,17 +601,6 @@ class DockerInstanceService(
             }
 
         dockerClient.containers.start(containerId)
-
-        val permissions =
-            dockerClient.exec.create(containerId) {
-                command = listOf("chmod", "-R", "777", workingDir)
-                attachStdout = true
-            }
-
-        val result = dockerClient.exec.start(permissions)
-
-        logger.debug("CHMOD result: {}", result)
-
         return containerId
     }
 
@@ -689,7 +704,7 @@ class DockerInstanceService(
             .replace("{node}", kukenConfig.node)
     }
 
-    suspend fun getValidInstance(instanceId: Uuid): InstanceEntity {
+    suspend fun getReachableInstance(instanceId: Uuid): InstanceEntity {
         val instance = instanceRepository.findById(instanceId) ?: throw InstanceNotFoundException()
         if (instance.containerId == null) {
             throw InstanceUnreachableRuntimeException()
@@ -723,35 +738,36 @@ class DockerInstanceService(
         val instance = getInstance(instanceId)
         val blueprint = blueprintService.getBlueprint(instance.blueprintId)
 
-        return when (val commandExecutor = blueprint.spec.instanceSettings?.commandExecutor) {
-            is InstanceSettingsCommandExecutor.SSH -> {
-                val template = String.format(commandExecutor.template, commandToRun)
-                logger.debug("Sending command to {}: {}", instance.id, template)
-
-                val execId =
-                    dockerClient.exec.create(instance.containerId!!) {
-                        tty = true
-                        attachStdin = false
-                        attachStdout = false
-                        attachStderr = false
-                        user = "1000"
-                        command = template.split(" ")
-                    }
-
-                dockerClient.exec.start(execId) {
-                    detach = true
-                }
-
-                dockerClient.exec.inspect(execId).exitCode
-            }
-
-            is InstanceSettingsCommandExecutor.Rcon -> {
-                error("RCON Command executor not supported")
-            }
-
-            null -> {
-                null
-            }
-        }
+        return -1
+//        return when (val commandExecutor = blueprint.spec.instanceSettings?.commandExecutor) {
+//            is InstanceSettingsCommandExecutor.SSH -> {
+//                val template = String.format(commandExecutor.template, commandToRun)
+//                logger.debug("Sending command to {}: {}", instance.id, template)
+//
+//                val execId =
+//                    dockerClient.exec.create(instance.containerId!!) {
+//                        tty = true
+//                        attachStdin = false
+//                        attachStdout = false
+//                        attachStderr = false
+//                        user = "1000"
+//                        command = template.split(" ")
+//                    }
+//
+//                dockerClient.exec.start(execId) {
+//                    detach = true
+//                }
+//
+//                dockerClient.exec.inspect(execId).exitCode
+//            }
+//
+//            is InstanceSettingsCommandExecutor.Rcon -> {
+//                error("RCON Command executor not supported")
+//            }
+//
+//            null -> {
+//                null
+//            }
+//        }
     }
 }

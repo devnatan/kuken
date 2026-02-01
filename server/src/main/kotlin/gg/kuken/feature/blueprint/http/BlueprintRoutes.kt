@@ -1,6 +1,6 @@
 package gg.kuken.feature.blueprint.http
 
-import io.ktor.resources.*
+import io.ktor.resources.Resource
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
@@ -27,8 +27,8 @@ class BlueprintRoutes {
     )
 
     @Serializable
-    @Resource("{blueprintId}/process")
-    class Process(
+    @Resource("{blueprintId}/resolve")
+    class Resolve(
         val parent: BlueprintRoutes = BlueprintRoutes(),
         val blueprintId: Uuid,
     )

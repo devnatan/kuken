@@ -19,7 +19,8 @@ val InstancesDI =
                 identityGeneratorService = get(),
                 kukenConfig = get(),
                 dockerNetworkService = DockerNetworkService(dockerClient = get()),
-                eventDispatcher = get(),
+                blueprintSpecProvider = get(),
+                blueprintProcessor = get(),
             )
         }
 

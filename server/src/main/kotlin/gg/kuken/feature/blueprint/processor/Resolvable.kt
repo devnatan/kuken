@@ -34,13 +34,18 @@ sealed class Resolvable<out T> {
     ) : Resolvable<String>()
 
     @Serializable
+    @SerialName("conditional")
+    data class ConditionalRef(
+        val inputName: String,
+        val value: String,
+    ) : Resolvable<String>()
+
+    @Serializable
     @SerialName("interpolated")
     data class Interpolated(
         val template: String,
         val parts: List<Resolvable<*>>,
     ) : Resolvable<String>()
-
-    fun isEager(): Boolean = this is Literal || this is Null
 
     fun toTemplateString(): String =
         when (this) {
@@ -62,6 +67,10 @@ sealed class Resolvable<out T> {
 
             is EnvVarRef -> {
                 $$"${env:$$envVarName}"
+            }
+
+            is ConditionalRef -> {
+                $$"${cond:$$inputName:$$value}"
             }
 
             is Interpolated -> {

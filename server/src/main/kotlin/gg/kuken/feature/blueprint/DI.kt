@@ -1,6 +1,7 @@
 package gg.kuken.feature.blueprint
 
 import gg.kuken.feature.blueprint.entity.BlueprintRepositoryImpl
+import gg.kuken.feature.blueprint.processor.BlueprintConverter
 import gg.kuken.feature.blueprint.repository.BlueprintRepository
 import org.koin.dsl.module
 
@@ -15,24 +16,25 @@ val BlueprintDI =
                 blueprintRepository = get(),
                 blueprintSpecProvider = get(),
                 identityGeneratorService = get(),
-                dockerClient = get(),
+                blueprintConverter = get(),
+                blueprintProcessor = get(),
             )
         }
 
         single<BlueprintSpecProvider> {
             CombinedBlueprintSpecProvider(
                 listOf(
-                    LocalBlueprintSpecProvider(
-                        parser = get(),
-                    ),
-                    RemoteBlueprintSpecProvider(
-                        processor = get(),
-                    ),
+                    LocalBlueprintSpecProvider(),
+                    RemoteBlueprintSpecProvider(),
                 ),
             )
         }
 
         factory {
-            BlueprintProcessor()
+            BlueprintConverter()
+        }
+
+        factory {
+            BlueprintProcessor(blueprintConverter = get())
         }
     }
