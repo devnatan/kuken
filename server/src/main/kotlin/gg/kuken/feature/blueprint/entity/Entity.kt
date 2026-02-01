@@ -1,9 +1,10 @@
 package gg.kuken.feature.blueprint.entity
 
+import gg.kuken.feature.blueprint.model.BlueprintHeader
+import gg.kuken.feature.blueprint.model.BlueprintStatus
 import gg.kuken.feature.blueprint.repository.BlueprintRepository
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
-import org.jetbrains.exposed.v1.core.statements.api.ExposedBlob
 import org.jetbrains.exposed.v1.dao.UUIDEntity
 import org.jetbrains.exposed.v1.dao.UUIDEntityClass
 import org.jetbrains.exposed.v1.datetime.timestamp
@@ -17,10 +18,14 @@ import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
 object BlueprintTable : UUIDTable("blueprints") {
+    val name = varchar("name", 255)
+    val version = varchar("version", 255)
+    val author = varchar("author", 255)
+    val url = varchar("url", 255)
     val origin = varchar("origin", 255)
     val createdAt = timestamp("created_at")
-    val updatedAt = timestamp("updated_at")
-    val content = blob("content")
+    val status = enumeration<BlueprintStatus>("status")
+    val assetsIcon = varchar("a_icon", 255)
 }
 
 class BlueprintEntity(
@@ -28,10 +33,14 @@ class BlueprintEntity(
 ) : UUIDEntity(id) {
     companion object : UUIDEntityClass<BlueprintEntity>(BlueprintTable)
 
+    var name: String by BlueprintTable.name
+    var version: String by BlueprintTable.version
+    var author: String by BlueprintTable.author
+    var url: String by BlueprintTable.url
     var origin: String by BlueprintTable.origin
     var createdAt: Instant by BlueprintTable.createdAt
-    var updatedAt: Instant by BlueprintTable.updatedAt
-    var content: ExposedBlob by BlueprintTable.content
+    var status: BlueprintStatus by BlueprintTable.status
+    var assetsIcon by BlueprintTable.assetsIcon
 }
 
 class BlueprintRepositoryImpl(
@@ -56,15 +65,20 @@ class BlueprintRepositoryImpl(
     override suspend fun create(
         id: Uuid,
         origin: String,
-        spec: ByteArray,
         createdAt: Instant,
+        status: BlueprintStatus,
+        header: BlueprintHeader,
     ): BlueprintEntity =
         suspendTransaction(db = database) {
             BlueprintEntity.new(id.toJavaUuid()) {
-                content = ExposedBlob(spec)
+                this.name = header.name
+                this.author = header.author
+                this.url = header.url
+                this.version = header.version
+                this.assetsIcon = header.assets.icon.uri
                 this.origin = origin
                 this.createdAt = createdAt
-                this.updatedAt = createdAt
+                this.status = status
             }
         }
 

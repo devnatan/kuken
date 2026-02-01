@@ -1,6 +1,8 @@
 package gg.kuken.feature.blueprint.repository
 
 import gg.kuken.feature.blueprint.entity.BlueprintEntity
+import gg.kuken.feature.blueprint.model.BlueprintHeader
+import gg.kuken.feature.blueprint.model.BlueprintStatus
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -12,8 +14,9 @@ interface BlueprintRepository {
     suspend fun create(
         id: Uuid,
         origin: String,
-        spec: ByteArray,
         createdAt: Instant,
+        status: BlueprintStatus,
+        header: BlueprintHeader,
     ): BlueprintEntity
 
     suspend fun delete(id: Uuid)
