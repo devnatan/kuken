@@ -16,8 +16,8 @@
                         v-for="unit in state.units"
                         :key="unit.id"
                         :to="{
-                            name: 'instance.console',
-                            params: { unitId: unit.id, instanceId: unit.instance.id }
+                            name: 'unit',
+                            params: { unitId: unit.id }
                         }"
                         class="serverListItem"
                     >

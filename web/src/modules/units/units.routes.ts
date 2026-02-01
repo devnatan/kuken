@@ -15,12 +15,18 @@ export const UnitsRoutes: Array<RouteRecordRaw> = [
     },
     {
         path: "servers/:unitId",
-        name: "unit",
         props: true,
         component: UnitMain,
         meta: {
             title: "Server"
         },
-        children: [...InstancesRoutes]
+        children: [
+            {
+                path: "overview",
+                name: "unit",
+                component: importPage("units", "overview/UnitOverview")
+            },
+            ...InstancesRoutes
+        ]
     }
 ]
