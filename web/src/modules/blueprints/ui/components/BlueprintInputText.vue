@@ -2,7 +2,7 @@
 import VInput from "@/modules/platform/ui/components/form/VInput.vue"
 import VLabel from "@/modules/platform/ui/components/form/VLabel.vue"
 import VFieldSet from "@/modules/platform/ui/components/form/VFieldSet.vue"
-import type { BlueprintBuildInput } from "@/modules/blueprints/api/models/blueprint.model.ts"
+import type { BlueprintBuildInput } from "@/modules/blueprints/api/models/blueprint.spec.model.ts"
 
 const props = defineProps<Partial<BlueprintBuildInput>>()
 const model = defineModel()

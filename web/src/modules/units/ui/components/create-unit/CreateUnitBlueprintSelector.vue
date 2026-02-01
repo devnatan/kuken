@@ -2,9 +2,8 @@
 import blueprintsService from "@/modules/blueprints/api/services/blueprints.service.ts"
 import Resource from "@/modules/platform/ui/components/Resource.vue"
 import { reactive, unref } from "vue"
-import { type Blueprint, resolveBlueprintSource } from "@/modules/blueprints/api/models/blueprint.model.ts"
+import { type Blueprint } from "@/modules/blueprints/api/models/blueprint.model.ts"
 import { isNull } from "@/utils"
-import { ProgressiveImage } from "vue-progressive-image"
 import VIcon from "@/modules/platform/ui/components/icons/VIcon.vue"
 
 const selected = defineModel()
@@ -37,14 +36,15 @@ function select(blueprint: Blueprint) {
                     class="blueprint"
                     @click="select(blueprint)"
                 >
-                    <ProgressiveImage
-                        :src="resolveBlueprintSource(blueprint.spec.assets?.icon)"
+                    <div
+                        :style="`background-image: url(${blueprint.header.assets.icon})`"
                         class="image"
                     />
                     <div class="body">
-                        <h5 class="title" v-text="blueprint.spec.metadata.name" />
+                        <h5 class="title" v-text="blueprint.header.name" />
                         <p class="description">
-                            Version {{ blueprint.spec.metadata.version }} · Küken Official Blueprint
+                            Version {{ blueprint.header.version
+                            }}{{ blueprint.official ? " · Küken Official Blueprint" : "" }}
                             <span class="icon">
                                 <VIcon name="Verified" />
                             </span>
@@ -92,7 +92,6 @@ function select(blueprint: Blueprint) {
     min-height: 72px;
     border-radius: 20px;
     display: block;
-    background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
 }
@@ -103,6 +102,10 @@ function select(blueprint: Blueprint) {
     padding: 8px 0;
     justify-content: center;
     gap: 0;
+
+    .title {
+        font-family: var(--kt-body-font), serif;
+    }
 }
 
 .description {

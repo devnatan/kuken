@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import Breadcrumb from "@/modules/platform/ui/components/Breadcrumb.vue"
 import { useHead } from "@unhead/vue"
 
 useHead({
@@ -8,7 +7,6 @@ useHead({
 </script>
 
 <template>
-    <Breadcrumb />
     <router-view />
 </template>
 

@@ -1,16 +1,17 @@
 <script lang="ts" setup>
 import { useConsoleFrames } from "@/modules/instances/composables/useConsoleFrames.ts"
 import { useConsoleLoader } from "@/modules/instances/composables/useConsoleLoader.ts"
-import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue"
+import { computed, nextTick, onMounted, onUnmounted, ref, unref, useTemplateRef, watch } from "vue"
 import type { Frame } from "@/modules/instances/api/models/frame.model.ts"
 import { useConsoleWebSocket } from "@/modules/instances/composables/useConsoleWebSocket.ts"
-import ConsoleLoadingIndicator from "@/modules/instances/ui/components/console/ConsoleLoadingIndicator.vue"
-import ConsoleEndIndicator from "@/modules/instances/ui/components/console/ConsoleEndIndicator.vue"
-import ConsoleEmpty from "@/modules/instances/ui/components/console/ConsoleEmpty.vue"
 import { useScroll } from "@vueuse/core"
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller"
 import ConsoleLine from "@/modules/instances/ui/components/console/ConsoleLine.vue"
 import instancesService from "@/modules/instances/api/services/instances.service.ts"
+import VInput from "@/modules/platform/ui/components/form/VInput.vue"
+import VForm from "@/modules/platform/ui/components/form/VForm.vue"
+import { useAnsiText } from "@/modules/instances/composables/useAnsiText.ts"
+import { isUndefined } from "@/utils"
 
 const props = defineProps<{
     instanceId: string
@@ -37,18 +38,7 @@ const {
     findByPersistentId
 } = useConsoleFrames({ maxFrames: MAX_FRAMES })
 
-const {
-    isLoadingOlder,
-    isLoadingNewer,
-    hasOlderLogs,
-    hasNewerLogs,
-    loadOlderLogs,
-    loadNewerLogs,
-    loadAroundTimestamp,
-    setHasOlderLogs,
-    setHasNewerLogs,
-    resetToRealtime
-} = useConsoleLoader({
+const { isRealtime, loadLogs, goToPrevious, goToNext, goToRealtime, goToDate } = useConsoleLoader({
     instanceId: props.instanceId,
     batchSize: LOAD_BATCH_SIZE
 })
@@ -65,50 +55,28 @@ const { y, arrivedState } = useScroll(scrollerRef, {
     }
 })
 
-// Para fade (offset pequeno)
 const { arrivedState: fadeState } = useScroll(scrollerRef, {
     offset: { top: 20, bottom: 20 }
 })
 
 const autoScroll = ref(true)
-const showJumpButton = computed(() => hasNewerLogs.value || !autoScroll.value)
-
-// =================================================
-// SCROLL
-// =================================================
-watch(
-    () => arrivedState.top,
-    (atTop) => {
-        console.log("atTop", atTop)
-        console.log("hasOlderLogs", hasOlderLogs.value)
-        if (atTop && hasOlderLogs.value) {
-            handleLoadOlder()
-        }
-    }
-)
-
-watch(
-    () => arrivedState.bottom,
-    (atBottom) => {
-        console.log("atBottom", atBottom)
-        if (atBottom) {
-            console.log("hasNewerLogs", hasNewerLogs.value)
-            if (hasNewerLogs.value) {
-                handleLoadNewer()
-            } else {
-                autoScroll.value = true
-            }
-        } else {
-            autoScroll.value = false
-        }
-    }
-)
 
 function scrollToBottom() {
     nextTick(() => {
-        if (scrollerRef.value) {
-            scrollerRef.value.scrollTop = scrollerRef.value.scrollHeight
+        const scroller = scrollerRef.value?.$el
+        if (!scroller) return
+
+        let lastScrollTop = -1
+        const tryScroll = () => {
+            scroller.scrollTop = scroller.scrollHeight
+
+            if (scroller.scrollTop !== lastScrollTop) {
+                lastScrollTop = scroller.scrollTop
+                requestAnimationFrame(tryScroll)
+            }
         }
+
+        tryScroll()
     })
 }
 
@@ -117,13 +85,10 @@ function scrollToBottom() {
 // =================================================
 
 function handleNewFrame(frame: Frame) {
-    const { trimmedOld } = addFrame(frame)
-    if (trimmedOld) {
-        setHasOlderLogs(true)
-    }
+    addFrame(frame)
 
     if (autoScroll.value) {
-        nextTick(() => {})
+        scrollToBottom()
     }
 }
 
@@ -142,47 +107,6 @@ const {
 // LOADING
 // =================================================
 
-async function handleLoadOlder() {
-    const oldestTimestamp = frames.value[0]?.timestamp
-    if (!oldestTimestamp) return
-
-    const newFrames = await loadOlderLogs(oldestTimestamp)
-    if (newFrames.length > 0) {
-        const { trimmedNew } = preprendFrames(newFrames)
-        if (trimmedNew) setHasNewerLogs(true)
-    }
-}
-
-async function handleLoadNewer() {
-    const newestTimestamp = frames.value[frames.value.length - 1]?.timestamp
-    if (!newestTimestamp) return
-
-    const newFrames = await loadNewerLogs(newestTimestamp)
-    if (newFrames.length > 0) {
-        const { trimmedOld } = appendFrames(newFrames)
-        if (trimmedOld) setHasOlderLogs(true)
-    }
-
-    if (!hasNewerLogs.value) {
-        autoScroll.value = true
-    }
-}
-
-async function navigateToAnchor(persistentId: string) {
-    const timestamp = parseInt(persistentId.split("-")[0]!, 10)
-    const newFrames = await loadAroundTimestamp(timestamp)
-
-    setFrames(newFrames)
-    autoScroll.value = false
-
-    await nextTick()
-    const index = findByPersistentId(persistentId)
-    if (index !== -1) {
-        // TODO Scroll to item
-        highlightFrame(persistentId)
-    }
-}
-
 function highlightFrame(persistentId: string) {
     setTimeout(() => {
         const element = document.querySelector(`[data-persistent-id="${persistentId}"]`)
@@ -197,20 +121,6 @@ function highlightFrame(persistentId: string) {
 // ACTIONS
 // =================================================
 
-function jumpToPresent() {
-    resetToRealtime()
-    autoScroll.value = false
-    trimToRecent(LOAD_BATCH_SIZE)
-    setHasOlderLogs(true)
-    scrollToBottom()
-}
-
-function reconnect() {
-    resetToRealtime()
-    autoScroll.value = true
-    wsReconnect()
-}
-
 function copyAnchorLink(frame: Frame) {
     const url = `${window.location.origin}/instances/${props.instanceId}/console#${frame.persistentId}`
     navigator.clipboard.writeText(url)
@@ -222,58 +132,180 @@ function copyAnchorLink(frame: Frame) {
 
 onMounted(async () => {
     if (props.anchorId) {
-        await navigateToAnchor(props.anchorId)
+        // TODO navigateToAnchor
     }
 
-    const { frames, hasMore } = await instancesService.getLogs(props.instanceId, {
-        limit: MAX_FRAMES
-    })
+    const { frames, hasMore } = await instancesService.getLogs(props.instanceId, {})
     if (frames.length > 0) {
         setFrames(frames)
-        hasOlderLogs.value = hasMore
         console.log(`Filling console up with ${frames.length} frames`)
     }
 
     const lastFrameTimestamp = frames[frames.length - 1]?.timestamp ?? 0
     subscribe(lastFrameTimestamp)
 
-    scrollToBottom()
+    setTimeout(() => scrollToBottom(), 500)
 })
 
 onUnmounted(() => unsubscribe("unmounted"))
+
+watch(isRealtime, (realtime) => {
+    if (realtime) {
+        subscribe(0)
+    } else {
+        unsubscribe("realtime")
+    }
+})
+
+// const windowHours = ref(6) // Padrão: 6 horas
+// const windowStart = ref<number | null>(null) // Padrão: tempo real
+//
+// async function handlePrevious() {
+//     goToPrevious()
+//     const newFrames = await loadLogs()
+//     setFrames(newFrames)
+// }
+//
+// async function handleNext() {
+//     goToNext()
+//     const newFrames = await loadLogs()
+//     setFrames(newFrames)
+// }
+//
+// async function handleRealtime() {
+//     goToRealtime()
+//     const newFrames = await loadLogs()
+//     setFrames(newFrames)
+// }
+//
+// async function handleChangeWindow(hours: number) {
+//     windowHours.value = hours
+//     const newFrames = await loadLogs()
+//     setFrames(newFrames)
+// }
+
+const command = ref("")
+const commandInput = useTemplateRef("commandInput")
+const history = ref<string[]>([])
+const historyIndex = ref(-1)
+
+async function sendCommand() {
+    const input = unref(command.value)
+    command.value = ""
+    history.value.push(input)
+
+    const { exitCode } = await instancesService.runInstanceCommand(props.instanceId, input)
+
+    console.log(`Exit code for ${input}: ${exitCode}`)
+}
+
+function setCommandToLastInHistory(direction: "up" | "down") {
+    const mod = direction === "up" ? -1 : 1
+
+    if (historyIndex.value == -1) historyIndex.value = history.value.length + mod
+    else historyIndex.value = historyIndex.value + mod
+
+    const next = history.value[historyIndex.value]
+    if (isUndefined(next)) historyIndex.value = -1
+    else {
+        command.value = next
+        setTimeout(() => {
+            const input: HTMLInputElement = commandInput.value!.$el
+            input.setSelectionRange(next.length, next.length)
+        }, 1)
+    }
+}
+
+const searchQuery = ref("")
+const searchResults = computed(() => {
+    let result: Frame[]
+    if (!searchQuery.value.trim()) result = frames.value
+    else {
+        const query = searchQuery.value.toLowerCase()
+        result = frames.value.filter((f) => f.value.toLowerCase().includes(query))
+    }
+
+    return result.map((f) => {
+        return { ...f, value: highlightSearch(useAnsiText(f.value)) }
+    })
+})
+
+const highlightSearch = (text: string) => {
+    const query = searchQuery.value.trim()
+    if (!query) return text
+
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi")
+    return text.replace(regex, "<mark>$1</mark>")
+}
 </script>
 
 <template>
-    <div :class="{ hidden: fadeState.top }" class="fade-top"></div>
     <div class="console-container">
-        <ConsoleLoadingIndicator v-if="isLoadingOlder" position="top" />
-        <ConsoleEndIndicator v-else-if="!hasOlderLogs && frames.length > 0" position="top" />
+        <div class="console-toolbar">
+            <div class="toolbar-left">
+                <input
+                    v-model="searchQuery"
+                    class="search-input"
+                    placeholder="Search..."
+                    type="text"
+                />
+                <span class="frame-count">
+                    {{ searchResults.length }} / {{ frames.length }} lines
+                </span>
+            </div>
 
-        <DynamicScroller
-            ref="scrollerRef"
-            :items="frames"
-            :min-item-size="24"
-            class="console-output"
-            key-field="seqId"
-        >
-            <template #default="{ item, index, active }">
-                <DynamicScrollerItem :active="active" :data-index="index" :item="item">
-                    <ConsoleLine :frame="item" @copy-link="copyAnchorLink" />
-                </DynamicScrollerItem>
-            </template>
-        </DynamicScroller>
+            <div class="toolbar-right">
+                <div class="connection-status">
+                    <span class="status-dot"></span>
+                    Connected
+                </div>
+                <!-- <ConsoleTimeNavigator
+                    :window-hours="windowHours"
+                    :window-start="windowStart"
+                    @next="handleNext"
+                    @previous="handlePrevious"
+                    @realtime="handleRealtime"
+                    @change-window="handleChangeWindow"
+                /> -->
+            </div>
+        </div>
 
-        <ConsoleLoadingIndicator v-if="isLoadingNewer" position="bottom" />
-        <ConsoleEndIndicator
-            v-else-if="hasNewerLogs"
-            clickable
-            position="bottom"
-            @click="jumpToPresent"
-        />
+        <div class="console-wrapper">
+            <div :class="{ hidden: fadeState.top }" class="fade-top" />
 
-        <ConsoleEmpty v-if="frames.length === 0 && !isLoadingOlder" />
+            <DynamicScroller
+                ref="scrollerRef"
+                :items="searchResults"
+                :min-item-size="24"
+                class="console-output"
+                key-field="seqId"
+            >
+                <template #default="{ item, index, active }">
+                    <DynamicScrollerItem :active="active" :data-index="index" :item="item">
+                        <ConsoleLine
+                            :key="item.seqId"
+                            :frame="item"
+                            :text="item.value"
+                            @copy-link="copyAnchorLink"
+                        />
+                    </DynamicScrollerItem>
+                </template>
+            </DynamicScroller>
+
+            <div :class="{ hidden: fadeState.bottom }" class="fade-bottom" />
+        </div>
+
+        <VForm class="command" @submit.prevent="sendCommand">
+            <VInput
+                ref="commandInput"
+                v-model="command"
+                auto-focus
+                placeholder="Type something..."
+                @keydown.up.stop="setCommandToLastInHistory('up')"
+                @keydown.down.stop="setCommandToLastInHistory('down')"
+            />
+        </VForm>
     </div>
-    <div :class="{ hidden: fadeState.bottom }" class="fade-bottom"></div>
 </template>
 
 <style lang="scss" scoped>
@@ -285,6 +317,7 @@ onUnmounted(() => unsubscribe("unmounted"))
     height: 100%;
     color: #d4d4d4;
     font-family: "JetBrains Mono", monospace;
+    scroll-snap-type: y proximity;
 }
 
 .console-wrapper {
@@ -294,13 +327,14 @@ onUnmounted(() => unsubscribe("unmounted"))
 }
 
 .console-output :deep(.vue-recycle-scroller__item-wrapper) {
-    scroll-snap-type: y proximity;
+    scroll-snap-type: y mandatory;
 }
 
 .console-output {
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+    scroll-snap-type: y proximity;
     position: relative;
     scroll-behavior: smooth;
     scrollbar-width: thin;
@@ -388,5 +422,138 @@ onUnmounted(() => unsubscribe("unmounted"))
 .fade-top.hidden,
 .fade-bottom.hidden {
     opacity: 0;
+}
+
+.console-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 32px;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+
+    .toolbar-left,
+    .toolbar-right {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    button,
+    select {
+        padding: 6px 12px;
+        background: #3e3e42;
+        border: 1px solid #555;
+        color: #d4d4d4;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+    }
+
+    button:hover:not(:disabled),
+    select:hover {
+        background: #505050;
+    }
+
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .search-input {
+        padding: 6px 12px;
+        background: rgba(0, 0, 0, 0.12);
+        font-family: "JetBrains Mono", "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+        color: #d1d5db;
+        border-radius: 8px;
+        min-width: 240px;
+        transition: border-color 0.2s;
+        height: 38px;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #0e639c;
+    }
+
+    .frame-count {
+        white-space: nowrap;
+        margin-left: 12px;
+        color: #d1d5db;
+    }
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    background: #2d4a2d;
+    border: 1px solid #4a7c4a;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #8cd98c;
+    font-weight: 500;
+    transition: all 0.3s;
+
+    &.disconnected {
+        background: #4a2d2d;
+        border-color: #7c4a4a;
+        color: #f48771;
+
+        .status-dot {
+            background: #f48771;
+        }
+    }
+
+    &.ended {
+        background: #3d3d2d;
+        border-color: #7c7c4a;
+        color: #f9a825;
+
+        .status-dot {
+            background: #f9a825;
+            animation: none;
+        }
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #8cd98c;
+        animation: blink 2s infinite;
+    }
+}
+
+@keyframes blink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.command input {
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.12);
+    font-family: "JetBrains Mono", "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+    color: #d1d5db;
+    border-radius: 0;
+    transition: border-color 0.2s;
+    height: 48px;
+
+    &::placeholder {
+        font-family: "JetBrains Mono", "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+        font-style: normal;
+        color: inherit;
+    }
 }
 </style>

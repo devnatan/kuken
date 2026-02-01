@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useRoute } from "vue-router"
 import { computed } from "vue"
 
@@ -25,27 +25,47 @@ const activeLink = computed(() => links.value[links.value.length - 1])
 </script>
 
 <template>
-    <div v-if="isVisible" class="root">
-        <router-link
-            v-for="link in inactiveLinks"
-            :key="link.title"
-            class="link"
-            :to="{ path: link.route }"
-        >
-            {{ link.title }}
-        </router-link>
-        <span key="active" class="link" v-text="activeLink?.title" />
-    </div>
+    <transition name="breadcrumb-container">
+        <div v-if="isVisible" class="breadcrumb-wrapper">
+            <transition-group class="breadcrumb" name="breadcrumb" tag="div">
+                <router-link
+                    v-for="link in inactiveLinks"
+                    :key="link.title"
+                    :to="{ path: link.route }"
+                    class="link"
+                >
+                    {{ link.title }}
+                </router-link>
+                <span key="active" class="link" v-text="activeLink?.title" />
+            </transition-group>
+        </div>
+    </transition>
 </template>
 
-<style scoped lang="scss">
-.root {
-    margin-bottom: 2rem;
+<style lang="scss" scoped>
+.breadcrumb-wrapper {
+    left: 54px;
+    top: 32px;
+    position: relative;
+    z-index: 1;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    height: 24px;
 
     .link {
         font-size: 16px;
         color: var(--kt-content-neutral-high);
         user-select: none;
+        display: inline-flex;
+        align-items: center;
+        height: 24px;
+        line-height: 1;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        -webkit-font-smoothing: subpixel-antialiased;
     }
 
     a.link {
@@ -59,7 +79,52 @@ const activeLink = computed(() => links.value[links.value.length - 1])
             padding: 0 12px;
             font-size: 12px;
             opacity: 0.38;
+            align-self: center;
+            backface-visibility: hidden;
         }
     }
+}
+
+.breadcrumb-container-enter-active,
+.breadcrumb-container-leave-active {
+    transition: all 0.1s ease;
+}
+
+.breadcrumb-container-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+    position: absolute;
+}
+
+.breadcrumb-container-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.breadcrumb-enter-active {
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+}
+
+.breadcrumb-enter-from {
+    opacity: 0;
+    transform: translateX(-20px) translateZ(0); // força GPU
+}
+
+.breadcrumb-leave-active {
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+    position: absolute;
+}
+
+.breadcrumb-leave-to {
+    opacity: 0;
+    transform: translateX(-20px) translateZ(0);
+}
+
+.breadcrumb-move {
+    transition: transform 0.3s ease;
 }
 </style>

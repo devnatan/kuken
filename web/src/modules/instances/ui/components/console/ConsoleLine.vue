@@ -1,18 +1,17 @@
 <script lang="ts" setup>
 import type { Frame } from "@/modules/instances/api/models/frame.model.ts"
-import { useAnsiText } from "@/modules/instances/composables/useAnsiText.ts"
 import { computed } from "vue"
 import dayjs from "dayjs"
 
 const props = defineProps<{
     frame: Frame
+    text: string
 }>()
 
 const emit = defineEmits<{
     copyLink: [frame: Frame]
 }>()
 
-const textContent = computed(() => useAnsiText(props.frame.value))
 const formattedTime = computed(() =>
     dayjs(props.frame.timestamp).format("dddd, MMMM D, YYYY h:mm A")
 )
@@ -20,20 +19,22 @@ const formattedTime = computed(() =>
 
 <template>
     <div
-        :class="[`stream-${frame.stream.name.toLowerCase()}`]"
-        :data-persistent-id="frame.persistentId"
+        :class="`stream-${props.frame.stream.name.toLowerCase()}`"
+        :data-persistent-id="props.frame.persistentId"
         class="console-line"
     >
-        <span class="line-number">{{ frame.seqId }}</span>
-        <span :title="formattedTime" class="line-content" v-html="textContent" />
-        <button class="copy-link" title="Copy link" @click.stop="emit('copyLink', frame)">#</button>
+        <span class="line-number">{{ props.frame.seqId }}</span>
+        <span :title="formattedTime" class="line-content" v-html="props.text" />
+        <button class="copy-link" title="Copy link" @click.stop="emit('copyLink', props.frame)">
+            #
+        </button>
     </div>
 </template>
 
 <style lang="scss" scoped>
 .console-line {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     box-sizing: border-box;
     padding: 2px 8px;
     min-height: 24px;
@@ -52,7 +53,6 @@ const formattedTime = computed(() =>
     padding-right: 12px;
     user-select: none;
     flex-shrink: 0;
-    align-self: baseline;
 }
 
 .line-content {

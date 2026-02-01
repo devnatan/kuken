@@ -1,6 +1,6 @@
 <template>
     <LoadingState v-if="isLoading" :class="$style.loading" />
-    <router-view v-else />
+    <RouterView v-else />
     <ModalsContainer />
 </template>
 

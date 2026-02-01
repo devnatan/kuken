@@ -56,7 +56,7 @@ function performImport() {
                         <div class="blueprintIcon">
                             <img
                                 :alt="`${blueprint.id} icon`"
-                                :src="resolveBlueprintSource(blueprint.spec.assets?.icon)"
+                                :src="resolveBlueprintSource(blueprint.header.assets.icon)"
                             />
                         </div>
                     </router-link>

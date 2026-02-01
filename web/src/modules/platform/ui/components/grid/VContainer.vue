@@ -1,14 +1,14 @@
 <template>
-    <div :class="$style.root">
+    <div class="container">
         <slot />
     </div>
 </template>
-<style lang="scss" module>
-.root {
+<style lang="scss" scoped>
+.container {
     position: relative;
     width: 100%;
-    max-width: calc(1170px * 1.6);
     margin: 0 auto;
+    max-width: calc(1170px * 1.4);
     box-sizing: border-box;
 
     &:after {

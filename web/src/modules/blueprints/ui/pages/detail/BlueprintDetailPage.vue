@@ -7,15 +7,15 @@
                         <div class="header">
                             <div
                                 :style="{
-                                    backgroundImage: `url(${resolveBlueprintSource(blueprint.spec.assets?.icon)})`
+                                    backgroundImage: `url(${resolveBlueprintSource(blueprint.header.assets?.icon)})`
                                 }"
                                 class="icon"
                             />
                             <div class="text">
-                                <h4 class="title">{{ blueprint.spec.metadata.name }}</h4>
+                                <h4 class="title">{{ blueprint.header.name }}</h4>
                                 <p class="description">
-                                    Version {{ blueprint.spec.metadata.version }} · Küken Official
-                                    Blueprint
+                                    Version {{ blueprint.header.version }}
+                                    {{ blueprint.official ? " · Küken Official Blueprint" : "" }}
                                 </p>
                             </div>
                         </div>
@@ -26,7 +26,10 @@
                         <div class="servers-using">
                             <span>There’s no servers using this blueprint.</span>
                             <VButton
-                                :to="{ name: 'units.create', query: { blueprint: blueprint.id } }"
+                                :to="{
+                                    name: 'units.create',
+                                    params: { blueprint: blueprint.id }
+                                }"
                                 variant="primary"
                             >
                                 Create new server
@@ -40,12 +43,12 @@
                     <section class="build-configuration">
                         <h4>Build Configuration</h4>
                         <VCard style="padding: 0">
-                            <higlight
-                                :autodetect="false"
-                                :code="JSON.stringify(blueprint.spec.build, null, 2)"
-                                class="highlight"
-                                language="json"
-                            />
+                            <!--                            <higlight-->
+                            <!--                                :autodetect="false"-->
+                            <!--                                :code="JSON.stringify(blueprint.spec.build, null, 2)"-->
+                            <!--                                class="highlight"-->
+                            <!--                                language="json"-->
+                            <!--                            />-->
                         </VCard>
                     </section>
                 </VCol>
@@ -53,12 +56,12 @@
                     <section class="file-descriptor">
                         <h4>File Descriptor</h4>
                         <VCard style="padding: 0">
-                            <higlight
-                                :autodetect="false"
-                                :code="JSON.stringify(blueprint.spec, null, 2)"
-                                class="highlight"
-                                language="json"
-                            />
+                            <!--                            <higlight-->
+                            <!--                                :autodetect="false"-->
+                            <!--                                :code="JSON.stringify(blueprint.spec, null, 2)"-->
+                            <!--                                class="highlight"-->
+                            <!--                                language="json"-->
+                            <!--                            />-->
                         </VCard>
                     </section>
                 </VCol>
@@ -68,10 +71,7 @@
 </template>
 <script lang="ts" setup>
 import { ref } from "vue"
-import {
-    type Blueprint,
-    resolveBlueprintSource
-} from "@/modules/blueprints/api/models/blueprint.model"
+import { type Blueprint, resolveBlueprintSource } from "@/modules/blueprints/api/models/blueprint.model"
 import blueprintsService from "@/modules/blueprints/api/services/blueprints.service"
 import Resource from "@/modules/platform/ui/components/Resource.vue"
 import VCol from "@/modules/platform/ui/components/grid/VCol.vue"
@@ -88,7 +88,7 @@ const resource = () => blueprintsService.getBlueprint(props.blueprintId)
 const blueprint = ref<Blueprint | null>(null)
 
 useHead({
-    title: () => (blueprint.value ? `${blueprint.value.spec.metadata.name} - Game Directory` : "")
+    title: () => (blueprint.value ? `${blueprint.value.header.name} - Game Directory` : "")
 })
 </script>
 <style lang="scss">
@@ -105,12 +105,11 @@ pre code.hljs {
     gap: 16px;
 
     .icon {
-        background-position: center;
         background-size: cover;
         background-repeat: no-repeat;
         width: 96px;
         height: 96px;
-        border-radius: 8px;
+        border-radius: 20px;
     }
 
     .text {

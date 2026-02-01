@@ -1,39 +1,52 @@
 <template>
     <VTitle>Welcome</VTitle>
-    <VButton to="blueprints" variant="primary"> Go to blueprints </VButton>
 
-    <div class="header">
-        <h4>Your Server List</h4>
-        <span class="count" v-text="state.units.length" />
-    </div>
-    <Resource :resource="unitsService.listUnits" @loaded="(data: Unit[]) => (state.units = data)">
-        <div class="serverList">
-            <router-link
-                v-for="unit in state.units"
-                :key="unit.id"
-                :to="{ name: 'instance.console', params: { instanceId: unit.instance.id } }"
-                class="serverListItem"
+    <VContainer>
+        <VCol :size="4">
+            <div class="header">
+                <h4>Your Server List</h4>
+                <span class="count" v-text="state.units.length" />
+            </div>
+            <Resource
+                :resource="unitsService.listUnits"
+                @loaded="(data: Unit[]) => (state.units = data)"
             >
-                <ProgressiveImage
-                    :src="resolveBlueprintSource(unit.instance.blueprint.spec.assets?.icon)"
-                    class="image"
-                />
-                <div class="body">
-                    <h5 class="title" v-text="unit.name" />
-                    <p class="description">
-                        {{ unit.instance.blueprint.spec.metadata.name }}
-                        <span class="icon">
-                            <VIcon name="Verified" />
-                        </span>
-                    </p>
+                <div class="serverList">
+                    <router-link
+                        v-for="unit in state.units"
+                        :key="unit.id"
+                        :to="{
+                            name: 'instance.console',
+                            params: { unitId: unit.id, instanceId: unit.instance.id }
+                        }"
+                        class="serverListItem"
+                    >
+                        <ProgressiveImage
+                            :src="
+                                resolveBlueprintSource(unit.instance.blueprint.header.assets.icon)
+                            "
+                            class="image"
+                        />
+                        <div class="body">
+                            <h5 class="title" v-text="unit.name" />
+                            <p class="description">
+                                {{ unit.instance.blueprint.header.name }}
+                                <span class="icon">
+                                    <VIcon name="Verified" />
+                                </span>
+                            </p>
+                        </div>
+                    </router-link>
                 </div>
-            </router-link>
-        </div>
-    </Resource>
+            </Resource>
+        </VCol>
+        <VCol :size="4">
+            <VButton to="blueprints" variant="primary"> Go to blueprints </VButton>
+        </VCol>
+    </VContainer>
 </template>
 
 <script lang="ts" setup>
-import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 import { reactive } from "vue"
 import type { Unit } from "@/modules/units/api/models/unit.model.ts"
 import Resource from "@/modules/platform/ui/components/Resource.vue"
@@ -42,6 +55,9 @@ import VTitle from "@/modules/platform/ui/components/typography/VTitle.vue"
 import { ProgressiveImage } from "vue-progressive-image"
 import { resolveBlueprintSource } from "@/modules/blueprints/api/models/blueprint.model.ts"
 import VIcon from "@/modules/platform/ui/components/icons/VIcon.vue"
+import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
+import VCol from "@/modules/platform/ui/components/grid/VCol.vue"
+import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 
 let state = reactive({ units: [] as Unit[] })
 </script>
@@ -90,16 +106,22 @@ let state = reactive({ units: [] as Unit[] })
         display: flex;
         flex-direction: row;
         gap: 16px;
-        padding: 12px;
+        padding: 8px;
         border: 2px solid var(--kt-border-low);
         transition:
             border ease-in-out 0.15s,
             background-color ease-in-out 0.15s;
         border-radius: 20px;
+        text-decoration: none;
 
         &:hover {
             cursor: pointer;
             border-color: var(--kt-border-medium);
+
+            .title,
+            .description {
+                opacity: 1;
+            }
         }
 
         &.selected {
@@ -111,7 +133,7 @@ let state = reactive({ units: [] as Unit[] })
             height: 72px;
             min-width: 72px;
             min-height: 72px;
-            border-radius: 20px;
+            border-radius: 16px;
             display: block;
             background-position: center;
             background-size: cover;
@@ -124,6 +146,11 @@ let state = reactive({ units: [] as Unit[] })
             padding: 8px 0;
             justify-content: center;
             gap: 0;
+        }
+
+        .title,
+        .description {
+            opacity: 0.88;
         }
 
         .description {

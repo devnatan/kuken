@@ -1,7 +1,7 @@
 <template>
-    <Component :is="component" class="icon" :aria-labelledby="`icon-${name}`" />
+    <Component :is="component" :aria-labelledby="`icon-${name}`" class="icon" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { defineAsyncComponent } from "vue"
 
 const props = defineProps<{ name: string }>()

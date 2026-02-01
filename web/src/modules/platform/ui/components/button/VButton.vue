@@ -1,12 +1,12 @@
 <template>
     <router-link
         v-if="to"
-        class="button"
         :class="styleClasses"
         :tabindex="disabled ? -1 : 0"
         :to="to"
+        class="button"
         type="button"
-        v-bind="{ disabled }"
+        v-bind="{ disabled: disabled ? 'true' : undefined }"
         @click="$emit('click')"
         @keydown.enter="$emit('keydown', $event)"
     >
@@ -14,11 +14,11 @@
     </router-link>
     <button
         v-else
-        class="button"
         :class="styleClasses"
         :tabindex="disabled ? -1 : 0"
+        class="button"
         type="button"
-        v-bind="{ disabled }"
+        v-bind="{ disabled: disabled ? 'true' : undefined }"
         @click="$emit('click', $event)"
         @keydown.enter="$emit('keydown', $event)"
     >
@@ -26,7 +26,7 @@
     </button>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { RouteLocationRaw } from "vue-router"
 import { computed } from "vue"
 

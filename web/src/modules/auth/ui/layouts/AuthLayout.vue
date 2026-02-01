@@ -1,7 +1,7 @@
 <template>
     <div class="root">
         <div class="form">
-            <img src="/img/icon-color.svg" class="logo" alt="Icon" />
+            <img alt="logo" class="logo" src="/img/icon-color.svg" />
             <div class="content">
                 <slot />
             </div>
@@ -28,7 +28,7 @@
 .form {
     align-items: normal;
     z-index: 1;
-    background: #fff;
+    background: var(--kt-background-surface);
     position: relative;
     left: 0;
     height: 100%;

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import TheHeader from "@/modules/platform/ui/components/TheHeader.vue"
+import Breadcrumb from "@/modules/platform/ui/components/Breadcrumb.vue"
 </script>
 <template>
     <div :class="$style.root">
@@ -7,6 +8,7 @@ import TheHeader from "@/modules/platform/ui/components/TheHeader.vue"
         <main :class="$style.body">
             <TheHeader />
             <div :class="$style.content">
+                <Breadcrumb />
                 <slot :class="$style.content" />
             </div>
         </main>
@@ -29,10 +31,11 @@ import TheHeader from "@/modules/platform/ui/components/TheHeader.vue"
 }
 
 .content {
-    background-color: #fff;
+    background-color: var(--kt-background-surface);
     border-radius: 20px;
     margin: 0 16px 16px 16px;
     height: 100%;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 </style>

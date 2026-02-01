@@ -1,20 +1,31 @@
-<script setup lang="ts">
-import { ref } from "vue"
+<script lang="ts" setup>
+import { computed, onUnmounted } from "vue"
 import type { Instance } from "@/modules/instances/api/models/instance.model.ts"
 import Resource from "@/modules/platform/ui/components/Resource.vue"
 import instancesService from "@/modules/instances/api/services/instances.service.ts"
+import { useInstanceStore } from "@/modules/instances/instances.store.ts"
 
-const props = defineProps<{ instanceId: string }>()
-const resource = () => instancesService.getInstance(props.instanceId)
-const instance = ref<Instance | null>(null)
+defineProps<{ instanceId: string }>()
+
+const instanceStore = useInstanceStore()
+const instance = computed(() => instanceStore.instance)
+
+function onInstanceLoaded(instance: Instance) {
+    instanceStore.updateInstance(instance)
+}
+
+onUnmounted(() => {
+    instanceStore.$reset()
+    instanceStore.$dispose()
+})
 </script>
 
 <template>
-    <Resource :resource="resource" @loaded="(value) => (instance = value)">
+    <Resource :resource="() => instancesService.getInstance(instanceId)" @loaded="onInstanceLoaded">
         <template v-if="instance">
             <router-view :instanceId="instance.id" />
         </template>
     </Resource>
 </template>
 
-<style scoped lang="scss"></style>
+<style lang="scss" scoped></style>

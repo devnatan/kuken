@@ -6,21 +6,23 @@ import { computed, reactive } from "vue"
 import VForm from "@/modules/platform/ui/components/form/VForm.vue"
 import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
 import VTitle from "@/modules/platform/ui/components/typography/VTitle.vue"
-import Breadcrumb from "@/modules/platform/ui/components/Breadcrumb.vue"
 import CreateUnitNameInput from "@/modules/units/ui/components/create-unit/CreateUnitNameInput.vue"
 import CreateUnitBlueprintSelector from "@/modules/units/ui/components/create-unit/CreateUnitBlueprintSelector.vue"
 import { onBeforeRouteLeave, useRouter } from "vue-router"
 import type { Unit } from "@/modules/units/api/models/unit.model.ts"
 import CreateUnitConfigureBlueprint from "@/modules/units/ui/components/create-unit/CreateUnitConfigureBlueprint.vue"
 import { useHead } from "@unhead/vue"
+import { isUndefined } from "@/utils"
 
 useHead({
     title: "Create new server"
 })
 
+const props = defineProps<{ blueprint?: string }>()
+
 const form = reactive({
     name: "",
-    blueprint: "",
+    blueprint: props.blueprint ?? "",
     inputs: {},
     env: {}
 })
@@ -59,7 +61,13 @@ function goBack() {
 }
 
 function goNext() {
-    steps.current = steps.all[steps.all.indexOf(steps.current) + 1]!
+    const next = steps.all[steps.all.indexOf(steps.current) + 1]!
+    if (next === Steps.SelectBlueprint && !isUndefined(props.blueprint)) {
+        steps.current = next
+        return goNext()
+    }
+
+    steps.current = next
 }
 
 onBeforeRouteLeave((_, __, next) => {
@@ -76,7 +84,7 @@ const { isLoading, execute } = useAsyncState(unitsService.createUnit, null as un
     onSuccess: (payload: Unit) => {
         window.location.href = router.resolve({
             name: "instance.console",
-            params: { instanceId: payload.instance.id }
+            params: { instanceId: payload.instance.id, unitId: payload.id }
         }).href
     }
 })
@@ -102,7 +110,6 @@ function proceed() {
 
 <template>
     <VContainer class="container">
-        <Breadcrumb />
         <VTitle :centered="true">Create new server</VTitle>
         <div class="content">
             <VForm @submit.prevent="proceed">
@@ -153,8 +160,8 @@ function proceed() {
 .content {
     display: flex;
     flex-direction: column;
-    min-width: 40%;
-    width: fit-content;
+    min-width: 50%;
+    width: 50%;
     position: relative;
     left: 50%;
     transform: translateX(-50%);

@@ -1,7 +1,7 @@
 <template>
-    <header :class="$style.root">
-        <div :class="$style.logo">
-            <img src="/img/icon-white-transparent.png" alt="Logo" />
+    <header>
+        <div class="logo">
+            <img alt="Logo" src="/img/icon-white-transparent.png" />
         </div>
         <template v-if="$slots.default">
             <slot />
@@ -9,16 +9,16 @@
     </header>
 </template>
 
-<style lang="scss" module>
-.root {
+<style lang="scss" scoped>
+header {
     padding: 0 16px;
     display: flex;
     flex-direction: row;
     align-items: center;
     width: 100%;
-}
 
-.logo img {
-    max-width: 72px;
+    .logo img {
+        max-width: 72px;
+    }
 }
 </style>

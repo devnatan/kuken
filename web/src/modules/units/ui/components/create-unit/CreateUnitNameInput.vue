@@ -8,7 +8,7 @@ const model = defineModel<string>({ required: true })
 
 <template>
     <VFieldSet>
-        <VLabel>Unit name</VLabel>
+        <VLabel>Server name</VLabel>
         <VInput
             ref="input"
             v-model="model"

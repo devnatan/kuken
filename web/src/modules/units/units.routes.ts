@@ -1,18 +1,26 @@
 import type { RouteRecordRaw } from "vue-router"
 import { importPage } from "@/router.ts"
+import UnitMain from "@/modules/units/ui/components/UnitMain.vue"
+import { InstancesRoutes } from "@/modules/instances/instances.routes.ts"
 
 export const UnitsRoutes: Array<RouteRecordRaw> = [
     {
-        path: "new",
+        path: "new/:blueprint?",
         name: "units.create",
-        props: {
-            blueprintId: {
-                required: false
-            }
-        },
+        props: true,
         component: importPage("units", "create-unit/CreateUnit"),
         meta: {
             title: "Create new"
         }
+    },
+    {
+        path: "servers/:unitId",
+        name: "unit",
+        props: true,
+        component: UnitMain,
+        meta: {
+            title: "Server"
+        },
+        children: [...InstancesRoutes]
     }
 ]

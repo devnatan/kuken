@@ -14,5 +14,9 @@ export default {
                 timeout: 15000
             })
             .then((res: AxiosResponse) => res.data as Unit)
+    },
+
+    async getUnit(unitId: string): Promise<Unit> {
+        return httpService.get(`units/${unitId}`).then((res: AxiosResponse) => res.data as Unit)
     }
 } as const

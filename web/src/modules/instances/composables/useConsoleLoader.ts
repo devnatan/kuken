@@ -1,5 +1,5 @@
 import type { Frame } from "@/modules/instances/api/models/frame.model.ts"
-import { ref } from "vue"
+import { computed, ref } from "vue"
 import instancesService from "@/modules/instances/api/services/instances.service.ts"
 
 export type ConsoleLogsResponse = {
@@ -15,94 +15,63 @@ export type UseConsoleLoaderOptions = {
 export function useConsoleLoader(options: UseConsoleLoaderOptions) {
     const { instanceId, batchSize } = options
 
-    const isLoadingOlder = ref(false)
-    const isLoadingNewer = ref(false)
-    const hasOlderLogs = ref(true)
-    const hasNewerLogs = ref(false)
+    const windowHours = ref(6)
+    const windowStart = ref<number | null>(null) // null = tempo real
+    const isRealtime = computed(() => windowStart.value === null)
 
-    async function loadOlderLogs(beforeTimestamp: number): Promise<Frame[]> {
-        if (isLoadingOlder.value || !hasOlderLogs.value) return []
+    async function loadLogs(): Promise<Frame[]> {
+        const now = Date.now()
 
-        isLoadingOlder.value = true
+        let since: number
+        let until: number
 
-        try {
-            const response = await instancesService.getLogs(instanceId, {
-                after: beforeTimestamp - 10 * 60 * 1000,
-                before: beforeTimestamp
-            })
-            hasOlderLogs.value = response.hasMore
+        if (windowStart.value === null) {
+            since = now - windowHours.value * 60 * 60 * 1000
+            until = now
+        } else {
+            since = windowStart.value
+            until = windowStart.value + windowHours.value * 60 * 60 * 1000
+        }
 
-            return response.frames
-        } catch (error) {
-            // TODO Use logger service with useLogger instead
-            console.error("Failed to load older logs", beforeTimestamp, error)
-            return []
-        } finally {
-            isLoadingOlder.value = false
+        const response = await instancesService.getLogs(instanceId, {
+            after: since,
+            before: until
+        })
+
+        return response.frames
+    }
+
+    function goToPrevious() {
+        const currentStart = windowStart.value ?? Date.now()
+        windowStart.value = currentStart - windowHours.value * 60 * 60 * 1000
+    }
+
+    function goToNext() {
+        if (windowStart.value === null) return
+
+        const nextStart = windowStart.value + windowHours.value * 60 * 60 * 1000
+
+        if (nextStart + windowHours.value * 60 * 60 * 1000 >= Date.now()) {
+            windowStart.value = null
+        } else {
+            windowStart.value = nextStart
         }
     }
 
-    async function loadNewerLogs(afterTimestamp: number): Promise<Frame[]> {
-        if (isLoadingNewer.value || !hasNewerLogs.value) return []
-
-        isLoadingNewer.value = true
-
-        try {
-            const response = await instancesService.getLogs(instanceId, {
-                after: afterTimestamp,
-                limit: batchSize
-            })
-            hasNewerLogs.value = response.hasMore
-
-            return response.frames
-        } catch (error) {
-            // TODO Use logger service with useLogger instead
-            console.error("Failed to load newer logs", afterTimestamp, error)
-            return []
-        } finally {
-            isLoadingNewer.value = false
-        }
+    function goToRealtime() {
+        windowStart.value = null
     }
 
-    async function loadAroundTimestamp(timestamp: number): Promise<Frame[]> {
-        try {
-            const response = await instancesService.fetchLogs(instanceId, {
-                around: timestamp,
-                batchSize
-            })
-
-            hasOlderLogs.value = true
-            hasNewerLogs.value = true
-            return response.frames
-        } catch (error) {
-            // TODO Use logger service with useLogger instead
-            console.error("Failed to load logs aroung timestamp", timestamp, error)
-            return []
-        }
-    }
-
-    function setHasOlderLogs(value: boolean) {
-        hasOlderLogs.value = value
-    }
-
-    function setHasNewerLogs(value: boolean) {
-        hasNewerLogs.value = value
-    }
-
-    function resetToRealtime() {
-        hasNewerLogs.value = false
+    function goToDate(timestamp: number) {
+        windowStart.value = timestamp - (windowHours.value * 60 * 60 * 1000) / 2
     }
 
     return {
-        isLoadingOlder,
-        isLoadingNewer,
-        hasOlderLogs,
-        hasNewerLogs,
-        loadOlderLogs,
-        loadNewerLogs,
-        loadAroundTimestamp,
-        setHasOlderLogs,
-        setHasNewerLogs,
-        resetToRealtime
+        isRealtime,
+        loadLogs,
+        goToPrevious,
+        goToNext,
+        goToRealtime,
+        goToDate
     }
 }
