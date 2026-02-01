@@ -15,11 +15,19 @@ import { SETUP_ROUTE } from "@/router.ts"
 import { useRouter } from "vue-router"
 import { usePlatformStore } from "@/modules/platform/platform.store.ts"
 import websocketService from "@/modules/platform/api/services/websocket.service.ts"
+import { useDark } from "@vueuse/core"
 
 const isLoading = ref(true)
 
 useHead({
     title: configService.appName
+})
+
+useDark({
+    selector: "body",
+    storageKey: "kk-theme",
+    attribute: "color-scheme",
+    valueDark: "dark"
 })
 
 const platformStore = usePlatformStore()

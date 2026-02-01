@@ -6,7 +6,7 @@
   --kt-border-low: rgba(48, 55, 66, 0.1);
 }
 
-.dark-theme {
+body[color-scheme="dark"] {
   --kt-background-body: #252526;
   --kt-background-surface: #1e1e1e;
   --kt-background-surface-overlay: rgba(0, 0, 0, 0.1);
