@@ -44,6 +44,7 @@ class StatFileEntryParser {
             isExecutable = perms.executable,
             isReadable = perms.readable,
             isWritable = perms.writable,
+            hidden = false,
         )
     }
 

@@ -12,10 +12,11 @@ data class FileEntry(
     val createdAt: Instant?,
     val accessedAt: Instant,
     val modifiedAt: Instant,
-    val permissions: String,
+    val permissions: String?,
     val isExecutable: Boolean,
     val isReadable: Boolean,
     val isWritable: Boolean,
+    val hidden: Boolean,
 ) {
     val isDirectory: Boolean
         get() = type == FileType.DIRECTORY
