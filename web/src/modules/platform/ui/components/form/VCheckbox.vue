@@ -1,5 +1,5 @@
 <template>
-    <input v-model="model" type="checkbox" />
+  <input v-model="model" type="checkbox" />
 </template>
 
 <script lang="ts" setup>

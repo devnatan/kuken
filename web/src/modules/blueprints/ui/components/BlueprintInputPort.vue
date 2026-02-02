@@ -9,18 +9,18 @@ const props = defineProps<BlueprintBuildInputPortNumber>()
 const model = defineModel()
 
 onMounted(() => {
-    model.value = props.default
+  model.value = props.default
 })
 </script>
 
 <template>
-    <VFieldSet>
-        <VLabel>
-            {{ props.label }}
-            <VInput v-model="model" type="number" />
-            <template v-if="props.description" #description>{{ props.description }}</template>
-        </VLabel>
-    </VFieldSet>
+  <VFieldSet>
+    <VLabel>
+      {{ props.label }}
+      <VInput v-model="model" type="number" />
+      <template v-if="props.description" #description>{{ props.description }}</template>
+    </VLabel>
+  </VFieldSet>
 </template>
 
 <style lang="scss" scoped></style>

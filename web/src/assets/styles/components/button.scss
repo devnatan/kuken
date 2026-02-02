@@ -21,7 +21,7 @@
   color: var(--kt-content-neutral);
   transition: opacity ease-in-out 0.2s;
 
-  &[disabled=true] {
+  &[disabled] {
     opacity: 0.38;
   }
 

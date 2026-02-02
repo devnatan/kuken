@@ -1,3 +1,3 @@
 export interface AccessToken {
-    readonly token: string
+  readonly token: string
 }

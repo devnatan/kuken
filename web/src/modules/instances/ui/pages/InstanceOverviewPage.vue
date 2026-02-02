@@ -10,9 +10,9 @@ const instance = ref<Instance | null>(null)
 </script>
 
 <template>
-    <Resource :resource="resource" @loaded="(value) => (instance = value)">
-        <template v-if="instance"> Pirocoptero {{ instance.id }} </template>
-    </Resource>
+  <Resource :resource="resource" @loaded="(value) => (instance = value)">
+    <template v-if="instance"> Pirocoptero {{ instance.id }} </template>
+  </Resource>
 </template>
 
 <style scoped lang="scss"></style>

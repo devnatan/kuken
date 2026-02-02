@@ -14,143 +14,143 @@ import { useHead } from "@unhead/vue"
 import configService from "@/modules/platform/api/services/config.service.ts"
 
 useHead({
-    title: `Configure ${configService.appName} organization`
+  title: `Configure ${configService.appName} organization`
 })
 
 type PendingSetup = {
-    currentStep: string
-    payload: {
-        email: string
-        password: string
-        orgName: string
-    }
+  currentStep: string
+  payload: {
+    email: string
+    password: string
+    orgName: string
+  }
 }
 
 const remainingSteps: string[] = reactive([])
 const setup: Reactive<PendingSetup> = reactive({
-    currentStep: "",
-    payload: {
-        email: "",
-        password: "",
-        orgName: ""
-    }
+  currentStep: "",
+  payload: {
+    email: "",
+    password: "",
+    orgName: ""
+  }
 })
 
 async function init() {
-    const remoteSetup = await setupService.getSetup()
-    for (const step of remoteSetup.remainingSteps) {
-        remainingSteps.push(step.type)
-    }
+  const remoteSetup = await setupService.getSetup()
+  for (const step of remoteSetup.remainingSteps) {
+    remainingSteps.push(step.type)
+  }
 
-    setup.currentStep = remainingSteps[0]!
+  setup.currentStep = remainingSteps[0]!
 }
 
 async function completeSetup() {
-    await setupService.completeSetup({
-        organizationName: setup.payload.orgName,
-        account: {
-            email: setup.payload.email,
-            password: setup.payload.password
-        }
-    })
+  await setupService.completeSetup({
+    organizationName: setup.payload.orgName,
+    account: {
+      email: setup.payload.email,
+      password: setup.payload.password
+    }
+  })
 
-    window.location.href = router.resolve({ name: AUTH_LOGIN_ROUTE }).href
+  window.location.href = router.resolve({ name: AUTH_LOGIN_ROUTE }).href
 }
 
 async function proceedSetup() {
-    const current = setup.currentStep
-    remainingSteps.splice(remainingSteps.indexOf(current), 1)
+  const current = setup.currentStep
+  remainingSteps.splice(remainingSteps.indexOf(current), 1)
 
-    if (remainingSteps.length === 0) {
-        return await completeSetup()
-    }
+  if (remainingSteps.length === 0) {
+    return await completeSetup()
+  }
 
-    setup.currentStep = remainingSteps[0] as string
+  setup.currentStep = remainingSteps[0] as string
 }
 
 type SetupStepInterface = {
-    title: string
-    description: string
-    stepType: SetupStepType
+  title: string
+  description: string
+  stepType: SetupStepType
 }
 
 const steps: Array<SetupStepInterface> = [
-    {
-        title: "Set up your organization",
-        description:
-            "Choose a name to identify your organization inside the platform.<br/>You can change this later if needed.",
-        stepType: SetupStepType.ORGANIZATION_NAME
-    },
-    {
-        title: "Create admin account",
-        description:
-            "This will be the first account in the system.<br/>You'll use it to access the dashboard, create servers, and manage your settings.",
-        stepType: SetupStepType.CREATE_ACCOUNT
-    }
+  {
+    title: "Set up your organization",
+    description:
+      "Choose a name to identify your organization inside the platform.<br/>You can change this later if needed.",
+    stepType: SetupStepType.ORGANIZATION_NAME
+  },
+  {
+    title: "Create admin account",
+    description:
+      "This will be the first account in the system.<br/>You'll use it to access the dashboard, create servers, and manage your settings.",
+    stepType: SetupStepType.CREATE_ACCOUNT
+  }
 ]
 
 init()
 </script>
 <template>
-    <RootLayout>
-        <div :class="$style.content">
-            <VTitle>Let’s get started</VTitle>
+  <RootLayout>
+    <div :class="$style.content">
+      <VTitle>Let’s get started</VTitle>
 
-            <VCol :size="6">
-                <div :class="$style.stepsList">
-                    <SetupStep
-                        v-for="(step, index) in steps"
-                        :key="`step-${index}`"
-                        :active="setup.currentStep == step.stepType"
-                        :completed="!remainingSteps.includes(step.stepType)"
-                    >
-                        <template #icon>
-                            {{ index + 1 }}
-                        </template>
-                        <template #title>
-                            {{ step.title }}
-                        </template>
-                        <template #description>
-                            <span v-html="step.description" />
-                        </template>
-                    </SetupStep>
-                </div>
-            </VCol>
-            <VCol :size="6">
-                <div :class="$style.stepData">
-                    <template v-if="setup.currentStep == SetupStepType.CREATE_ACCOUNT">
-                        <SetupCreateAccount
-                            v-model:email="setup.payload.email"
-                            v-model:password="setup.payload.password"
-                            @done="proceedSetup"
-                        />
-                    </template>
-                    <template v-if="setup.currentStep == SetupStepType.ORGANIZATION_NAME">
-                        <SetupOrganizationName
-                            v-model:organization-name="setup.payload.orgName"
-                            @done="proceedSetup()"
-                        />
-                    </template>
-                </div>
-            </VCol>
+      <VCol :size="6">
+        <div :class="$style.stepsList">
+          <SetupStep
+            v-for="(step, index) in steps"
+            :key="`step-${index}`"
+            :active="setup.currentStep == step.stepType"
+            :completed="!remainingSteps.includes(step.stepType)"
+          >
+            <template #icon>
+              {{ index + 1 }}
+            </template>
+            <template #title>
+              {{ step.title }}
+            </template>
+            <template #description>
+              <span v-html="step.description" />
+            </template>
+          </SetupStep>
         </div>
-    </RootLayout>
+      </VCol>
+      <VCol :size="6">
+        <div :class="$style.stepData">
+          <template v-if="setup.currentStep == SetupStepType.CREATE_ACCOUNT">
+            <SetupCreateAccount
+              v-model:email="setup.payload.email"
+              v-model:password="setup.payload.password"
+              @done="proceedSetup"
+            />
+          </template>
+          <template v-if="setup.currentStep == SetupStepType.ORGANIZATION_NAME">
+            <SetupOrganizationName
+              v-model:organization-name="setup.payload.orgName"
+              @done="proceedSetup()"
+            />
+          </template>
+        </div>
+      </VCol>
+    </div>
+  </RootLayout>
 </template>
 <style lang="scss" module>
 .content {
-    padding: 48px;
+  padding: 48px;
 }
 
 .stepsList {
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
 
 .stepData {
-    border: 4px dashed #ff8f5f;
-    border-radius: 20px;
-    padding: 36px;
-    height: 60dvh;
+  border: 4px dashed #ff8f5f;
+  border-radius: 20px;
+  padding: 36px;
+  height: 60dvh;
 }
 </style>

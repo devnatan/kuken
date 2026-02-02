@@ -1,5 +1,5 @@
 <template>
-    <p class="text--body2">
-        <slot />
-    </p>
+  <p class="text--body2">
+    <slot />
+  </p>
 </template>

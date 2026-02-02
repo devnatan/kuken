@@ -2,12 +2,12 @@
 import { useHead } from "@unhead/vue"
 
 useHead({
-    title: "Game Directory"
+  title: "Game Directory"
 })
 </script>
 
 <template>
-    <router-view />
+  <router-view />
 </template>
 
 <style lang="scss" scoped></style>

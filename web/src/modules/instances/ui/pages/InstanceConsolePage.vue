@@ -7,18 +7,18 @@ import InstanceConsoleLayout from "@/modules/instances/ui/layouts/InstanceConsol
 
 const unit = useUnitStore().getUnit
 useHead({
-    title: `${unit.name} - Instance Console`
+  title: `${unit.name} - Instance Console`
 })
 
 const instance = useInstanceStore().getInstance
 </script>
 
 <template>
-    <InstanceConsoleLayout>
-        <div class="console-container">
-            <InstanceConsole :instance-id="instance.id" />
-        </div>
-    </InstanceConsoleLayout>
+  <InstanceConsoleLayout>
+    <div class="console-container">
+      <InstanceConsole :instance-id="instance.id" />
+    </div>
+  </InstanceConsoleLayout>
 </template>
 
 <style scoped>
@@ -26,17 +26,17 @@ const instance = useInstanceStore().getInstance
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap");
 
 .console-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    color: #d4d4d4;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: #d4d4d4;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
 }
 
 .console-wrapper {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
 }
 </style>

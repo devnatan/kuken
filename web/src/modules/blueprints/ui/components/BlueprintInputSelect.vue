@@ -10,26 +10,26 @@ const props = defineProps<BlueprintBuildInputSelect>()
 const model = defineModel()
 
 onMounted(() => {
-    model.value = props.items[0]
+  model.value = props.items[0]
 })
 </script>
 
 <template>
-    <VFieldSet>
-        <VLabel>
-            {{ props.label }}
-            <VSelect v-model="model">
-                <VOption v-for="(label, key) in props.items" :key="key" :value="label">
-                    {{ label }}
-                </VOption>
-            </VSelect>
-        </VLabel>
-    </VFieldSet>
+  <VFieldSet>
+    <VLabel>
+      {{ props.label }}
+      <VSelect v-model="model">
+        <VOption v-for="(label, key) in props.items" :key="key" :value="label">
+          {{ label }}
+        </VOption>
+      </VSelect>
+    </VLabel>
+  </VFieldSet>
 </template>
 
 <style lang="scss" scoped>
 label {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 </style>

@@ -11,24 +11,24 @@ const emit = defineEmits(["done"])
 </script>
 
 <template>
-    <VForm @submit.prevent="emit('done')">
-        <VFieldSet>
-            <VLabel>
-                Email
-                <VInput v-model="email" type="email" required="true" autocomplete="email" />
-            </VLabel>
-            <VLabel>
-                Password
-                <VInput
-                    v-model="password"
-                    type="password"
-                    required="true"
-                    autocomplete="current-password"
-                />
-            </VLabel>
-        </VFieldSet>
-        <VButton type="submit" variant="primary" style="align-self: end"> Proceed </VButton>
-    </VForm>
+  <VForm @submit.prevent="emit('done')">
+    <VFieldSet>
+      <VLabel>
+        Email
+        <VInput v-model="email" type="email" required="true" autocomplete="email" />
+      </VLabel>
+      <VLabel>
+        Password
+        <VInput
+          v-model="password"
+          type="password"
+          required="true"
+          autocomplete="current-password"
+        />
+      </VLabel>
+    </VFieldSet>
+    <VButton type="submit" variant="primary" style="align-self: end"> Proceed </VButton>
+  </VForm>
 </template>
 
 <style scoped lang="scss"></style>

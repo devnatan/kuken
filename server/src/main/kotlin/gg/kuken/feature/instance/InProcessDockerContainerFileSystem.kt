@@ -4,6 +4,8 @@ import gg.kuken.KukenConfig
 import gg.kuken.core.io.FileEntry
 import gg.kuken.core.io.FileSystem
 import gg.kuken.core.io.util.StatFileEntryParser
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.devnatan.dockerkt.DockerClient
 import me.devnatan.dockerkt.models.exec.ExecStartOptions
 import me.devnatan.dockerkt.models.exec.ExecStartResult
@@ -61,22 +63,33 @@ class InProcessDockerContainerFileSystem(
         contents: String,
     ) {
         val fileDirectory = path.substringBeforeLast(FILE_SEPARATOR)
-        val tempDir = KukenConfig.tempDir(Paths.get(fileDirectory))
+        val tempDir = KukenConfig.tempDirRecursively(fileDirectory)
 
         val workingDir =
-            dockerClient.containers
-                .inspect(containerId)
-                .config.workingDir
+            requireNotNull(
+                dockerClient.containers
+                    .inspect(containerId)
+                    .config.workingDir,
+            ) {
+                "Docker container working directory is not set"
+            }
 
+        // TODO Preserve original file permissions and line breaks
         try {
             val fileName = path.substringAfterLast(FILE_SEPARATOR)
             val tempFile = tempDir.resolve(fileName).toFile()
             tempFile.writeText(contents)
 
-            dockerClient.containers.copyDirectoryTo(
+            val destPath =
+                if (path.contains(FILE_SEPARATOR)) {
+                    workingDir + FILE_SEPARATOR + fileDirectory
+                } else {
+                    workingDir
+                }
+            dockerClient.containers.copyFileTo(
                 container = containerId,
-                sourcePath = tempDir.pathString,
-                destinationPath = workingDir + FILE_SEPARATOR + fileDirectory,
+                sourcePath = tempFile.absolutePath,
+                destinationPath = destPath,
             )
         } finally {
             @OptIn(ExperimentalPathApi::class)

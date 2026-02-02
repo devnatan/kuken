@@ -10,103 +10,103 @@ const model = defineModel()
 </script>
 
 <template>
-    <VFieldSet>
-        <VLabel>
-            <div class="info">
-                <div class="title">{{ props.label }}</div>
-                <div v-if="props.description" class="description">{{ props.description }}</div>
-            </div>
-            <VCheckbox v-model="model" />
-            <span></span>
-            <VIcon name="Check" />
-        </VLabel>
-    </VFieldSet>
+  <VFieldSet>
+    <VLabel>
+      <div class="info">
+        <div class="title">{{ props.label }}</div>
+        <div v-if="props.description" class="description">{{ props.description }}</div>
+      </div>
+      <VCheckbox v-model="model" />
+      <span></span>
+      <VIcon name="Check" />
+    </VLabel>
+  </VFieldSet>
 </template>
 
 <style lang="scss" scoped>
 fieldset:not(:last-child) {
-    margin-bottom: 2.4rem;
+  margin-bottom: 2.4rem;
 }
 
 label {
-    display: flex;
-    align-content: space-between;
+  display: flex;
+  align-content: space-between;
 
-    &:hover {
-        cursor: pointer;
+  &:hover {
+    cursor: pointer;
 
-        .title {
-            opacity: 0.78;
-        }
-
-        input[type="checkbox"]:not(:checked) + span {
-            border-color: var(--kt-border-low);
-        }
+    .title {
+      opacity: 0.78;
     }
+
+    input[type="checkbox"]:not(:checked) + span {
+      border-color: var(--kt-border-low);
+    }
+  }
 }
 
 label input {
-    opacity: 0 !important;
-    display: block;
-    height: 0;
-    width: 0;
-    position: absolute;
-    overflow: hidden;
+  opacity: 0 !important;
+  display: block;
+  height: 0;
+  width: 0;
+  position: absolute;
+  overflow: hidden;
 }
 
 $size: 24px;
 
 label span {
-    height: $size;
-    width: $size;
-    border: 1.5px solid var(--kt-border-medium);
-    border-radius: 4px;
-    position: absolute;
-    right: 0;
-    transition:
-        background-color linear 0.15s,
-        border linear 0.15s;
+  height: $size;
+  width: $size;
+  border: 1.5px solid var(--kt-border-medium);
+  border-radius: 4px;
+  position: absolute;
+  right: 0;
+  transition:
+    background-color linear 0.15s,
+    border linear 0.15s;
 }
 
 input[type="checkbox"]:not(:checked) + * + .icon {
-    display: none;
+  display: none;
 }
 
 input[type="checkbox"]:checked {
-    & + * + .icon {
-        fill: var(--kt-content-primary-oncolor);
-    }
+  & + * + .icon {
+    fill: var(--kt-content-primary-oncolor);
+  }
 
-    & + span {
-        border-color: transparent;
-        background-color: var(--kt-content-primary);
-    }
+  & + span {
+    border-color: transparent;
+    background-color: var(--kt-content-primary);
+  }
 }
 
 label .icon {
-    $iconSize: calc($size - 8px);
-    height: $iconSize;
-    width: $iconSize;
-    min-height: $iconSize;
-    min-width: $iconSize;
-    position: absolute;
-    right: 4px;
-    top: 4px;
+  $iconSize: calc($size - 8px);
+  height: $iconSize;
+  width: $iconSize;
+  min-height: $iconSize;
+  min-width: $iconSize;
+  position: absolute;
+  right: 4px;
+  top: 4px;
 }
 
 .info {
-    display: flex;
-    flex-direction: column;
-    flex-basis: 85%;
-    justify-items: center;
+  display: flex;
+  flex-direction: column;
+  flex-basis: 85%;
+  justify-items: center;
 
-    .title {
-        transition: color linear 0.15s;
-    }
+  .title {
+    transition: color linear 0.15s;
+  }
 
-    .description {
-        color: var(--kt-content-neutral);
-        font-weight: 400;
-    }
+  .description {
+    color: var(--kt-content-neutral);
+    font-weight: 400;
+  }
 }
 </style>

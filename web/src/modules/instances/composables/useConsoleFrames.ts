@@ -2,117 +2,117 @@ import { computed, ref } from "vue"
 import type { Frame } from "@/modules/instances/api/models/frame.model.ts"
 
 export type UseConsoleFramesOptions = {
-    maxFrames: number
+  maxFrames: number
 }
 
 export function useConsoleFrames(options: UseConsoleFramesOptions) {
-    const frames = ref<Frame[]>([])
-    const seenIds = ref(new Set<string>())
-    const seqOffsetId = ref(0)
+  const frames = ref<Frame[]>([])
+  const seenIds = ref(new Set<string>())
+  const seqOffsetId = ref(0)
 
-    const oldestSeqId = computed(() => (frames.value.length > 0 ? frames.value[0]!.seqId : null))
-    const newestSeqId = computed(() =>
-        frames.value.length > 0 ? frames.value[frames.value.length - 1]!.seqId : null
-    )
+  const oldestSeqId = computed(() => (frames.value.length > 0 ? frames.value[0]!.seqId : null))
+  const newestSeqId = computed(() =>
+    frames.value.length > 0 ? frames.value[frames.value.length - 1]!.seqId : null
+  )
 
-    function addFrame(frame: Frame): { trimmedOld: boolean } {
-        if (seenIds.value.has(frame.persistentId)) return { trimmedOld: false }
+  function addFrame(frame: Frame): { trimmedOld: boolean } {
+    if (seenIds.value.has(frame.persistentId)) return { trimmedOld: false }
 
-        frame.seqId = seqOffsetId.value + frame.seqId
-        seenIds.value.add(frame.persistentId)
-        frames.value.push(frame)
+    frame.seqId = seqOffsetId.value + frame.seqId
+    seenIds.value.add(frame.persistentId)
+    frames.value.push(frame)
 
-        let trimmedOld = false
-        if (frames.value.length > options.maxFrames) {
-            const removed = frames.value.splice(0, frames.value.length - options.maxFrames)
-            removed.forEach((frame) => seenIds.value.delete(frame.persistentId))
-            trimmedOld = true
-        }
-
-        return { trimmedOld }
+    let trimmedOld = false
+    if (frames.value.length > options.maxFrames) {
+      const removed = frames.value.splice(0, frames.value.length - options.maxFrames)
+      removed.forEach((frame) => seenIds.value.delete(frame.persistentId))
+      trimmedOld = true
     }
 
-    function preprendFrames(newFrames: Frame[]): { trimmedNew: boolean } {
-        const uniqueFrames = newFrames.filter((f) => !seenIds.value.has(f.persistentId))
+    return { trimmedOld }
+  }
 
-        uniqueFrames.forEach((f) => seenIds.value.add(f.persistentId))
-        frames.value.unshift(...uniqueFrames)
+  function preprendFrames(newFrames: Frame[]): { trimmedNew: boolean } {
+    const uniqueFrames = newFrames.filter((f) => !seenIds.value.has(f.persistentId))
 
-        frames.value.forEach((f, index) => {
-            f.seqId = index + 1
-        })
+    uniqueFrames.forEach((f) => seenIds.value.add(f.persistentId))
+    frames.value.unshift(...uniqueFrames)
 
-        seqOffsetId.value = frames.value.length
+    frames.value.forEach((f, index) => {
+      f.seqId = index + 1
+    })
 
-        let trimmedNew = false
-        if (frames.value.length > options.maxFrames) {
-            const removed = frames.value.splice(options.maxFrames)
-            removed.forEach((frame) => seenIds.value.delete(frame.persistentId))
-            trimmedNew = true
-        }
+    seqOffsetId.value = frames.value.length
 
-        return { trimmedNew }
+    let trimmedNew = false
+    if (frames.value.length > options.maxFrames) {
+      const removed = frames.value.splice(options.maxFrames)
+      removed.forEach((frame) => seenIds.value.delete(frame.persistentId))
+      trimmedNew = true
     }
 
-    function appendFrames(newFrames: Frame[]): { trimmedOld: boolean } {
-        const uniqueFrames = newFrames.filter((frame) => !seenIds.value.has(frame.persistentId))
-        const maxCurrentSeqId = frames.value[frames.value.length - 1]?.seqId ?? 0
+    return { trimmedNew }
+  }
 
-        uniqueFrames.forEach((frame, index) => {
-            frame.seqId = maxCurrentSeqId + index + 1
-            seenIds.value.add(frame.persistentId)
-        })
+  function appendFrames(newFrames: Frame[]): { trimmedOld: boolean } {
+    const uniqueFrames = newFrames.filter((frame) => !seenIds.value.has(frame.persistentId))
+    const maxCurrentSeqId = frames.value[frames.value.length - 1]?.seqId ?? 0
 
-        frames.value.push(...uniqueFrames)
+    uniqueFrames.forEach((frame, index) => {
+      frame.seqId = maxCurrentSeqId + index + 1
+      seenIds.value.add(frame.persistentId)
+    })
 
-        let trimmedOld = false
-        if (frames.value.length > options.maxFrames) {
-            const removed = frames.value.splice(0, frames.value.length - options.maxFrames)
-            removed.forEach((frame) => seenIds.value.delete(frame.persistentId))
-            trimmedOld = true
-        }
+    frames.value.push(...uniqueFrames)
 
-        return { trimmedOld }
+    let trimmedOld = false
+    if (frames.value.length > options.maxFrames) {
+      const removed = frames.value.splice(0, frames.value.length - options.maxFrames)
+      removed.forEach((frame) => seenIds.value.delete(frame.persistentId))
+      trimmedOld = true
     }
 
-    function setFrames(newFrames: Frame[]) {
-        frames.value = newFrames
-        seenIds.value.clear()
-        newFrames.forEach((frame) => seenIds.value.add(frame.persistentId))
+    return { trimmedOld }
+  }
 
-        if (newFrames.length > 0) {
-            seqOffsetId.value = newFrames[newFrames.length - 1]?.seqId ?? 0
-        }
-    }
+  function setFrames(newFrames: Frame[]) {
+    frames.value = newFrames
+    seenIds.value.clear()
+    newFrames.forEach((frame) => seenIds.value.add(frame.persistentId))
 
-    function clear() {
-        frames.value = []
-        seenIds.value.clear()
+    if (newFrames.length > 0) {
+      seqOffsetId.value = newFrames[newFrames.length - 1]?.seqId ?? 0
     }
+  }
 
-    function trimToRecent(count: number) {
-        if (frames.value.length > count) {
-            const kept = frames.value.slice(-count)
-            frames.value = kept
-            seenIds.value.clear()
-            kept.forEach((frame) => seenIds.value.add(frame.persistentId))
-        }
-    }
+  function clear() {
+    frames.value = []
+    seenIds.value.clear()
+  }
 
-    function findByPersistentId(persistentId: string): number {
-        return frames.value.findIndex((frame) => frame.persistentId === persistentId)
+  function trimToRecent(count: number) {
+    if (frames.value.length > count) {
+      const kept = frames.value.slice(-count)
+      frames.value = kept
+      seenIds.value.clear()
+      kept.forEach((frame) => seenIds.value.add(frame.persistentId))
     }
+  }
 
-    return {
-        frames,
-        oldestSeqId,
-        newestSeqId,
-        addFrame,
-        preprendFrames,
-        appendFrames,
-        setFrames,
-        clear,
-        trimToRecent,
-        findByPersistentId
-    }
+  function findByPersistentId(persistentId: string): number {
+    return frames.value.findIndex((frame) => frame.persistentId === persistentId)
+  }
+
+  return {
+    frames,
+    oldestSeqId,
+    newestSeqId,
+    addFrame,
+    preprendFrames,
+    appendFrames,
+    setFrames,
+    clear,
+    trimToRecent,
+    findByPersistentId
+  }
 }

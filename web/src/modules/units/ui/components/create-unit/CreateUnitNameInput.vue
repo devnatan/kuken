@@ -7,17 +7,17 @@ const model = defineModel<string>({ required: true })
 </script>
 
 <template>
-    <VFieldSet>
-        <VLabel>Server name</VLabel>
-        <VInput
-            ref="input"
-            v-model="model"
-            autofocus
-            placeholder="Type your server name"
-            required="true"
-            type="text"
-        />
-    </VFieldSet>
+  <VFieldSet>
+    <VLabel>Server name</VLabel>
+    <VInput
+      ref="input"
+      v-model="model"
+      autofocus
+      placeholder="Type your server name"
+      required="true"
+      type="text"
+    />
+  </VFieldSet>
 </template>
 
 <style lang="scss" scoped></style>

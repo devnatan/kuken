@@ -1,34 +1,25 @@
 {
-	"extends": "@vue/tsconfig/tsconfig.dom.json",
-	"include": [
-		"src/**/*.vue",
-		"src/**/*.ts",
-		"src/**/*.js"
-	],
-	"exclude": [
-		"src/**/__tests__/*",
-		"node_modules"
-	],
-	"compilerOptions": {
-		"module": "esnext",
-		"composite": true,
-		"baseUrl": ".",
-		"paths": {
-			"@/*": [
-				"./src/*"
-			]
-		},
-		"types": ["./types"],
-		"experimentalDecorators": true,
-		"esModuleInterop": true,
-		"noImplicitAny": true,
-		"noImplicitReturns": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noUncheckedIndexedAccess": true,
-		"strictNullChecks": true,
-		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true,
-		"typeRoots": []
-	}
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": ["src/**/*.vue", "src/**/*.ts", "src/**/*.js"],
+  "exclude": ["src/**/__tests__/*", "node_modules"],
+  "compilerOptions": {
+    "module": "esnext",
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["./types"],
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "typeRoots": []
+  }
 }

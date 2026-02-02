@@ -9,10 +9,10 @@ const model = defineModel()
 </script>
 
 <template>
-    <VFieldSet>
-        <VLabel>
-            {{ props.label }}
-            <VInput v-model="model" required="true" type="text" />
-        </VLabel>
-    </VFieldSet>
+  <VFieldSet>
+    <VLabel>
+      {{ props.label }}
+      <VInput v-model="model" required="true" type="text" />
+    </VLabel>
+  </VFieldSet>
 </template>

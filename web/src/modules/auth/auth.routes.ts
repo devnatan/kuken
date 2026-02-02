@@ -5,13 +5,13 @@ import { AuthenticatedOnlyGuard } from "@/modules/auth/guards/authenticated-only
 export const AUTH_LOGIN_ROUTE = "auth.login"
 
 export const AuthRoutes: Array<RouteRecordRaw> = [
-    {
-        path: "/login",
-        name: AUTH_LOGIN_ROUTE,
-        beforeEnter: [AuthenticatedOnlyGuard],
-        component: importPage("auth", "Login"),
-        meta: {
-            title: "Log In"
-        }
+  {
+    path: "/login",
+    name: AUTH_LOGIN_ROUTE,
+    beforeEnter: [AuthenticatedOnlyGuard],
+    component: importPage("auth", "Login"),
+    meta: {
+      title: "Log In"
     }
+  }
 ]

@@ -1,5 +1,5 @@
 <template>
-    <div class="text--subtitle1">
-        <slot />
-    </div>
+  <div class="text--subtitle1">
+    <slot />
+  </div>
 </template>

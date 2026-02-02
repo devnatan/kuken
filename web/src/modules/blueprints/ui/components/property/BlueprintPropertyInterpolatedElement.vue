@@ -3,5 +3,5 @@ defineProps<{ html: string }>()
 </script>
 
 <template>
-    <code v-html="html" />
+  <code v-html="html" />
 </template>

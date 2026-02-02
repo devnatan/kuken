@@ -6,24 +6,24 @@ import httpService from "@/modules/platform/api/services/http.service"
 import type { AxiosResponse } from "axios"
 
 class AccountsService {
-    private readonly logger!: Logger
+  private readonly logger!: Logger
 
-    constructor() {
-        this.logger = logService.create(AccountsService.name)
-    }
+  constructor() {
+    this.logger = logService.create(AccountsService.name)
+  }
 
-    get isLoggedIn(): boolean {
-        return useAccountsStore().isLoggedIn
-    }
+  get isLoggedIn(): boolean {
+    return useAccountsStore().isLoggedIn
+  }
 
-    async listAccounts(): Promise<Account[]> {
-        return httpService.get("accounts").then((res: AxiosResponse) => res.data as Account[])
-    }
+  async listAccounts(): Promise<Account[]> {
+    return httpService.get("accounts").then((res: AxiosResponse) => res.data as Account[])
+  }
 
-    async updateAccount(account: Account): Promise<void> {
-        this.logger.debug("Account updated", account)
-        useAccountsStore().updateAccount(account)
-    }
+  async updateAccount(account: Account): Promise<void> {
+    this.logger.debug("Account updated", account)
+    useAccountsStore().updateAccount(account)
+  }
 }
 
 export default new AccountsService()

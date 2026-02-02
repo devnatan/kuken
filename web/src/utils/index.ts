@@ -1,10 +1,10 @@
 export function undefinedOr<T, R = unknown>(
-    value: T | undefined,
-    fallback: (arg0: T) => unknown
+  value: T | undefined,
+  fallback: (arg0: T) => unknown
 ): R | undefined {
-    if (!isUndefined(value)) return fallback(value) as R
+  if (!isUndefined(value)) return fallback(value) as R
 
-    return undefined
+  return undefined
 }
 
 /**
@@ -12,7 +12,7 @@ export function undefinedOr<T, R = unknown>(
  * @param {*} value - the value.
  */
 export function isUndefined(value: unknown): value is undefined {
-    return typeof value === "undefined"
+  return typeof value === "undefined"
 }
 
 /**
@@ -20,7 +20,7 @@ export function isUndefined(value: unknown): value is undefined {
  * @param {*} value - the value.
  */
 export function isNull(value: unknown): value is null {
-    return value === null
+  return value === null
 }
 
 /**
@@ -28,7 +28,7 @@ export function isNull(value: unknown): value is null {
  * @param {*} value - the value.
  */
 export function isNumber(value: unknown): value is number {
-    return typeof value === "number"
+  return typeof value === "number"
 }
 
 /**
@@ -36,7 +36,7 @@ export function isNumber(value: unknown): value is number {
  * @param {*} value - the value.
  */
 export function isObject(value: unknown): value is object {
-    return typeof value === "object"
+  return typeof value === "object"
 }
 
 /**
@@ -44,7 +44,7 @@ export function isObject(value: unknown): value is object {
  * @param {*} value - the value.
  */
 export function isFunction(value: unknown): boolean {
-    return typeof value === "function"
+  return typeof value === "function"
 }
 
 /**
@@ -52,7 +52,7 @@ export function isFunction(value: unknown): boolean {
  * @param {T | undefined} value - the value.
  */
 export function undefinedToNull<T>(value: T | undefined): T | null {
-    return isUndefined(value) ? null : value
+  return isUndefined(value) ? null : value
 }
 
 /**
@@ -60,11 +60,28 @@ export function undefinedToNull<T>(value: T | undefined): T | null {
  * @param {T | null} value - the value.
  */
 export function nullToUndefined<T>(value: T | null): T | undefined {
-    return isNull(value) ? undefined : value
+  return isNull(value) ? undefined : value
 }
 
 export function assertIsDefined<T>(val: T | undefined | null): asserts val is T {
-    if (val === undefined || val === null) {
-        throw new Error("Value was not defined")
-    }
+  if (val === undefined || val === null) {
+    throw new Error("Value was not defined")
+  }
+}
+
+// See https://stackoverflow.com/a/52171480
+export function cybrh3(value: string, seed: number = 0) {
+  let h1 = 0xdeadbeef ^ seed,
+    h2 = 0x41c6ce57 ^ seed
+  for (let i = 0, ch; i < value.length; i++) {
+    ch = value.charCodeAt(i)
+    h1 = Math.imul(h1 ^ ch, 2654435761)
+    h2 = Math.imul(h2 ^ ch, 1597334677)
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507)
+  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909)
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507)
+  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909)
+
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0)
 }

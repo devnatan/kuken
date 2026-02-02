@@ -9,17 +9,17 @@ const props = defineProps<Partial<BlueprintBuildInput>>()
 const model = defineModel()
 
 onMounted(() => {
-    model.value = props.default
+  model.value = props.default
 })
 </script>
 
 <template>
-    <VFieldSet>
-        <VLabel>
-            {{ props.label }}
-            <VInput v-model="model" required="true" type="password" />
-        </VLabel>
-    </VFieldSet>
+  <VFieldSet>
+    <VLabel>
+      {{ props.label }}
+      <VInput v-model="model" required="true" type="password" />
+    </VLabel>
+  </VFieldSet>
 </template>
 
 <style lang="scss" scoped></style>

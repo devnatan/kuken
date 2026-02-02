@@ -1,10 +1,10 @@
 <template>
-    <div class="stepper__step">
-        <slot />
-    </div>
+  <div class="stepper__step">
+    <slot />
+  </div>
 </template>
 <script setup lang="ts">
 defineProps<{
-    name: string
+  name: string
 }>()
 </script>

@@ -11,21 +11,21 @@ const instanceStore = useInstanceStore()
 const instance = computed(() => instanceStore.instance)
 
 function onInstanceLoaded(instance: Instance) {
-    instanceStore.updateInstance(instance)
+  instanceStore.updateInstance(instance)
 }
 
 onUnmounted(() => {
-    instanceStore.$reset()
-    instanceStore.$dispose()
+  instanceStore.$reset()
+  instanceStore.$dispose()
 })
 </script>
 
 <template>
-    <Resource :resource="() => instancesService.getInstance(instanceId)" @loaded="onInstanceLoaded">
-        <template v-if="instance">
-            <router-view :instanceId="instance.id" />
-        </template>
-    </Resource>
+  <Resource :resource="() => instancesService.getInstance(instanceId)" @loaded="onInstanceLoaded">
+    <template v-if="instance">
+      <router-view :instanceId="instance.id" />
+    </template>
+  </Resource>
 </template>
 
 <style lang="scss" scoped></style>

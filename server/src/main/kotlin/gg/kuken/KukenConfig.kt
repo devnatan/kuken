@@ -4,6 +4,10 @@ import kotlinx.serialization.Serializable
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createDirectory
+import kotlin.io.path.createParentDirectories
 
 @Serializable
 data class KukenConfig(
@@ -48,6 +52,15 @@ data class KukenConfig(
 
         @JvmStatic
         fun tempDir(path: Path): Path = Files.createTempDirectory(path, null)
+
+        @JvmStatic
+        fun tempDirRecursively(path: String): Path {
+            val tmp = Files.createTempDirectory(null)
+            val dir = tmp.resolve(path)
+            dir.createDirectories()
+
+            return dir
+        }
 
         @JvmStatic
         fun tempFile(suffix: String): Path = Files.createTempFile(TMP_FILE_PREFIX, suffix)

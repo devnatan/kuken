@@ -10,15 +10,15 @@ const emit = defineEmits(["done"])
 </script>
 
 <template>
-    <VForm @submit.prevent="emit('done')">
-        <VFieldSet>
-            <VLabel>
-                Organization Name
-                <VInput v-model="organizationName" type="text" required="true" />
-            </VLabel>
-        </VFieldSet>
-        <VButton type="submit" variant="primary" style="align-self: end"> Proceed </VButton>
-    </VForm>
+  <VForm @submit.prevent="emit('done')">
+    <VFieldSet>
+      <VLabel>
+        Organization Name
+        <VInput v-model="organizationName" type="text" required="true" />
+      </VLabel>
+    </VFieldSet>
+    <VButton type="submit" variant="primary" style="align-self: end"> Proceed </VButton>
+  </VForm>
 </template>
 
 <style scoped lang="scss"></style>

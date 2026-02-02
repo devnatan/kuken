@@ -3,7 +3,7 @@ import BlueprintPropertyLiteral from "@/modules/blueprints/ui/components/propert
 import { h, type VNode } from "vue"
 
 export function useBlueprintProperty(property: BlueprintProperty): VNode {
-    if (property.type === "literal") h(BlueprintPropertyLiteral, { value: property.value })
+  if (property.type === "literal") h(BlueprintPropertyLiteral, { value: property.value })
 
-    return h(BlueprintPropertyLiteral, { value: "<unknown>" })
+  return h(BlueprintPropertyLiteral, { value: "<unknown>" })
 }

@@ -1,7 +1,7 @@
 <template>
-    <LoadingState v-if="isLoading" :class="$style.loading" />
-    <RouterView v-else />
-    <ModalsContainer />
+  <LoadingState v-if="isLoading" />
+  <RouterView v-else />
+  <ModalsContainer />
 </template>
 
 <script lang="ts" setup>
@@ -20,45 +20,35 @@ import { useDark } from "@vueuse/core"
 const isLoading = ref(true)
 
 useHead({
-    title: configService.appName
+  title: configService.appName,
+  meta: [
+    {
+      name: "color-scheme",
+      content: "light dark"
+    }
+  ]
 })
 
 useDark({
-    selector: "body",
-    storageKey: "kk-theme",
-    attribute: "color-scheme",
-    valueDark: "dark"
+  selector: "body",
+  storageKey: "kk-theme",
+  attribute: "color-scheme",
+  valueDark: "dark"
 })
 
 const platformStore = usePlatformStore()
 const router = useRouter()
 
 backendService
-    .getInfo()
-    .catch(console.error)
-    .finally(() => {
-        if (!platformStore.hasBackendInfo) {
-            router.push({ name: SETUP_ROUTE }).finally(() => (isLoading.value = false))
-        } else {
-            isLoading.value = false
-        }
-    })
+  .getInfo()
+  .catch(console.error)
+  .finally(() => {
+    if (!platformStore.hasBackendInfo) {
+      router.push({ name: SETUP_ROUTE }).finally(() => (isLoading.value = false))
+    } else {
+      isLoading.value = false
+    }
+  })
 
 onUnmounted(() => websocketService.close())
 </script>
-<style lang="scss">
-#app {
-    display: flex;
-    display: -ms-flexbox;
-    flex-direction: column;
-    height: 100%;
-}
-</style>
-<style lang="scss" module>
-.loading {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-}
-</style>

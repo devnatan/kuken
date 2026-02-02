@@ -5,20 +5,20 @@ import { isNull } from "@/utils"
 type PlatformStore = { backendInfo: BackendInfo | null }
 
 export const usePlatformStore = defineStore("platform", {
-    state: (): PlatformStore => ({ backendInfo: null }),
-    getters: {
-        getBackendInfo(): BackendInfo {
-            if (!this.hasBackendInfo) throw new Error("Missing backend information")
+  state: (): PlatformStore => ({ backendInfo: null }),
+  getters: {
+    getBackendInfo(): BackendInfo {
+      if (!this.hasBackendInfo) throw new Error("Missing backend information")
 
-            return this.backendInfo!
-        },
-        hasBackendInfo(): boolean {
-            return !isNull(this.backendInfo)
-        }
+      return this.backendInfo!
     },
-    actions: {
-        updateBackendInfo(backendInfo: BackendInfo) {
-            this.backendInfo = backendInfo
-        }
+    hasBackendInfo(): boolean {
+      return !isNull(this.backendInfo)
     }
+  },
+  actions: {
+    updateBackendInfo(backendInfo: BackendInfo) {
+      this.backendInfo = backendInfo
+    }
+  }
 })
