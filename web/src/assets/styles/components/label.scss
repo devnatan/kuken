@@ -1,4 +1,4 @@
-.label {
+label {
   font-family: var(--kt-body-font), serif;
   color: var(--kt-content-neutral-high);
   font-size: 14px;
@@ -11,20 +11,20 @@
   &:not(:first-child) {
     margin-top: 16px;
   }
-}
 
-.label--high {
-  color: var(--kt-content-neutral-high);
-}
+  &.label--high {
+    color: var(--kt-content-neutral-high);
+  }
 
-.label--onColor {
-  color: var(--kt-content-primary-oncolor);
-}
+  &.label--onColor {
+    color: var(--kt-content-primary-oncolor);
+  }
 
-.label--required::after {
-  content: "*";
-  position: relative;
-  display: inline-block;
-  color: var(--kt-content-negative);
-  font-size: 14px;
+  &.label--required::after {
+    content: "*";
+    position: relative;
+    display: inline-block;
+    color: var(--kt-content-negative);
+    font-size: 14px;
+  }
 }

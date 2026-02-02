@@ -165,6 +165,18 @@
   resolved "https://registry.npmjs.org/@humanwhocodes/object-schema/-/object-schema-2.0.3.tgz"
   integrity sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==
 
+"@imengyu/vue-scroll-rect@^0.1.4":
+  version "0.1.8"
+  resolved "https://registry.npmjs.org/@imengyu/vue-scroll-rect/-/vue-scroll-rect-0.1.8.tgz"
+  integrity sha512-Mg7rgHlsGPO0tcMFjp1kB2BZ3oRrRtFN8MoE52jTgQnlc+Y0N6ttFnbIxOh2fc9j82uhdQ8zgZcXlFHUXeGnCA==
+
+"@imengyu/vue3-context-menu@^1.5.3":
+  version "1.5.3"
+  resolved "https://registry.npmjs.org/@imengyu/vue3-context-menu/-/vue3-context-menu-1.5.3.tgz"
+  integrity sha512-PysXO1/3r+1fetumAkpZcXG5FyKAS/Bs6TtSvJqcAvk+gSvnN4C6x9KfgN8cBhyCDT8XLHMOzw+gkevY2Mx7zA==
+  dependencies:
+    "@imengyu/vue-scroll-rect" "^0.1.4"
+
 "@jridgewell/sourcemap-codec@^1.5.5":
   version "1.5.5"
   resolved "https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz"

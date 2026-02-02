@@ -16,6 +16,8 @@ import VueVirtualScroller from "vue-virtual-scroller"
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css"
 import localizedFormat from "dayjs/plugin/localizedFormat"
 import dayjs from "dayjs"
+import "@imengyu/vue3-context-menu/lib/vue3-context-menu.css"
+import ContextMenu from "@imengyu/vue3-context-menu"
 
 dayjs.extend(localizedFormat)
 
@@ -29,6 +31,7 @@ createApp(App)
   .use(router)
   .use(createHead())
   .use(hljsVuePlugin)
+  .use(ContextMenu)
   .mount("#app")
 
 logService.info(configService.toVersionInfoString())

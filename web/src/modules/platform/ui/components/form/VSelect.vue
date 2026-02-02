@@ -74,7 +74,7 @@ onClickOutside(container, () => {
   position: relative;
   border: 1px solid var(--kt-border-low);
   border-radius: 8px;
-  background-color: var(--kt-background-surface);
+  background-color: var(--kt-background-body);
 
   .text {
     padding: 0.8rem 1.2rem;
@@ -83,10 +83,6 @@ onClickOutside(container, () => {
     align-items: center;
     gap: 1.2rem;
     cursor: pointer;
-
-    span {
-      height: 24px;
-    }
   }
 
   .icon {
@@ -97,8 +93,8 @@ onClickOutside(container, () => {
   }
 
   .icon-wrapper {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     display: block;
   }
 }
@@ -107,7 +103,7 @@ onClickOutside(container, () => {
   position: absolute;
   border: 1px solid var(--kt-border-low);
   border-radius: 20px;
-  background-color: var(--kt-background-surface);
+  background-color: var(--kt-background-body);
   padding: 0.8rem;
   transform: translateY(0.8rem);
   z-index: 1;

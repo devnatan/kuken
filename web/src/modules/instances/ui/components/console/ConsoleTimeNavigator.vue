@@ -65,7 +65,7 @@ const windowLabel = computed(() => {
 .console-time-nav {
   padding: 6px 12px;
   background: rgba(0, 0, 0, 0.12);
-  font-family: "JetBrains Mono", "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+  font-family: "JetBrains Mono", "Consolas", "Monaco", "Courier New", monospace;
   color: #d1d5db;
   border-radius: 8px;
   min-width: 240px;

@@ -5,7 +5,6 @@
       'label--hight': high,
       'label--required': required
     }"
-    class="label"
   >
     <slot v-if="$slots.default" />
     <span v-if="$slots.description" class="description">

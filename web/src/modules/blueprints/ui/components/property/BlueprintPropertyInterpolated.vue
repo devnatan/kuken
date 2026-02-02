@@ -109,14 +109,12 @@ const updateContent = (event: InputEvent) => {
 </template>
 
 <style lang="scss">
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap");
-
 .element {
   border-radius: 4px;
   padding: 1px 4px;
   margin: 0 2px;
   line-height: 1.6;
-  font-family: "JetBrains Mono", "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+  font-family: "JetBrains Mono", "Consolas", "Monaco", "Courier New", monospace;
   user-select: none;
 
   &.conditional {

@@ -22,9 +22,6 @@ const instance = useInstanceStore().getInstance
 </template>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap");
-
 .console-container {
   display: flex;
   flex-direction: column;

@@ -74,5 +74,11 @@ export default {
         params: { path }
       })
       .then((res: AxiosResponse) => res.data)
+  },
+
+  async deleteFile(instanceId: string, path: string): Promise<string> {
+    return httpService
+      .delete(`instances/${instanceId}/files?path=${path}`)
+      .then((res: AxiosResponse) => res.data)
   }
 } as const

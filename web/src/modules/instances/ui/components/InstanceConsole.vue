@@ -304,8 +304,6 @@ const highlightSearch = (text: string) => {
 </template>
 
 <style lang="scss" scoped>
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap");
-
 .console-container {
   display: flex;
   flex-direction: column;
@@ -450,7 +448,7 @@ const highlightSearch = (text: string) => {
   .search-input {
     padding: 6px 12px;
     background: rgba(0, 0, 0, 0.12);
-    font-family: "JetBrains Mono", "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+    font-family: "JetBrains Mono", "Consolas", "Monaco", "Courier New", monospace;
     color: #d1d5db;
     border-radius: 8px;
     min-width: 240px;
@@ -526,14 +524,14 @@ const highlightSearch = (text: string) => {
 .command input {
   padding: 6px 12px;
   background: rgba(0, 0, 0, 0.12);
-  font-family: "JetBrains Mono", "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+  font-family: "JetBrains Mono", "Consolas", "Monaco", "Courier New", monospace;
   color: #d1d5db;
   border-radius: 0;
   transition: border-color 0.2s;
   height: 48px;
 
   &::placeholder {
-    font-family: "JetBrains Mono", "DM Mono", "Consolas", "Monaco", "Courier New", monospace;
+    font-family: "JetBrains Mono", "Consolas", "Monaco", "Courier New", monospace;
     font-style: normal;
     color: inherit;
   }

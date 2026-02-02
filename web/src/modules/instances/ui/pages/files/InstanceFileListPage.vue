@@ -8,5 +8,5 @@ const instance = useInstanceStore().getInstance
 </script>
 
 <template>
-  <InstanceFileList :instance-id="instance.id" :file-path="filePath ? `${filePath}/*` : '*'" />
+  <InstanceFileList :instance-id="instance.id" :file-path="filePath ?? ''" />
 </template>

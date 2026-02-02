@@ -15,7 +15,7 @@
 
   &:hover {
     color: var(--kt-content-neutral-high);
-    background-color: var(--kt-background-surface-high);
+    background-color: var(--kt-background-surface-hover);
   }
 }
 </style>
