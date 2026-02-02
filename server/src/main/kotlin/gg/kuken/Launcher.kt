@@ -25,6 +25,10 @@ import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+val log: Logger = LoggerFactory.getLogger("Kuken")
 
 fun main() {
     val config = loadConfig()
@@ -44,22 +48,28 @@ fun main() {
     }
 }
 
+private fun initDockerClient(config: KukenConfig): DockerClient {
+    val client =
+        DockerClient {
+            apiVersion(config.docker.apiVersion)
+            debugHttpCalls(debugHttpCalls = config.devMode)
+        }
+
+    runBlocking {
+        client.system.ping()
+    }
+
+    return client
+}
+
 private fun configureDependencyInjection(config: KukenConfig) =
     startKoin {
         val root =
             module {
                 single { config }
-
                 single { DatabaseFactory(config).create() }
-
                 single { setupRedis(config.redis) }
-
-                single {
-                    DockerClient {
-                        apiVersion("1.52")
-                        debugHttpCalls(debugHttpCalls = config.devMode)
-                    }
-                }
+                single { initDockerClient(config = get()) }
 
                 single<Hash> { BcryptHash() }
 
