@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useRoute } from "vue-router"
 import { computed } from "vue"
+import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
 
 type Link = { title: PropertyKey; route: string }
 
@@ -32,7 +33,7 @@ const activeLink = computed(() => links.value[links.value.length - 1])
 
 <template>
   <transition name="breadcrumb-container">
-    <div v-if="isVisible" class="breadcrumb-wrapper">
+    <VContainer v-if="isVisible" class="breadcrumb-wrapper">
       <transition-group class="breadcrumb" name="breadcrumb" tag="div">
         <router-link
           v-for="link in inactiveLinks"
@@ -44,14 +45,14 @@ const activeLink = computed(() => links.value[links.value.length - 1])
         </router-link>
         <span key="active" class="link" v-text="activeLink?.title" />
       </transition-group>
-    </div>
+    </VContainer>
   </transition>
 </template>
 
 <style lang="scss" scoped>
 .breadcrumb-wrapper {
-  margin-left: 54px;
-  top: 32px;
+  padding-top: 4.8rem;
+  padding-bottom: 2.4rem;
   position: relative;
   z-index: 1;
 }

@@ -13,7 +13,7 @@ h2 {
   position: relative;
   font-weight: bold;
   width: fit-content;
-  margin-bottom: 48px;
+  margin-bottom: 2.4rem;
   user-select: none;
 
   &:after {

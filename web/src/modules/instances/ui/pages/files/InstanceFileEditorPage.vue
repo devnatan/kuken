@@ -13,6 +13,7 @@ import VRow from "@/modules/platform/ui/components/grid/VRow.vue"
 import VFlexRow from "@/modules/platform/ui/components/grid/VFlexRow.vue"
 import VLayout from "@/modules/platform/ui/components/grid/VLayout.vue"
 import { cybrh3, isUndefined } from "@/utils"
+import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
 
 const instance = useInstanceStore().getInstance
 const filePath = useInstanceFilesStore().getCurrentFilePath
@@ -43,13 +44,13 @@ function onSave() {
 </script>
 
 <template>
-  <div class="header">
+  <VContainer>
     <VLayout gap="sm" direction="horizontal">
       <VButton variant="default" @click="router.back()">Go back</VButton>
       <VButton variant="primary" :disabled="!canSave" @click.prevent="onSave">Save</VButton>
       {{ filePath }}
     </VLayout>
-  </div>
+  </VContainer>
   <div class="editor">
     <Resource
       :resource="() => instancesService.getFileContents(instance.id, filePath)"
@@ -63,10 +64,6 @@ function onSave() {
 </template>
 
 <style scoped lang="scss">
-.header {
-  margin: 4.8rem 4.8rem 0;
-}
-
 .editor {
   margin-top: 2.4rem;
   position: relative;

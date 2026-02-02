@@ -18,10 +18,10 @@ const props = withDefaults(defineProps<Props>(), {
 })
 const gapMappings: { [size: string]: number } = {
   none: 0,
-  xs: 0.4,
-  sm: 0.8,
-  md: 1.6,
-  lg: 2.4
+  xs: 0.8,
+  sm: 1.6,
+  md: 2.4,
+  lg: 4.8
 }
 const style: CSSProperties = {
   "flex-direction": props.direction === "vertical" ? "column" : "row",

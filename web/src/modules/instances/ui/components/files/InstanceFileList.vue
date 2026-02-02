@@ -9,6 +9,7 @@ import VIcon from "@/modules/platform/ui/components/icons/VIcon.vue"
 import dayjs from "dayjs"
 import VCol from "@/modules/platform/ui/components/grid/VCol.vue"
 import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
+import { filesize } from "filesize"
 
 const { instanceId, filePath } = defineProps<{
   instanceId: string
@@ -39,7 +40,7 @@ const router = useRouter()
 </script>
 
 <template>
-  <div class="file-list-container">
+  <VContainer>
     <div>
       <VButton variant="default" @click="router.back()">Go back</VButton>
       {{ filePath }}
@@ -64,8 +65,11 @@ const router = useRouter()
               <VIcon name="File" />
             </div>
             <div class="name">{{ file.name }}</div>
+            <div class="size">
+              {{ filesize(file.size, { standard: "jedec" }) }}
+            </div>
             <div class="createdAt">
-              {{ dayjs(file.createdAt).format("dddd, MMMM D, YYYY h:mm A") }}
+              {{ dayjs(file.createdAt).format("DD/MMM/YYYY h:mm A") }}
             </div>
           </router-link>
           <router-link
@@ -82,13 +86,13 @@ const router = useRouter()
             </div>
             <div class="name">{{ file.name }}</div>
             <div class="createdAt">
-              {{ dayjs(file.createdAt).format("dddd, MMMM D, YYYY h:mm A") }}
+              {{ dayjs(file.createdAt).format("DD/MMM/YYYY h:mm A") }}
             </div>
           </router-link>
         </template>
       </div>
     </Resource>
-  </div>
+  </VContainer>
 </template>
 <style scoped lang="scss">
 .file-list {
@@ -99,7 +103,6 @@ const router = useRouter()
 }
 
 .file-list-container {
-  margin: 4.8rem;
 }
 
 .file {
@@ -110,6 +113,11 @@ const router = useRouter()
   border-radius: 8px;
   gap: 16px;
   text-decoration: none;
+
+  .size,
+  .createdAt {
+    color: var(--kt-content-neutral);
+  }
 
   &:hover {
     background-color: var(--kt-background-surface);
