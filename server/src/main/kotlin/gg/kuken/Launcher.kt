@@ -32,6 +32,8 @@ fun main() {
         setupDevMode()
     }
 
+    log.info("Data directory: ${config.engine.dataDirectory}")
+
     val di = configureDependencyInjection(config)
     runBlocking {
         val database = di.koin.get<Database>()
