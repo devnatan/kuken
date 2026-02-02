@@ -4,25 +4,14 @@ import gg.kuken.KukenConfig
 import gg.kuken.core.io.FileEntry
 import gg.kuken.core.io.FileSystem
 import gg.kuken.core.io.util.StatFileEntryParser
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import me.devnatan.dockerkt.DockerClient
 import me.devnatan.dockerkt.models.exec.ExecStartOptions
 import me.devnatan.dockerkt.models.exec.ExecStartResult
-import me.devnatan.dockerkt.resource.container.copyDirectoryTo
-import me.devnatan.dockerkt.resource.container.copyFileTo
-import me.devnatan.dockerkt.resource.container.copyTo
 import me.devnatan.dockerkt.resource.exec.create
 import me.devnatan.dockerkt.resource.exec.start
-import java.io.File
-import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
+import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.deleteExisting
-import kotlin.io.path.deleteIfExists
 import kotlin.io.path.deleteRecursively
-import kotlin.io.path.pathString
-import kotlin.io.path.writeText
 
 private const val FILE_SEPARATOR = "/"
 
@@ -30,6 +19,7 @@ class InProcessDockerContainerFileSystem(
     val containerId: String,
     val dockerClient: DockerClient,
 ) : FileSystem {
+    override val root: Path get() = error("Not supported")
     val statFileEntryParser = StatFileEntryParser()
 
     override suspend fun listDirectory(path: String): List<FileEntry> {

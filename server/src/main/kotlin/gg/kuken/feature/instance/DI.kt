@@ -28,6 +28,7 @@ val InstancesDI =
             InstanceFileService(
                 instanceService = get(),
                 dockerClient = get(),
+                config = get(),
             )
         }
 

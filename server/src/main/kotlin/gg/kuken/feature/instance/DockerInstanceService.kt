@@ -54,7 +54,9 @@ import me.devnatan.dockerkt.resource.exec.start
 import me.devnatan.dockerkt.resource.image.ImageNotFoundException
 import me.devnatan.dockerkt.resource.volume.create
 import org.apache.logging.log4j.LogManager
+import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.io.path.pathString
 import kotlin.random.Random
 import kotlin.random.nextUInt
 import kotlin.time.Clock
@@ -477,27 +479,23 @@ class DockerInstanceService(
         instanceId: Uuid,
         onInstall: AppResource?,
     ): String {
-        logger.debug("Blueprint image working directory: $workingDir")
-
         if (onInstall == null) {
             logger.debug("Skipping instance installation, no install hook was set")
-            val volume =
-                dockerClient.volumes.create {
-                    name = DOCKER_INSTALL_VOLUME_FORMAT.format(instanceId)
-                }
+            val installDir = kukenConfig.engine.instancesDataDirectory.resolve(instanceId.toString())
 
-            return volume.name
+            logger.debug("Installation directory: {}", installDir)
+            Files.createDirectories(installDir)
+            return installDir.pathString
         }
 
         logger.debug("Preparing installation...")
-
-        val installScriptFile = KukenConfig.tempDir(Paths.get(LOCAL_RESOURCES_DIR, onInstall.name)).toFile()
-        logger.debug("Installation file: {}", installScriptFile)
+        logger.debug("Blueprint image working directory: $workingDir")
 
         var createdContainer: String? = null
         val volume =
             dockerClient.volumes.create {
                 name = DOCKER_INSTALL_VOLUME_FORMAT.format(Random.nextUInt())
+                labels = mapOf("gg.kuken.instance.id" to instanceId.toString())
             }
 
         try {
@@ -513,6 +511,9 @@ class DockerInstanceService(
                     }
                 }
             dockerClient.containers.start(createdContainer)
+
+            val installScriptFile = KukenConfig.tempDir(Paths.get(LOCAL_RESOURCES_DIR, onInstall.name)).toFile()
+            logger.debug("Installation file: {}", installScriptFile)
 
             dockerClient.containers.copyDirectoryTo(
                 container = createdContainer,
@@ -581,7 +582,7 @@ class DockerInstanceService(
                 .inspect(image)
                 .config.workingDir ?: error("Working directory not set")
 
-        val installationVolume = tryInstallInstance(workingDir, instanceId, onInstall)
+        val installationDir = tryInstallInstance(workingDir, instanceId, onInstall)
 
         val containerId =
             dockerClient.containers.create {
@@ -589,24 +590,27 @@ class DockerInstanceService(
                 this@create.image = image
 
                 labels = mapOf("gg.kuken.instance.id" to instanceId.toString())
-
-                // TODO Assign and replace reference values
-                // tty = true
-                // openStdin = true
                 env = options.env.map { (key, value) -> "$key=$value" }
 
-                // TODO Allow random port assigned (options.port == null)
-                //      https://github.com/DevNatan/docker-kotlin?tab=readme-ov-file#create-and-start-a-container-with-auto-assigned-port-bindings
+                // TODO Allow random port assignment
                 hostConfig {
                     portBindings(options.address.port) {
                         add(PortBinding(options.address.host, options.address.port))
                     }
 
-                    binds = listOf("$installationVolume:$workingDir")
+                    binds = listOf("${installationDir.replace("\\", "/")}:$workingDir")
                 }
             }
 
         dockerClient.containers.start(containerId)
+
+        val chmod =
+            dockerClient.exec.create(containerId) {
+                command = listOf("chmod", "-R", "777", workingDir)
+                attachStdout = true
+            }
+        dockerClient.exec.start(chmod)
+
         return containerId
     }
 

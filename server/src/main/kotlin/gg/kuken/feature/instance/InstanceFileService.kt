@@ -1,5 +1,6 @@
 package gg.kuken.feature.instance
 
+import gg.kuken.KukenConfig
 import gg.kuken.core.io.FileEntry
 import gg.kuken.core.io.FileSystem
 import me.devnatan.dockerkt.DockerClient
@@ -9,12 +10,18 @@ import kotlin.uuid.Uuid
 class InstanceFileService(
     val instanceService: InstanceService,
     val dockerClient: DockerClient,
-) : KoinComponent {
+    val config: KukenConfig,
+) {
     suspend fun fileSystemOf(instanceId: Uuid): FileSystem {
         val containerId = instanceService.getInstanceContainerId(instanceId)
-        val fileSystem = InProcessDockerContainerFileSystem(containerId, dockerClient)
 
-        return fileSystem
+        // FIXME val isRunning = dockerClient.containers.inspect(containerId).state.isRunning
+        // FIXME isRunning
+        return if (false) {
+            InProcessDockerContainerFileSystem(containerId, dockerClient)
+        } else {
+            HostDockerContainerFileSystem(instanceId, dockerClient, config)
+        }
     }
 
     suspend fun listFiles(
