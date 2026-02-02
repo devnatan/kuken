@@ -1,10 +1,10 @@
 services:
-  kuken-server:
+  kuken:
     build:
       context: .
       dockerfile: Dockerfile
     image: kuken-server:latest
-    container_name: kuken-server
+    container_name: kuken
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -13,18 +13,18 @@ services:
       - NODE=kuken0
       - HTTP_HOST=0.0.0.0
       - HTTP_PORT=8080
-      - DB_URL=jdbc:postgresql://kuken_db:5432/kuken
+      - DB_URL=jdbc:postgresql://kuken_postgres:5432/kuken
       - DB_USER=kuken
       - DB_PASSWORD=kuken
-      - REDIS_URL=redis://kuken_redis:6379
       - DOCKER_NETWORK=kuken_network
-      - DOCKER_HOST=tcp://host.docker.internal:2375
+      - DATA_DIRECTORY=/data/volumes
+    volumes:
+      - /var/lib/kuken:/data/volumes
+      - /var/run/docker.sock:/var/run/docker.sock
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
-      kuken_db:
-        condition: service_healthy
-      kuken_redis:
+      kuken_postgres:
         condition: service_healthy
     networks:
       - kuken_network
@@ -40,9 +40,9 @@ services:
     tmpfs:
       - /app/logs:uid=1000,gid=1000,mode=1777
       - /tmp:uid=1000,gid=1000,mode=1777
-  kuken_db:
+  kuken_postgres:
     image: postgres:16-alpine
-    container_name: kuken_db
+    container_name: postgres
     restart: unless-stopped
     environment:
       - POSTGRES_DB=kuken
@@ -50,7 +50,7 @@ services:
       - POSTGRES_PASSWORD=kuken
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
     volumes:
-      - kuken_db_data:/var/lib/postgresql/data
+      - kuken_postgres_data:/var/lib/postgresql/data
     networks:
       - kuken_network
     healthcheck:
@@ -62,31 +62,11 @@ services:
     security_opt:
       - no-new-privileges:true
 
-  kuken_redis:
-    image: redis:7-alpine
-    container_name: kuken_redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - kuken_redis_data:/data
-    networks:
-      - kuken_network
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 5s
-    security_opt:
-      - no-new-privileges:true
-
 networks:
   kuken_network:
     driver: bridge
     name: kuken_network
 
 volumes:
-  kuken_db_data:
-    name: kuken_db_data
-  kuken_redis_data:
-    name: kuken_redis_data
+  kuken_postgres_data:
+    name: kuken_postgres_data
