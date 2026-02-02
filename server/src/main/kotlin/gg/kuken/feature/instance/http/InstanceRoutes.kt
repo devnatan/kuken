@@ -15,6 +15,14 @@ class InstanceRoutes {
     )
 
     @Serializable
+    @Resource("{instanceId}/files")
+    class File(
+        val parent: InstanceRoutes = InstanceRoutes(),
+        val instanceId: Uuid,
+        val path: String,
+    )
+
+    @Serializable
     @Resource("{instanceId}/files/contents")
     class FileContents(
         val parent: InstanceRoutes = InstanceRoutes(),

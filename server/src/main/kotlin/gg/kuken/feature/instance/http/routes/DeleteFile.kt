@@ -10,7 +10,7 @@ import org.koin.ktor.ext.inject
 fun Route.deleteFile() {
     val instanceFileService by inject<InstanceFileService>()
 
-    delete<InstanceRoutes.FileContents> { parameters ->
+    delete<InstanceRoutes.File> { parameters ->
         val contents =
             instanceFileService.deleteFile(
                 instanceId = parameters.instanceId,
