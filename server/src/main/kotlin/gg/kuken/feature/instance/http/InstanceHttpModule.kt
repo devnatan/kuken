@@ -7,6 +7,7 @@ import gg.kuken.feature.instance.http.routes.fetchLogs
 import gg.kuken.feature.instance.http.routes.getInstanceDetails
 import gg.kuken.feature.instance.http.routes.listFiles
 import gg.kuken.feature.instance.http.routes.readFile
+import gg.kuken.feature.instance.http.routes.renameFile
 import gg.kuken.feature.instance.http.routes.writeFile
 import gg.kuken.feature.instance.websocket.handlers.InstanceLogsPacketWSHandler
 import gg.kuken.feature.instance.websocket.handlers.InstanceLogsRequestWSHandler
@@ -32,6 +33,7 @@ internal object InstanceHttpModule : HttpModule() {
                     readFile()
                     writeFile()
                     deleteFile()
+                    renameFile()
                     command()
                     fetchLogs()
                 }

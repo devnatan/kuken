@@ -18,7 +18,7 @@ defineProps<{ file: VirtualFile }>()
     <div class="icon-wrapper">
       <VIcon name="Folder" />
     </div>
-    <div class="name">{{ file.name }}</div>
+    <div class="name">{{ file.name }}/</div>
     <div class="createdAt">
       {{ dayjs(file.createdAt).format("DD/MMM/YYYY h:mm A") }}
     </div>

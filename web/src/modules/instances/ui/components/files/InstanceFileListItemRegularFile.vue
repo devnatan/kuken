@@ -10,13 +10,13 @@ import {
   ContextMenuSeparator,
   type MenuOptions
 } from "@imengyu/vue3-context-menu"
-import { ref } from "vue"
+import { markRaw, readonly, ref, shallowRef, toRaw, useTemplateRef } from "vue"
 import instancesService from "@/modules/instances/api/services/instances.service.ts"
 import { useInstanceFilesStore } from "@/modules/instances/instance-files.store.ts"
 import { useInstanceStore } from "@/modules/instances/instances.store.ts"
+import { onClickOutside, useManualRefHistory } from "@vueuse/core"
 
 const { file } = defineProps<{ file: VirtualFile }>()
-const deleted = ref(false)
 
 const showContextMenu = ref(false)
 const options = ref<MenuOptions>({
@@ -33,17 +33,50 @@ function onContextMenu(e: MouseEvent) {
   options.value.y = e.y
 }
 
+const renaming = ref(false)
+const fileName = shallowRef(file.name)
+const nameInput = useTemplateRef("name")
+
+function onBeginRenameFile() {
+  renaming.value = true
+  nameInput.value?.blur()
+}
+
+async function onFinishRenameFile() {
+  if (!renaming.value) return
+  if (fileName.value.trim().length === 0 || fileName.value === file.name) {
+    renaming.value = false
+    return
+  }
+
+  try {
+    const instanceId = useInstanceStore().getInstance.id
+    console.log("props", instanceId, file.relativePath, fileName.value)
+
+    await instancesService.renameFile(instanceId, file.relativePath, fileName.value)
+  } finally {
+    renaming.value = false
+  }
+}
+
+const deleted = ref(false)
 async function onDeleteFile() {
   const instanceId = useInstanceStore().getInstance.id
 
   await instancesService.deleteFile(instanceId, file.relativePath)
   deleted.value = true
 }
+
+onClickOutside(nameInput, () => {
+  onFinishRenameFile()
+})
 </script>
 
 <template>
-  <router-link
+  <component
+    :is="renaming ? 'span' : 'router-link'"
     v-if="!deleted"
+    :disabled="renaming"
     :to="{
       name: 'instance.file.editor',
       query: { filePath: file.relativePath }
@@ -51,20 +84,23 @@ async function onDeleteFile() {
     class="file"
     @contextmenu="onContextMenu"
   >
-    <div class="icon-wrapper">
-      <VIcon name="File" />
+    <div class="icon-wrapper"><VIcon name="File" /></div>
+    <form v-if="renaming" @submit.prevent="onFinishRenameFile" @keydown.enter.stop>
+      <input ref="name" v-model="fileName" type="text" class="name" />
+    </form>
+    <div v-else ref="name" class="name">
+      {{ fileName }}
     </div>
-    <div class="name">{{ file.name }}</div>
     <div class="size">
       {{ filesize(file.size, { standard: "jedec" }) }}
     </div>
     <div class="createdAt">
       {{ dayjs(file.createdAt).format("DD/MMM/YYYY h:mm A") }}
     </div>
-  </router-link>
+  </component>
 
   <context-menu v-model:show="showContextMenu" :options="options">
-    <context-menu-item label="Rename">
+    <context-menu-item label="Rename" @click="onBeginRenameFile">
       <template #icon>
         <VIcon name="Rename" />
       </template>
@@ -111,5 +147,18 @@ async function onDeleteFile() {
   .createdAt {
     margin-left: auto;
   }
+
+  .name[contenteditable="true"] {
+    cursor: default;
+  }
+}
+
+input {
+  border-radius: 4px;
+  background-color: var(--kt-background-surface-high);
+  height: 26px;
+  padding: 0 8px;
+  font-family: var(--kt-body-font), serif;
+  font-size: 14px;
 }
 </style>

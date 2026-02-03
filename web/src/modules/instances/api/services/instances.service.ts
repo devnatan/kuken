@@ -80,5 +80,17 @@ export default {
     return httpService
       .delete(`instances/${instanceId}/files?path=${path}`)
       .then((res: AxiosResponse) => res.data)
+  },
+
+  async renameFile(
+    instanceId: string,
+    path: string,
+    newName: string
+  ): Promise<{
+    updates: ["fileName"]
+  }> {
+    return httpService
+      .patch(`instances/${instanceId}/files?path=${path}`, { newName })
+      .then((res: AxiosResponse) => res.data)
   }
 } as const

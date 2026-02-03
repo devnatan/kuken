@@ -5,6 +5,7 @@ import gg.kuken.core.io.FileEntry
 import gg.kuken.core.io.FileSystem
 import gg.kuken.core.io.FileType
 import gg.kuken.core.io.requireSafePath
+import gg.kuken.core.io.safePath
 import me.devnatan.dockerkt.DockerClient
 import java.nio.file.Files
 import java.nio.file.Path
@@ -55,6 +56,17 @@ class HostDockerContainerFileSystem(
     @OptIn(ExperimentalPathApi::class)
     override suspend fun deleteFile(path: String) {
         requireSafePath(path).deleteRecursively()
+    }
+
+    override suspend fun renameFile(
+        path: String,
+        newName: String,
+    ) {
+        val file = safePath(path).toFile()
+        val dir = file.parentFile
+        val newFile = dir.resolve(newName)
+
+        file.renameTo(newFile)
     }
 
     private fun toFileEntry(path: Path): FileEntry {

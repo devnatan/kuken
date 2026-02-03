@@ -46,4 +46,10 @@ class InstanceFileService(
         instanceId: Uuid,
         filePath: String,
     ) = fileSystemOf(instanceId).deleteFile(filePath)
+
+    suspend fun renameFile(
+        instanceId: Uuid,
+        filePath: String,
+        newName: String,
+    ) = fileSystemOf(instanceId).renameFile(filePath, newName)
 }

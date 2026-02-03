@@ -18,6 +18,11 @@ interface FileSystem {
     )
 
     suspend fun deleteFile(path: String)
+
+    suspend fun renameFile(
+        path: String,
+        newName: String,
+    )
 }
 
 context(_: FileSystem)

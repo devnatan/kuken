@@ -47,6 +47,10 @@ class HttpService {
   delete<T>(url: string, config?: AxiosRequestConfig): AxiosPromise<T> {
     return this.axios.delete(url, config)
   }
+
+  patch<T>(url: string, data?: T): AxiosPromise<T> {
+    return this.axios.patch(url, data)
+  }
 }
 
 export default new HttpService()

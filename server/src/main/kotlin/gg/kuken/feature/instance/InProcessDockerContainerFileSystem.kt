@@ -3,6 +3,7 @@ package gg.kuken.feature.instance
 import gg.kuken.KukenConfig
 import gg.kuken.core.io.FileEntry
 import gg.kuken.core.io.FileSystem
+import gg.kuken.core.io.safePath
 import gg.kuken.core.io.util.StatFileEntryParser
 import me.devnatan.dockerkt.DockerClient
 import me.devnatan.dockerkt.models.exec.ExecStartOptions
@@ -11,7 +12,9 @@ import me.devnatan.dockerkt.resource.exec.create
 import me.devnatan.dockerkt.resource.exec.start
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.Path
 import kotlin.io.path.deleteRecursively
+import kotlin.io.path.pathString
 
 private const val FILE_SEPARATOR = "/"
 
@@ -91,6 +94,22 @@ class InProcessDockerContainerFileSystem(
         val execId =
             dockerClient.exec.create(containerId) {
                 command = listOf("rm", "-f", path)
+            }
+
+        dockerClient.exec.start(execId)
+    }
+
+    override suspend fun renameFile(
+        path: String,
+        newName: String,
+    ) {
+        val parent = Path(path).parent
+        val expectedNewPath = parent.resolve(newName)
+        val fixedNewPath = safePath(expectedNewPath.pathString)
+
+        val execId =
+            dockerClient.exec.create(containerId) {
+                command = listOf("cp", path, fixedNewPath.pathString)
             }
 
         dockerClient.exec.start(execId)
