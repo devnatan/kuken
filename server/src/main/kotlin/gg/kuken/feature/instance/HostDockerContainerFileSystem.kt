@@ -7,7 +7,6 @@ import gg.kuken.core.io.FileType
 import gg.kuken.core.io.requireSafePath
 import gg.kuken.core.io.safePath
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import me.devnatan.dockerkt.DockerClient
 import org.apache.tika.Tika

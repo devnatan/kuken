@@ -1,9 +1,7 @@
 package gg.kuken.feature.rbac.repository
 
-import gg.kuken.feature.rbac.entity.AccountPermissionsTable
 import gg.kuken.feature.rbac.entity.PermissionResourceRulesTable
 import gg.kuken.feature.rbac.entity.PermissionsTable
-import gg.kuken.feature.rbac.entity.RolePermissionsTable
 import gg.kuken.feature.rbac.model.Permission
 import gg.kuken.feature.rbac.model.PermissionAction
 import gg.kuken.feature.rbac.model.ResourceType

@@ -9,7 +9,6 @@ import gg.kuken.feature.account.entity.toDomain
 import gg.kuken.feature.account.model.Account
 import gg.kuken.feature.account.repository.AccountRepository
 import kotlin.time.Clock
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 interface AccountService {

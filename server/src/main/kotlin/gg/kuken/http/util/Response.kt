@@ -4,13 +4,9 @@ import gg.kuken.http.HttpError
 import gg.kuken.http.HttpException
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.request.receiveNullable
-import io.ktor.server.response.respond
-import io.ktor.util.pipeline.PipelineContext
 import jakarta.validation.Validator
 import org.koin.ktor.ext.get
-import org.koin.ktor.ext.inject
 
 suspend inline fun <reified T : Any> ApplicationCall.receiveValid(): T = receiveValidating(get<Validator>())
 

@@ -3,7 +3,6 @@ package gg.kuken.core.io
 import kotlinx.io.files.FileNotFoundException
 import java.nio.file.Path
 import kotlin.io.path.exists
-import kotlin.io.path.pathString
 
 interface FileSystem {
     val root: Path

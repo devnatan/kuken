@@ -1,6 +1,5 @@
 package gg.kuken.feature.blueprint.model
 
-import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.ConfigParseOptions
 import com.typesafe.config.ConfigSyntax

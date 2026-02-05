@@ -1,10 +1,7 @@
 package gg.kuken.orchestrator
 
 import gg.kuken.orchestrator.model.Node
-import gg.kuken.orchestrator.model.NodeRole
-import gg.kuken.orchestrator.model.NodeState
 import io.lettuce.core.RedisClient
-import org.apache.commons.lang3.mutable.Mutable
 
 class Orchestrator(
     val redisClient: RedisClient,

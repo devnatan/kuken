@@ -2,7 +2,6 @@ package gg.kuken.feature.account.repository
 
 import gg.kuken.feature.account.entity.AccountEntity
 import gg.kuken.feature.account.model.Account
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 interface AccountRepository {

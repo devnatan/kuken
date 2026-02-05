@@ -5,31 +5,31 @@ import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
 @Serializable
-sealed class CommandExecutionStrategy<T : CommandExecutionStrategy.Settings>(
+sealed class CommandExecutionStrategy<T : CommandExecutionStrategy.Context>(
     val strategyName: String,
     val settingsType: KClass<T>,
 ) {
-    interface Settings
+    interface Context
 
-    data object DockerExec : CommandExecutionStrategy<DockerExec.Settings>(
+    data object DockerExec : CommandExecutionStrategy<DockerExec.Context>(
         strategyName = "exec",
-        settingsType = Settings::class,
+        settingsType = Context::class,
     ) {
-        data class Settings(
+        data class Context(
             val shell: String,
             val timeout: Int,
             val template: String,
-        ) : CommandExecutionStrategy.Settings
+        ) : CommandExecutionStrategy.Context
     }
 
-    data object RCON : CommandExecutionStrategy<RCON.Settings>(
+    data object RCON : CommandExecutionStrategy<RCON.Context>(
         strategyName = "rcon",
-        settingsType = Settings::class,
+        settingsType = Context::class,
     ) {
-        data class Settings(
+        data class Context(
             val port: String,
             val password: SensitiveText,
             val template: String,
-        ) : CommandExecutionStrategy.Settings
+        ) : CommandExecutionStrategy.Context
     }
 }

@@ -6,7 +6,6 @@ import gg.kuken.feature.account.model.Account
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
-import kotlin.uuid.ExperimentalUuidApi
 
 @Serializable
 data class VerifyResponse(
