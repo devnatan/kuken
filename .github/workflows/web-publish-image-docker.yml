@@ -14,7 +14,7 @@ defaults:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: webui
+  IMAGE_NAME: kuken-project/webui
 
 jobs:
   publish:
