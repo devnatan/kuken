@@ -40,10 +40,9 @@ const container = ref({ width: 320 })
   width: 240px;
   background: var(--kt-background-body);
   height: 100%;
-  border-right: 2px solid var(--kt-border-low);
+  border-right: 1px solid var(--kt-border-low);
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 1.6rem 0.8rem;
 }
 
 .files {
@@ -53,5 +52,6 @@ const container = ref({ width: 320 })
   display: flex;
   flex-direction: column;
   gap: 2px;
+  padding: 1.6rem 1.2rem;
 }
 </style>

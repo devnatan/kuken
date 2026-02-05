@@ -2,6 +2,7 @@
 import type { VirtualFile } from "@/modules/instances/api/models/file.model.ts"
 import instancesService from "@/modules/instances/api/services/instances.service.ts"
 import { useInstanceFilesStore } from "@/modules/instances/instance-files.store.ts"
+import InstanceFileBrowserEmptyDirectory from "@/modules/instances/ui/components/files/browser/InstanceFileBrowserEmptyDirectory.vue"
 import InstanceFileListItemDirectory from "@/modules/instances/ui/components/files/browser/list/InstanceFileListItemDirectory.vue"
 import InstanceFileListItemRegularFile from "@/modules/instances/ui/components/files/browser/list/InstanceFileListItemRegularFile.vue"
 import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
@@ -61,20 +62,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <VContainer>
-    <Resource
-      v-if="!refreshing"
-      :resource="() => instancesService.listFiles(instanceId, filePath)"
-      @loaded="onFilesLoaded"
-    >
+  <Resource
+    v-if="!refreshing"
+    :resource="() => instancesService.listFiles(instanceId, filePath)"
+    @loaded="onFilesLoaded"
+  >
+    <InstanceFileBrowserEmptyDirectory v-if="fileList!.length === 0" />
+    <VContainer v-else>
       <div class="file-list">
         <template v-for="file in fileList" :key="file.name">
           <InstanceFileListItemRegularFile v-if="file.type === 'FILE'" :file="file" />
           <InstanceFileListItemDirectory v-if="file.type === 'DIRECTORY'" :file="file" />
         </template>
       </div>
-    </Resource>
-  </VContainer>
+    </VContainer>
+  </Resource>
 </template>
 <style scoped lang="scss">
 .file-list {

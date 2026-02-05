@@ -29,6 +29,7 @@ header {
 
   .logo img {
     max-width: 72px;
+    user-select: none;
   }
 
   .avatar {

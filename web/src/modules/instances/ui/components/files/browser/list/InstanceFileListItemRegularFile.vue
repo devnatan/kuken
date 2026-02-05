@@ -1,36 +1,16 @@
 <script setup lang="ts">
 import type { VirtualFile } from "@/modules/instances/api/models/file.model.ts"
-import { filesize } from "filesize"
-import dayjs from "dayjs"
-import VIcon from "@/modules/platform/ui/components/icons/VIcon.vue"
-import {
-  ContextMenu,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  type MenuOptions
-} from "@imengyu/vue3-context-menu"
-import { ref, shallowRef, useTemplateRef } from "vue"
 import instancesService from "@/modules/instances/api/services/instances.service.ts"
 import { useInstanceStore } from "@/modules/instances/instances.store.ts"
-import { onClickOutside } from "@vueuse/core"
+import InstanceFileListItemRegularFileContextMenu from "@/modules/instances/ui/components/files/browser/list/InstanceFileListItemRegularFileContextMenu.vue"
 import VCheckbox from "@/modules/platform/ui/components/form/VCheckbox.vue"
+import VIcon from "@/modules/platform/ui/components/icons/VIcon.vue"
+import { onClickOutside } from "@vueuse/core"
+import dayjs from "dayjs"
+import { filesize } from "filesize"
+import { ref, shallowRef, useTemplateRef } from "vue"
 
 const { file } = defineProps<{ file: VirtualFile }>()
-
-const showContextMenu = ref(false)
-const options = ref<MenuOptions>({
-  zIndex: 3,
-  minWidth: 230,
-  x: 500,
-  y: 200
-})
-
-function onContextMenu(e: MouseEvent) {
-  e.preventDefault()
-  showContextMenu.value = true
-  options.value.x = e.x
-  options.value.y = e.y
-}
 
 const renaming = ref(false)
 const fileName = shallowRef(file.name)
@@ -69,6 +49,8 @@ async function onDeleteFile() {
 onClickOutside(nameInput, () => {
   onFinishRenameFile()
 })
+
+const contextMenu = ref<{ onContextMenu: Function } | null>(null)
 </script>
 
 <template>
@@ -81,7 +63,7 @@ onClickOutside(nameInput, () => {
       query: { filePath: file.relativePath }
     }"
     class="file"
-    @contextmenu="onContextMenu"
+    @contextmenu="contextMenu?.onContextMenu"
   >
     <VCheckbox @click.stop />
     <div class="icon-wrapper"><VIcon name="File" /></div>
@@ -99,24 +81,11 @@ onClickOutside(nameInput, () => {
     </div>
   </component>
 
-  <context-menu v-model:show="showContextMenu" :options="options">
-    <context-menu-item label="Rename" @click="onBeginRenameFile">
-      <template #icon>
-        <VIcon name="Rename" />
-      </template>
-    </context-menu-item>
-    <context-menu-item label="Download">
-      <template #icon>
-        <VIcon name="Download" />
-      </template>
-    </context-menu-item>
-    <context-menu-separator />
-    <context-menu-item label="Delete" @click="onDeleteFile">
-      <template #icon>
-        <VIcon name="DeleteForever" />
-      </template>
-    </context-menu-item>
-  </context-menu>
+  <InstanceFileListItemRegularFileContextMenu
+    ref="contextMenu"
+    @rename="onBeginRenameFile"
+    @delete="onDeleteFile"
+  />
 </template>
 
 <style scoped lang="scss">

@@ -8,7 +8,8 @@ import VLayout from "@/modules/platform/ui/components/grid/VLayout.vue"
 import { useDropZone, useFileDialog } from "@vueuse/core"
 import { nextTick, ref, useTemplateRef } from "vue"
 
-const filePath = useInstanceFilesStore().getCurrentFilePath
+const instanceFilesStore = useInstanceFilesStore()
+const filePath = instanceFilesStore.getCurrentFilePath
 const instance = useInstanceStore().getInstance
 
 const dropZoneRef = useTemplateRef("dropZone")
@@ -59,7 +60,12 @@ async function uploadFiles(files: File[] | null) {
     <!--    </div>-->
     <div class="header">
       <VLayout direction="horizontal" gap="sm">
-        <VButton variant="default" @click="$router.back()">Go back</VButton>
+        <VButton
+          v-if="$route.query.filePath"
+          variant="default"
+          :to="instanceFilesStore.getPreviousPathAsRouteLink()"
+          >Go back</VButton
+        >
         <VButton variant="primary" @click="fileDialog.open">Upload file</VButton>
       </VLayout>
     </div>
@@ -86,6 +92,7 @@ async function uploadFiles(files: File[] | null) {
 }
 
 .file-browser {
+  height: 100%;
   .header {
     padding: 1.6rem;
   }

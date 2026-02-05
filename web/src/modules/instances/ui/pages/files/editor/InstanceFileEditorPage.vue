@@ -44,7 +44,7 @@ onMounted(() => {
 <template>
   <div class="header">
     <VLayout gap="sm" direction="horizontal">
-      <VButton variant="default" @click="store.goBack($router)">Go back</VButton>
+      <VButton variant="default" :to="store.getPreviousPathAsRouteLink()">Go back</VButton>
       <VButton variant="primary" :disabled="!canSave" @click.prevent="onSave">Save</VButton>
       {{ filePath }}
     </VLayout>
@@ -64,13 +64,20 @@ onMounted(() => {
 <style scoped lang="scss">
 .editor {
   position: relative;
+  height: 100%;
 }
 
 .contents {
-  background-color: var(--kt-background-surface);
+  height: 100%;
 
   :deep(.cm-content) {
     padding: 12px;
+  }
+
+  &,
+  :deep(.cm-gutters),
+  :deep(.cm-content) {
+    background-color: var(--kt-background-surface) !important;
   }
 }
 

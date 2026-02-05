@@ -3,7 +3,7 @@ import instancesService from "@/modules/instances/api/services/instances.service
 import { useInstanceStore } from "@/modules/instances/instances.store.ts"
 import { isNull, isUndefined, substringBeforeLast, systemPathSepatator } from "@/utils"
 import { defineStore } from "pinia"
-import { type Router, useRoute } from "vue-router"
+import { type RouteLocationRaw, useRoute } from "vue-router"
 
 type InstanceFilesStore = {
   dirRelativePath: string | null
@@ -57,6 +57,8 @@ export const useInstanceFilesStore = defineStore("instanceFiles", {
     async initTree() {
       if (this.tree.length !== 0) return
 
+      console.log("init tree")
+
       const instance = useInstanceStore().getInstance.id
       return instancesService.listFiles(instance, "").then((files) => {
         this.tree = files
@@ -85,11 +87,6 @@ export const useInstanceFilesStore = defineStore("instanceFiles", {
 
     updateFiles(files: VirtualFile[]) {
       this.files = files
-      this.initTree().then(() => {
-        if (!isNull(this.dirRelativePath)) {
-          this.toggleExpand(this.dirRelativePath)
-        }
-      })
     },
 
     toggleExpand(id: string): void {
@@ -100,6 +97,10 @@ export const useInstanceFilesStore = defineStore("instanceFiles", {
       }
     },
 
+    removeExpanded(id: string): void {
+      this.expandedIds.delete(id)
+    },
+
     select(id: string): void {
       this.selectedId = id
     },
@@ -108,24 +109,23 @@ export const useInstanceFilesStore = defineStore("instanceFiles", {
       return this.expandedIds.has(id)
     },
 
-    goBack(router: Router) {
+    getPreviousPathAsRouteLink(): RouteLocationRaw {
       const currentPath = this.getCurrentFilePath
       const pathSeparator = systemPathSepatator(currentPath)
       const isOnRoot = isUndefined(pathSeparator)
       if (isOnRoot) {
-        router.replace({
+        return {
           name: "instance.files"
-        })
-        return
+        }
       }
 
       const previousPath = substringBeforeLast(currentPath, pathSeparator)
-      router.replace({
+      return {
         name: "instance.files",
         query: {
           filePath: previousPath
         }
-      })
+      }
     }
   }
 })

@@ -34,7 +34,7 @@ function onClick() {
 
 function onChildLeave(child: VirtualFile) {
   if (store.isExpanded(child.relativePath)) {
-    store.toggleExpand(child.relativePath)
+    store.removeExpanded(child.relativePath)
   }
 }
 
@@ -147,5 +147,7 @@ onUnmounted(() => {
   left: 32px;
   top: -2px;
   position: relative;
+  user-select: none;
+  pointer-events: none;
 }
 </style>
