@@ -2,11 +2,14 @@ package gg.kuken.core.io.util
 
 import gg.kuken.core.io.FileEntry
 import gg.kuken.core.io.FileType
+import org.apache.tika.Tika
 import kotlin.time.Instant
 
 private const val FIELD_SEPARATOR = '|'
 
 class StatFileEntryParser {
+    val tika: Tika = Tika()
+
     fun parse(output: String): List<FileEntry> =
         output
             .lines()
@@ -45,6 +48,7 @@ class StatFileEntryParser {
             isReadable = perms.readable,
             isWritable = perms.writable,
             hidden = false,
+            mimeType = tika.detect(name),
         )
     }
 

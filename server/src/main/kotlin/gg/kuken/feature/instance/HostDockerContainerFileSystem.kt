@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import me.devnatan.dockerkt.DockerClient
+import org.apache.tika.Tika
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.BasicFileAttributes
@@ -38,6 +39,8 @@ class HostDockerContainerFileSystem(
     val dockerClient: DockerClient,
     config: KukenConfig,
 ) : FileSystem {
+    private val tika: Tika = Tika()
+
     override val root: Path =
         config.engine.instancesDataDirectory
             .resolve(instanceId.toString())
@@ -102,6 +105,7 @@ class HostDockerContainerFileSystem(
             isWritable = path.isWritable(),
             hidden = path.isHidden(),
             permissions = permissions,
+            mimeType = tika.detect(path.name),
         )
     }
 

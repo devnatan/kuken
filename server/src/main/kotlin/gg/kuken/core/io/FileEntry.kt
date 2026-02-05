@@ -17,13 +17,5 @@ data class FileEntry(
     val isReadable: Boolean,
     val isWritable: Boolean,
     val hidden: Boolean,
-) {
-    val isDirectory: Boolean
-        get() = type == FileType.DIRECTORY
-
-    val isFile: Boolean
-        get() = type == FileType.FILE
-
-    val isSymlink: Boolean
-        get() = type == FileType.SYMLINK
-}
+    val mimeType: String,
+)
