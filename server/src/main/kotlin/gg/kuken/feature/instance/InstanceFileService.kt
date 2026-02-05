@@ -3,8 +3,9 @@ package gg.kuken.feature.instance
 import gg.kuken.KukenConfig
 import gg.kuken.core.io.FileEntry
 import gg.kuken.core.io.FileSystem
+import gg.kuken.core.io.safePath
 import me.devnatan.dockerkt.DockerClient
-import org.koin.core.component.KoinComponent
+import java.nio.file.Path
 import kotlin.uuid.Uuid
 
 class InstanceFileService(
@@ -23,6 +24,11 @@ class InstanceFileService(
             HostDockerContainerFileSystem(instanceId, dockerClient, config)
         }
     }
+
+    suspend fun resolve(
+        instanceId: Uuid,
+        path: String,
+    ): Path = with(fileSystemOf(instanceId)) { safePath(path) }
 
     suspend fun listFiles(
         instanceId: Uuid,
@@ -52,4 +58,9 @@ class InstanceFileService(
         filePath: String,
         newName: String,
     ) = fileSystemOf(instanceId).renameFile(filePath, newName)
+
+    suspend fun touchFile(
+        instanceId: Uuid,
+        filePath: String,
+    ): String = fileSystemOf(instanceId).touchFile(filePath)
 }

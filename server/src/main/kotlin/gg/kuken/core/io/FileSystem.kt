@@ -23,6 +23,8 @@ interface FileSystem {
         path: String,
         newName: String,
     )
+
+    suspend fun touchFile(path: String): String
 }
 
 context(_: FileSystem)

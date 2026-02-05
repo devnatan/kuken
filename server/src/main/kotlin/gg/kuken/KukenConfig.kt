@@ -31,7 +31,11 @@ data class KukenConfig(
     data class HttpConfig(
         val host: String,
         val port: Int,
-    )
+        @SerialName("file-upload-limit")
+        val fileUploadLimit: Long,
+    ) {
+        val fileUploadLimitBytes get() = fileUploadLimit * 1024 * 1024
+    }
 
     @Serializable
     data class DBConfig(

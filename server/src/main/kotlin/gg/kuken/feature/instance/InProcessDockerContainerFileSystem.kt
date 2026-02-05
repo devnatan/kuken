@@ -114,4 +114,14 @@ class InProcessDockerContainerFileSystem(
 
         dockerClient.exec.start(execId)
     }
+
+    override suspend fun touchFile(path: String): String {
+        val execId =
+            dockerClient.exec.create(containerId) {
+                command = listOf("touch", path)
+            }
+
+        dockerClient.exec.start(execId)
+        return path
+    }
 }

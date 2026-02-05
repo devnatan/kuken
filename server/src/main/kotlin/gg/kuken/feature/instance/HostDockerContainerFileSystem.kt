@@ -6,6 +6,9 @@ import gg.kuken.core.io.FileSystem
 import gg.kuken.core.io.FileType
 import gg.kuken.core.io.requireSafePath
 import gg.kuken.core.io.safePath
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import me.devnatan.dockerkt.DockerClient
 import java.nio.file.Files
 import java.nio.file.Path
@@ -100,5 +103,17 @@ class HostDockerContainerFileSystem(
             hidden = path.isHidden(),
             permissions = permissions,
         )
+    }
+
+    override suspend fun touchFile(path: String): String {
+        val file = safePath(path).toFile()
+        if (!file.exists()) {
+            withContext(Dispatchers.IO) {
+                Files.createDirectories(file.parentFile.toPath())
+                file.createNewFile()
+            }
+        }
+
+        return file.absolutePath
     }
 }
