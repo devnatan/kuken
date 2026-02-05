@@ -6,9 +6,9 @@ LABEL MAINTAINER="Natan Vieira Do Nascimento <natanvnascimento@gmail.com>"
 WORKDIR /app
 COPY package*.json ./
 ENV NODE_OPTIONS "--max_old_space_size=4096"
-RUN yarn ci
+RUN npm ci
 COPY . .
-RUN yarn build
+RUN npm run build
 
 # Production stage
 FROM nginx:stable-alpine AS production-stage

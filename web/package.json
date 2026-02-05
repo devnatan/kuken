@@ -9,8 +9,7 @@
     "test:unit": "vitest",
     "build": "vite build",
     "lint": "eslint --ext .vue,.js,.ts --ignore-path .gitignore --fix src",
-    "format": "prettier . --write",
-    "ci": "yarn install --immutable --immutable-cache --check-cache"
+    "format": "prettier . --write"
   },
   "dependencies": {
     "@codemirror/lang-json": "^6.0.2",
