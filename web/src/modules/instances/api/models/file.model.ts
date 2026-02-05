@@ -9,4 +9,5 @@ export type VirtualFile = {
   isExecutable: boolean
   isReadable: boolean
   isWritable: boolean
+  mimeType: string
 }
