@@ -1,6 +1,6 @@
 package gg.kuken.http
 
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.Serializable
 
 class HttpException(
