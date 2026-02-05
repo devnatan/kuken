@@ -10,9 +10,6 @@
   </div>
 </template>
 <style lang="scss" scoped>
-// TODO remove it from here
-@import "@/assets/styles/abstracts/variables";
-
 .root {
   display: flex;
   align-items: center;
@@ -42,14 +39,6 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-
-  @media (max-width: map-get($breakpoints, "medium")) {
-    & {
-      width: 100%;
-      max-width: 100%;
-      padding: 24px;
-    }
-  }
 
   .logo {
     position: relative;
