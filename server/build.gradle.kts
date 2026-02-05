@@ -58,6 +58,10 @@ tasks {
             attributes["Implementation-Version"] = project.version
         }
     }
+
+    check {
+        dependsOn("installKotlinterPrePushHook")
+    }
 }
 
 ktor {
