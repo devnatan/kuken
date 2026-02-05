@@ -1,10 +1,6 @@
 name: "[Web] Build"
 
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - "web/**"
   pull_request:
     branches: [ "main" ]
     paths:
@@ -35,7 +31,7 @@ jobs:
     strategy:
       matrix:
         # https://nodejs.org/en/about/releases/
-        node-version: [20, 22, 24]
+        node-version: [24]
     steps:
       - name: Checkout Application Repository
         uses: actions/checkout@v4
