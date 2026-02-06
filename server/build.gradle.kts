@@ -1,4 +1,4 @@
-import io.ktor.plugin.*
+import io.ktor.plugin.OpenApiPreview
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 
 plugins {
@@ -83,7 +83,6 @@ graalvmNative {
             buildArgs.addAll(
                 "--install-exit-handlers",
                 "--add-modules=jdk.unsupported",
-                "--add-modules=jdk.unsupported",
                 "--initialize-at-build-time=kotlin",
                 "--initialize-at-run-time=kotlin.uuid.SecureRandomHolder",
                 "--initialize-at-run-time=org.bouncycastle",
@@ -93,6 +92,7 @@ graalvmNative {
                 "--initialize-at-run-time=io.netty.channel.unix.Errors",
                 "--initialize-at-run-time=io.netty.channel.unix.IovArray",
                 "--initialize-at-run-time=io.netty.channel.unix.Limits",
+                "--initialize-at-build-time=org.pkl.core.runtime.VmLanguageProvider",
                 "-J--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED",
                 "-H:+ReportUnsupportedElementsAtRuntime",
                 "-H:+ReportExceptionStackTraces",
