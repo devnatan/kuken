@@ -11,6 +11,8 @@ import gg.kuken.feature.blueprint.processor.BlueprintResolutionContext
 import gg.kuken.feature.blueprint.processor.CheckboxInput
 import gg.kuken.feature.blueprint.processor.DataSizeInput
 import gg.kuken.feature.blueprint.processor.InstanceBlueprintResourceReader
+import gg.kuken.feature.blueprint.processor.InstanceSettingsCommandExecutor
+import gg.kuken.feature.blueprint.processor.NoopBlueprintResourceReader
 import gg.kuken.feature.blueprint.processor.PasswordInput
 import gg.kuken.feature.blueprint.processor.PortInput
 import gg.kuken.feature.blueprint.processor.Resolvable
@@ -748,37 +750,32 @@ class DockerInstanceService(
         val instance = getInstance(instanceId)
 
         val blueprint = blueprintService.getBlueprint(instance.blueprintId)
+        val specText = blueprintSpecProvider.provide(blueprint.origin)
+        val processor = blueprintProcessor.process(specText, listOf(NoopBlueprintResourceReader))
+        val executor =
+            when (val value = processor.instanceSettings?.commandExecutor) {
+                null -> error("No command executor was specified")
+                !is InstanceSettingsCommandExecutor.SSH -> error("Only SSH command execution are supported for now")
+                else -> value
+            }
 
-        return -1
-//        return when (val commandExecutor = blueprint.spec.instanceSettings?.commandExecutor) {
-//            is InstanceSettingsCommandExecutor.SSH -> {
-//                val template = String.format(commandExecutor.template, commandToRun)
-//                logger.debug("Sending command to {}: {}", instance.id, template)
-//
-//                val execId =
-//                    dockerClient.exec.create(instance.containerId!!) {
-//                        tty = true
-//                        attachStdin = false
-//                        attachStdout = false
-//                        attachStderr = false
-//                        user = "1000"
-//                        command = template.split(" ")
-//                    }
-//
-//                dockerClient.exec.start(execId) {
-//                    detach = true
-//                }
-//
-//                dockerClient.exec.inspect(execId).exitCode
-//            }
-//
-//            is InstanceSettingsCommandExecutor.Rcon -> {
-//                error("RCON Command executor not supported")
-//            }
-//
-//            null -> {
-//                null
-//            }
-//        }
+        val template = executor.template.replace($$"${refs.instance.command}", commandToRun)
+        logger.debug("Sending command to {}: {}", instance.id, template)
+
+        val execId =
+            dockerClient.exec.create(instance.containerId!!) {
+                tty = true
+                attachStdin = false
+                attachStdout = false
+                attachStderr = false
+                user = "1000"
+                command = template.split(" ")
+            }
+
+        dockerClient.exec.start(execId) {
+            detach = true
+        }
+
+        return dockerClient.exec.inspect(execId).exitCode
     }
 }
