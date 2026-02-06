@@ -10,7 +10,7 @@ body:
        * [Official Documentation](https://kuken.io)
        * [Our Discord community](https://discord.gg/j8JahE8xuV)
        
-       Also have a look at the [README](https://github.com/devnatan/kuken) for more information on how to get support
+       Also have a look at the [README](https://github.com/kuken-project/kuken) for more information on how to get support
 - type: textarea
   id: cannot_help
   attributes:

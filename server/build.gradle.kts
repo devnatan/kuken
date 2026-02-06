@@ -131,7 +131,7 @@ dokka {
 
         sourceLink {
             localDirectory.set(file("src/main/kotlin"))
-            remoteUrl("https://github.com/devnatan/kuken/blob/main/server/src/main/kotlin")
+            remoteUrl("https://github.com/kuken-project/kuken/blob/main/server/src/main/kotlin")
             remoteLineSuffix.set("#L")
         }
     }

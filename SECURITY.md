@@ -21,7 +21,7 @@ and will make every effort to acknowledge your contributions.
 Instead, please report security vulnerabilities by emailing the maintainer directly or through GitHub's private vulnerability reporting feature:
 
 1. **GitHub Security Advisories** (Recommended)
-    - Go to the [Security tab](https://github.com/devnatan/kuken/security/advisories)
+    - Go to the [Security tab](https://github.com/kuken-project/kuken/security/advisories)
     - Click "Report a vulnerability"
     - Fill out the form with details about the vulnerability
 
@@ -134,6 +134,6 @@ our security posture. Significant contributions may be recognized in our documen
 
 ## Contact
 
-For general security questions or concerns that are not vulnerabilities, please open a discussion in the [GitHub Discussions](https://github.com/devnatan/kuken/discussions) section.
+For general security questions or concerns that are not vulnerabilities, please open a discussion in the [GitHub Discussions](https://github.com/kuken-project/kuken/discussions) section.
 
 Thank you for helping keep Küken and its users safe!

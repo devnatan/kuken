@@ -4,15 +4,15 @@
 
 Bash (Ubuntu, Debian, Fedora, etc.)
 ```shell
-curl -fsSL https://raw.githubusercontent.com/devnatan/kuken/main/server/installer/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/kuken-project/kuken/main/server/installer/installer.sh | bash
 ```
 ```shell
-wget -qO- https://raw.githubusercontent.com/devnatan/kuken/main/server/installer/installer.sh | bash
+wget -qO- https://raw.githubusercontent.com/kuken-project/kuken/main/server/installer/installer.sh | bash
 ```
 
 Manual installation
 ```shell
-curl -fsSL https://raw.githubusercontent.com/devnatan/kuken/main/server/installer/installer.sh
+curl -fsSL https://raw.githubusercontent.com/kuken-project/kuken/main/server/installer/installer.sh
 cat installer.sh
 chmod +x installer.sh
 ./installer.sh
@@ -21,18 +21,18 @@ chmod +x installer.sh
 System installation
 ```shell
 sudo INSTALL_DIR=/opt/kuken BIN_DIR=/usr/local/bin \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/devnatan/kuken/main/server/installer/installer.sh)"
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/kuken-project/kuken/main/server/installer/installer.sh)"
 ```
 
 ## macOS
 
 ```shell
-curl -fsSL https://raw.githubusercontent.com/devnatan/kuken/main/server/installer/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/kuken-project/kuken/main/server/installer/installer.sh | bash
 ```
 
 ## Windows
 
 ```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/devnatan/kuken/main/installer/installer.sh" -OutFile "install.sh"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/kuken-project/kuken/main/installer/installer.sh" -OutFile "install.sh"
 & bash install.sh
 ```

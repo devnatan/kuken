@@ -119,7 +119,7 @@ check_curl() {
 # --- Installation ---
 get_latest_release() {
 	local response
-	response=$(curl -s "https://api.github.com/repos/devnatan/kuken/releases/latest")
+	response=$(curl -s "https://api.github.com/repos/kuken-project/kuken/releases/latest")
 	local tag
 	tag=$(echo "$response" | grep '"tag_name":' | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
 
@@ -134,7 +134,7 @@ get_latest_release() {
 get_download_url() {
 	local version=$1
 	local response
-	response=$(curl -s "https://api.github.com/repos/devnatan/kuken/releases/tags/$version")
+	response=$(curl -s "https://api.github.com/repos/kuken-project/kuken/releases/tags/$version")
 	local download_url
 	download_url=$(echo "$response" | grep -o '"browser_download_url": "[^"]*\.jar"' | grep -o 'http[^"]*' | head -n1)
 
