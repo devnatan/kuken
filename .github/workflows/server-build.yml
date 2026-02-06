@@ -1,4 +1,4 @@
-name: "[Server] Build"
+name: "Server Build"
 
 on:
   push:
@@ -14,10 +14,45 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  jar:
+    name: JAR File
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '24'
+          distribution: 'graalvm-community'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          validate-wrappers: true
+
+      - name: Build Fat JAR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew buildFatJar
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-artifacts
+          path: server/build/libs/*.jar
+
+  native:
     name: Native - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
+    if: ${{ vars.NATIVE_BUILDS == 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -63,11 +98,6 @@ jobs:
           validate-wrappers: true
           gradle-home-cache-cleanup: true
 
-      - name: Build with Gradle
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew buildFatJar
-
       - name: Build Native Image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,13 +112,7 @@ jobs:
         shell: pwsh
         run: Copy-Item src/main/resources/kuken.conf build/native/nativeCompile/
 
-      - name: Upload JAR artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: jar-${{ matrix.os }}
-          path: server/build/libs/*.jar
-
-      - name: Upload native artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}

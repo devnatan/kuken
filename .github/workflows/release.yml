@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-jar:
-    name: JAR File
+    name: Build JAR File
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -40,8 +40,9 @@ jobs:
           path: server/build/libs/*.jar
 
   build-native:
-    name: Native - ${{ matrix.os }}
+    name: Build Native - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    if: ${{ vars.NATIVE_BUILDS == 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -116,7 +117,7 @@ jobs:
         with:
           path: artifacts
 
-      - name: Package Binaries
+      - name: Package Native Binaries
         run: |
           cd artifacts/kuken-server-linux-amd64
           tar -czf ../kuken-server-linux-amd64.tar.gz *
