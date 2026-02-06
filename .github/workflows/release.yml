@@ -7,14 +7,14 @@ on:
 
 jobs:
   build-jar:
-    name: Build JAR
+    name: JAR File
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: server
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup GraalVM
         uses: graalvm/setup-graalvm@v1
@@ -40,14 +40,17 @@ jobs:
           path: server/build/libs/*.jar
 
   build-native:
-    name: Build Native - ${{ matrix.os }}
+    name: Native - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             artifact-name: kuken-server-linux-amd64
+            archive-ext: tar.gz
+          - os: ubuntu-24.04-arm
+            artifact-name: kuken-server-linux-arm64
             archive-ext: tar.gz
           - os: windows-latest
             artifact-name: kuken-server-windows-amd64
@@ -57,7 +60,7 @@ jobs:
         working-directory: server
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup GraalVM
         uses: graalvm/setup-graalvm@v1
@@ -81,20 +84,13 @@ jobs:
           validate-wrappers: true
           gradle-home-cache-cleanup: true
 
-      - name: Build Native Image (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew nativeCompile
-
-      - name: Build Native Image (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Build Native Image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew nativeCompile
 
       - name: Copy config file (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os != 'windows-latest'
         run: cp src/main/resources/kuken.conf build/native/nativeCompile/
 
       - name: Copy config file (Windows)
@@ -124,6 +120,8 @@ jobs:
         run: |
           cd artifacts/kuken-server-linux-amd64
           tar -czf ../kuken-server-linux-amd64.tar.gz *
+          cd artifacts/kuken-server-linux-arm64
+          tar -czf ../kuken-server-linux-arm64.tar.gz *
           cd ../kuken-server-windows-amd64
           zip -r ../kuken-server-windows-amd64.zip *
 
@@ -137,6 +135,7 @@ jobs:
           files: |
             artifacts/jar-artifacts/*.jar
             artifacts/kuken-server-linux-amd64.tar.gz
+            artifacts/kuken-server-linux-arm64.tar.gz
             artifacts/kuken-server-windows-amd64.zip
           generate_release_notes: true
         env:
