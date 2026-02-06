@@ -31,6 +31,8 @@ data class CombinedBlueprintSpecProvider(
     }
 }
 
+private const val GITHUB_RAW_DOWNLOAD_HEADER = "x-raw-download"
+
 class RemoteBlueprintSpecProvider : BlueprintSpecProvider {
     private val httpClient: HttpClient = HttpClient()
     override val providerId: String get() = "remote"
@@ -46,6 +48,10 @@ class RemoteBlueprintSpecProvider : BlueprintSpecProvider {
             } catch (_: UnresolvedAddressException) {
                 throw BlueprintSpecNotFound()
             }
+
+        if (response.headers.contains(GITHUB_RAW_DOWNLOAD_HEADER)) {
+            return provide(BlueprintSpecSource.Remote(response.headers[GITHUB_RAW_DOWNLOAD_HEADER]!!, secure = true))
+        }
 
         return response.body()
     }
