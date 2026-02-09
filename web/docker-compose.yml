@@ -6,6 +6,7 @@ services:
       - "80:80"
     environment:
       - NODE_ENV=production
+      - VITE_KUKEN_API=${KUKEN_API}
     volumes:
       - ./logs:/var/log/nginx
     restart: unless-stopped
