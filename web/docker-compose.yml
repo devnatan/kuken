@@ -1,0 +1,11 @@
+services:
+  webui:
+    image: ghcr.io/kuken-project/webui:latest
+    container_name: kuken-webui
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./logs:/var/log/nginx
+    restart: unless-stopped
