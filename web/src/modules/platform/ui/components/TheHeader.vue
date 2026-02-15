@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-import { useAccount } from "@/modules/accounts/accounts.store.ts"
+import { useAccount, useAccountsStore } from "@/modules/accounts/accounts.store.ts"
+import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 
-const userName = useAccount().value.email.charAt(0).toUpperCase()
+const { isLoggedIn } = useAccountsStore()
+const userName = !isLoggedIn || useAccount().value.email.charAt(0).toUpperCase()
 </script>
 <template>
   <header>
@@ -11,10 +13,13 @@ const userName = useAccount().value.email.charAt(0).toUpperCase()
     <template v-if="$slots.default">
       <slot />
     </template>
-    <div class="profile">
+    <div v-if="isLoggedIn" class="profile">
       <div class="avatar">
         {{ userName }}
       </div>
+    </div>
+    <div class="create-button">
+      <VButton variant="primary">Create new server</VButton>
     </div>
   </header>
 </template>

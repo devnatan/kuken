@@ -1,6 +1,7 @@
 import { AuthRoutes } from "@/modules/auth/auth.routes"
 import { AuthenticatedOnlyGuard } from "@/modules/auth/guards/authenticated-only.guard"
 import { HomeRoutes } from "@/modules/home/home.routes"
+import { OrganizationRoutes } from "@/modules/organization/organization.routes.ts"
 import { UnitsRoutes } from "@/modules/units/units.routes.ts"
 import { createRouter, createWebHistory } from "vue-router"
 
@@ -19,7 +20,7 @@ const router = createRouter({
       path: "/",
       component: importPage("platform", "Root"),
       beforeEnter: [AuthenticatedOnlyGuard],
-      children: [...HomeRoutes, ...UnitsRoutes]
+      children: [...HomeRoutes, ...UnitsRoutes, ...OrganizationRoutes]
     },
     {
       path: "/setup",
@@ -33,6 +34,11 @@ const router = createRouter({
       path: "/access-denied",
       name: "access-denied",
       component: importPage("platform", "AccessDenied")
+    },
+    {
+      path: "/:pathMatch(.*)*",
+      name: "not-found",
+      component: importPage("platform", "NotFound")
     }
   ]
 })

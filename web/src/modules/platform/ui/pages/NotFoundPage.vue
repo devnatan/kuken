@@ -1,7 +1,11 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import RootLayout from "@/modules/platform/ui/layouts/RootLayout.vue"
+</script>
 
 <template>
-  <h1>Access Denied</h1>
+  <RootLayout>
+    <h1>Not Found</h1>
+  </RootLayout>
 </template>
 
 <style scoped lang="scss">
