@@ -4,6 +4,7 @@ import {
   resolveBlueprintSource
 } from "@/modules/blueprints/api/models/blueprint.model.ts"
 import blueprintsService from "@/modules/blueprints/api/services/blueprints.service.ts"
+import PageWrapper from "@/modules/platform/ui/components/PageWrapper.vue"
 import Resource from "@/modules/platform/ui/components/Resource.vue"
 import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 import VFieldSet from "@/modules/platform/ui/components/form/VFieldSet.vue"
@@ -14,7 +15,10 @@ import VCol from "@/modules/platform/ui/components/grid/VCol.vue"
 import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
 import VLayout from "@/modules/platform/ui/components/grid/VLayout.vue"
 import VTitle from "@/modules/platform/ui/components/typography/VTitle.vue"
+import { useI18n } from "petite-vue-i18n"
 import { reactive, ref } from "vue"
+
+const { t } = useI18n()
 
 let state = reactive({ readyToUseBlueprints: [] as Blueprint[] })
 const importUrl = ref("")
@@ -33,61 +37,63 @@ function performImport() {
 </script>
 
 <template>
-  <VContainer>
-    <VTitle>Game Directory</VTitle>
-    <VLayout gap="lg" direction="horizontal">
-      <VCol :size="4">
-        <Resource
-          :resource="blueprintsService.listReadyToUseBlueprints"
-          @loaded="(blueprints: Blueprint[]) => (state.readyToUseBlueprints = blueprints)"
-        >
-          <div class="header">
-            <h4>Your Library</h4>
-            <span class="blueprintsCount" v-text="state.readyToUseBlueprints.length" />
+  <PageWrapper>
+    <VContainer>
+      <VTitle>{{ t("blueprints.home.pageTitle") }}</VTitle>
+      <VLayout gap="lg" direction="horizontal">
+        <VCol :size="4">
+          <Resource
+            :resource="blueprintsService.listReadyToUseBlueprints"
+            @loaded="(blueprints: Blueprint[]) => (state.readyToUseBlueprints = blueprints)"
+          >
+            <div class="header">
+              <h4>{{ t("blueprints.home.library.title") }}</h4>
+              <span class="blueprintsCount" v-text="state.readyToUseBlueprints.length" />
+            </div>
+            <p style="color: var(--kt-content-neutral)">
+              {{ t("blueprints.home.library.subtitle") }}
+            </p>
+            <div class="blueprintList">
+              <router-link
+                v-for="blueprint in state.readyToUseBlueprints"
+                :key="blueprint.id"
+                :to="{ name: 'blueprints.details', params: { blueprintId: blueprint.id } }"
+                class="blueprint"
+              >
+                <div class="blueprintIcon">
+                  <img
+                    :alt="`${blueprint.id} icon`"
+                    :src="resolveBlueprintSource(blueprint.header.assets.icon)"
+                  />
+                </div>
+              </router-link>
+              <div class="importBlueprint">+</div>
+            </div>
+          </Resource>
+        </VCol>
+        <VCol :size="8">
+          <h4>Import from URL</h4>
+          <div v-if="importError" class="importError">
+            <pre><code>{{ importError }}</code></pre>
           </div>
-          <p style="color: var(--kt-content-neutral)">
-            Games that are available to create new servers immediately.
-          </p>
-          <div class="blueprintList">
-            <router-link
-              v-for="blueprint in state.readyToUseBlueprints"
-              :key="blueprint.id"
-              :to="{ name: 'blueprints.details', params: { blueprintId: blueprint.id } }"
-              class="blueprint"
-            >
-              <div class="blueprintIcon">
-                <img
-                  :alt="`${blueprint.id} icon`"
-                  :src="resolveBlueprintSource(blueprint.header.assets.icon)"
+          <VForm @submit.prevent>
+            <VFieldSet>
+              <VLabel>
+                URL
+                <VInput
+                  v-model="importUrl"
+                  placeholder="https://kuken.io"
+                  required="true"
+                  type="url"
                 />
-              </div>
-            </router-link>
-            <div class="importBlueprint">+</div>
-          </div>
-        </Resource>
-      </VCol>
-      <VCol :size="8">
-        <h4>Import from URL</h4>
-        <div v-if="importError" class="importError">
-          <pre><code>{{ importError }}</code></pre>
-        </div>
-        <VForm @submit.prevent>
-          <VFieldSet>
-            <VLabel>
-              URL
-              <VInput
-                v-model="importUrl"
-                placeholder="https://kuken.io"
-                required="true"
-                type="url"
-              />
-            </VLabel>
-          </VFieldSet>
-          <VButton variant="primary" @click="performImport">Import</VButton>
-        </VForm>
-      </VCol>
-    </VLayout>
-  </VContainer>
+              </VLabel>
+            </VFieldSet>
+            <VButton variant="primary" @click="performImport">Import</VButton>
+          </VForm>
+        </VCol>
+      </VLayout>
+    </VContainer>
+  </PageWrapper>
 </template>
 
 <style lang="scss" scoped>
