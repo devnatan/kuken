@@ -3,7 +3,6 @@ import accountService from "@/modules/accounts/api/services/accounts.service"
 import authService from "@/modules/auth/api/services/auth.service"
 import { AUTH_LOGIN_ROUTE } from "@/modules/auth/auth.routes"
 import logService from "@/modules/platform/api/services/log.service"
-import { isNull } from "@/utils"
 import type { NavigationGuard, NavigationGuardNext, RouteLocationNormalized } from "vue-router"
 
 export const AuthenticatedOnlyGuard: NavigationGuard = (
@@ -15,7 +14,7 @@ export const AuthenticatedOnlyGuard: NavigationGuard = (
 
   const isGoingToLogin = to.name === AUTH_LOGIN_ROUTE
   const localToken = authService.getLocalAccessToken()
-  if (isNull(localToken)) return isGoingToLogin ? next() : next({ name: AUTH_LOGIN_ROUTE })
+  if (localToken === null) return isGoingToLogin ? next() : next({ name: AUTH_LOGIN_ROUTE })
 
   authService
     .verify(localToken!)

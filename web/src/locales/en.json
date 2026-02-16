@@ -4,5 +4,13 @@
   "blueprints.home.docTitle": "Game Directory",
   "blueprints.home.pageTitle": "Game Directory",
   "blueprints.home.library.title": "Your Library",
-  "blueprints.home.library.subtitle": "Games that are available to create new servers immediately."
+  "blueprints.home.library.subtitle": "Games that are available to create new servers immediately.",
+  "org.home.docTitle": "Organization Settings",
+  "profile.docTitle": "Profile",
+  "profile.pageTitle": "Personal Settings",
+  "profile.organization.title": "Organization",
+  "profile.appearence.title": "Appearence",
+  "profile.appearence.theme.label.light": "Light",
+  "profile.appearence.theme.label.dark": "Dark",
+  "profile.appearence.theme.label.auto": "System Preference"
 }

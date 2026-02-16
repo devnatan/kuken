@@ -1,3 +1,4 @@
+import { AccountsRoutes } from "@/modules/accounts/accounts.routes.ts"
 import { AuthRoutes } from "@/modules/auth/auth.routes"
 import { AuthenticatedOnlyGuard } from "@/modules/auth/guards/authenticated-only.guard"
 import { HomeRoutes } from "@/modules/home/home.routes"
@@ -10,6 +11,10 @@ export function importPage(module: string, path: string): () => Promise<unknown>
   return comps[`./modules/${module}/ui/pages/${path}Page.vue`]!
 }
 
+export function importPageRelative(path: string): () => Promise<unknown> {
+  return () => import(`ui/pages/${path}Page.vue`)
+}
+
 export const SETUP_ROUTE = "setup"
 
 const router = createRouter({
@@ -20,7 +25,7 @@ const router = createRouter({
       path: "/",
       component: importPage("platform", "Root"),
       beforeEnter: [AuthenticatedOnlyGuard],
-      children: [...HomeRoutes, ...UnitsRoutes, ...OrganizationRoutes]
+      children: [...HomeRoutes, ...UnitsRoutes, ...OrganizationRoutes, ...AccountsRoutes]
     },
     {
       path: "/setup",

@@ -3,7 +3,14 @@ import { useAccount, useAccountsStore } from "@/modules/accounts/accounts.store.
 import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 
 const { isLoggedIn } = useAccountsStore()
-const userName = !isLoggedIn || useAccount().value.email.charAt(0).toUpperCase()
+let username: string
+let isAdmin: boolean
+
+if (isLoggedIn) {
+  const account = useAccount().value
+  username = account.email.charAt(0).toUpperCase()
+  isAdmin = account.permissions.includes("account.manage")
+}
 </script>
 <template>
   <header>
@@ -15,11 +22,12 @@ const userName = !isLoggedIn || useAccount().value.email.charAt(0).toUpperCase()
     </template>
     <div v-if="isLoggedIn" class="profile">
       <div class="avatar">
-        {{ userName }}
+        {{ username }}
       </div>
     </div>
     <div class="create-button">
       <VButton variant="primary">Create new server</VButton>
+      <VButton variant="primary" v-if="isAdmin" :to="{ name: 'organization' }">Org</VButton>
     </div>
   </header>
 </template>

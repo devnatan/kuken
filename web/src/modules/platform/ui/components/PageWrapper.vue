@@ -8,6 +8,7 @@
 
 <style scoped lang="scss">
 .page-wrapper {
-  padding: 4.8rem;
+  padding: 4rem;
+  position: relative;
 }
 </style>
