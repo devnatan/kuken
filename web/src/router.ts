@@ -11,10 +11,6 @@ export function importPage(module: string, path: string): () => Promise<unknown>
   return comps[`./modules/${module}/ui/pages/${path}Page.vue`]!
 }
 
-export function importPageRelative(path: string): () => Promise<unknown> {
-  return () => import(`ui/pages/${path}Page.vue`)
-}
-
 export const SETUP_ROUTE = "setup"
 
 const router = createRouter({
