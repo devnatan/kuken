@@ -7,10 +7,16 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.decodeFromJsonElement
 
 private const val FILE_PROTOCOL = "file://"
 private const val INTERNET_SECURE_PROTOCOL = "https://"
 private const val INTERNET_INSECURE_PROTOCOL = "http://"
+
+context(json: Json)
+fun BlueprintSpecSource.Companion.fromString(source: String) = json.decodeFromJsonElement<BlueprintSpecSource>(JsonPrimitive(source))
 
 @Serializable(with = BlueprintSpecSource.Serializer::class)
 sealed class BlueprintSpecSource {
@@ -28,7 +34,7 @@ sealed class BlueprintSpecSource {
     @SerialName("remote")
     data class Remote(
         private val _url: String,
-        private val secure: Boolean,
+        val secure: Boolean = _url.startsWith(INTERNET_SECURE_PROTOCOL),
     ) : BlueprintSpecSource() {
         override val uri: String get() = _url
     }

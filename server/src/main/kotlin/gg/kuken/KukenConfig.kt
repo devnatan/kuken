@@ -6,6 +6,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
+import kotlin.random.Random
+import kotlin.random.nextUInt
 
 @Serializable
 data class KukenConfig(
@@ -23,8 +25,10 @@ data class KukenConfig(
         @SerialName("data-directory")
         private val _dataDirectory: String,
     ) {
-        val dataDirectory get() = Path(_dataDirectory)
-        val instancesDataDirectory get() = dataDirectory.resolve("instances")
+        val dataDirectory = Path(_dataDirectory)
+
+        val instancesDataDirectory: Path = dataDirectory.resolve("instances")
+        val blueprintsDataDirectory: Path = dataDirectory.resolve("blueprints")
     }
 
     @Serializable
@@ -76,6 +80,6 @@ data class KukenConfig(
         }
 
         @JvmStatic
-        fun tempFile(suffix: String): Path = Files.createTempFile(TMP_FILE_PREFIX, suffix)
+        fun tempFile(suffix: String = Random.nextUInt().toString()): Path = Files.createTempFile(TMP_FILE_PREFIX, suffix)
     }
 }

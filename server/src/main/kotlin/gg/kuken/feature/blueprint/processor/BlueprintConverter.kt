@@ -81,14 +81,7 @@ class BlueprintConverter : AutoCloseable {
                 assets = assets,
             )
 
-        var resources =
-            module
-                .getPropertyOrNull("resources")
-                ?.takeUnless { it is PNull }
-                ?.let {
-                    val list = it as List<PObject>
-                    list.map { obj -> AppResource(name = "", source = obj.getProperty("source") as String) }
-                }.orEmpty()
+        var resources = extractResources(module)
 
         val hooks =
             module
@@ -159,6 +152,16 @@ class BlueprintConverter : AutoCloseable {
             hooks = hooks ?: AppHooks(),
         )
     }
+
+    public fun extractResources(module: PModule): List<AppResource> =
+        module
+            .getPropertyOrNull("resources")
+            ?.let { resources ->
+                @Suppress("UNCHECKED_CAST")
+                val list = resources as List<PObject>
+
+                list.map { obj -> AppResource(name = "", source = obj.getProperty("source") as String) }
+            }.orEmpty()
 
     private fun collectInputs(inputsObj: List<PObject>): List<UserInput> = inputsObj.map(::convertUserInput)
 
