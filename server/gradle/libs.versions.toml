@@ -14,7 +14,7 @@ docker-kotlin = "0.14.4"
 bcprov = "1.83"
 validator = "9.1.0.Final"
 hocon = "1.4.5"
-lettuce = "7.2.1.RELEASE"
+lettuce = "7.4.0.RELEASE"
 pkl = "0.30.2"
 tika = "3.2.3"
 
