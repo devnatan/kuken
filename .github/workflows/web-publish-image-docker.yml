@@ -5,6 +5,7 @@ on:
     tags: [ 'v*.*.*' ]
     paths:
       - "web/**"
+      - ".github/workflows/web-**.yml"
   workflow_dispatch:
 
 defaults:
