@@ -21,8 +21,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: 'npm'
-          cache-dependency-path: web/package-lock.json
 
       - name: Lint
         run: cd web && pnpm lint
@@ -40,8 +38,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: web/package-lock.json
 
       - name: Build
         run: cd web && npm ci && pnpm build
