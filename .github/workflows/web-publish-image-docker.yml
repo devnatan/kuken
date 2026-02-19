@@ -2,7 +2,6 @@ name: "Publish Web Docker Image"
 
 on:
   push:
-    branches: [ "main" ]
     tags: [ 'v*.*.*' ]
     paths:
       - "web/**"
