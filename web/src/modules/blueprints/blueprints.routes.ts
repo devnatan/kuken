@@ -1,4 +1,3 @@
-import BlueprintsPage from "@/modules/blueprints/ui/pages/BlueprintsPage.vue"
 import { importPage } from "@/router"
 import type { RouteRecordRaw } from "vue-router"
 
@@ -9,7 +8,7 @@ export const BlueprintsRoutes: Array<RouteRecordRaw> = [
   {
     path: "blueprints",
     name: BLUEPRINTS_ROUTE,
-    component: BlueprintsPage,
+    component: importPage("blueprints", "Blueprints"),
     meta: {
       title: "Game Directory"
     },
