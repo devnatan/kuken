@@ -18,8 +18,8 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0(highlight.js@11.11.1)(vue@3.5.27(typescript@5.9.3))
       '@imengyu/vue3-context-menu':
-        specifier: ^1.5.3
-        version: 1.5.3
+        specifier: ^1.5.4
+        version: 1.5.4
       '@unhead/vue':
         specifier: ^2.1.4
         version: 2.1.4(vue@3.5.27(typescript@5.9.3))
@@ -382,8 +382,8 @@ packages:
   '@imengyu/vue-scroll-rect@0.1.8':
     resolution: {integrity: sha512-Mg7rgHlsGPO0tcMFjp1kB2BZ3oRrRtFN8MoE52jTgQnlc+Y0N6ttFnbIxOh2fc9j82uhdQ8zgZcXlFHUXeGnCA==}
 
-  '@imengyu/vue3-context-menu@1.5.3':
-    resolution: {integrity: sha512-PysXO1/3r+1fetumAkpZcXG5FyKAS/Bs6TtSvJqcAvk+gSvnN4C6x9KfgN8cBhyCDT8XLHMOzw+gkevY2Mx7zA==}
+  '@imengyu/vue3-context-menu@1.5.4':
+    resolution: {integrity: sha512-/a6Quyn3V320/Mi6UoH+6wSTBYrln70RovT3iyfoXQQpIHpC7ZPWObzS0BXQTRlWtyJB92XmGDT703UxSO8Tvg==}
 
   '@intlify/core-base@12.0.0-alpha.3':
     resolution: {integrity: sha512-LEvBHBUbiOOtIBkp4IIQENVC5Fg2YHsvdXN1+WRIxQ8hzHbHSBiqZ2l68B/yg8sE1a4S7dqhkaAedunShWPH+Q==}
@@ -2144,7 +2144,7 @@ snapshots:
 
   '@imengyu/vue-scroll-rect@0.1.8': {}
 
-  '@imengyu/vue3-context-menu@1.5.3':
+  '@imengyu/vue3-context-menu@1.5.4':
     dependencies:
       '@imengyu/vue-scroll-rect': 0.1.8
 
