@@ -6,7 +6,7 @@ import Resource from "@/modules/platform/ui/components/Resource.vue"
 import { isNull } from "@/utils"
 import { reactive, unref } from "vue"
 
-const selected = defineModel()
+const selected = defineModel<string | null>()
 
 const resource = () => blueprintsService.listReadyToUseBlueprints()
 const { blueprintList } = reactive<{ blueprintList: Blueprint[] }>({ blueprintList: [] })
