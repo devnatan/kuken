@@ -227,8 +227,8 @@ class BlueprintService(
             val filename =
                 httpResponse.headers[HttpHeaders.ContentDisposition]
                     ?.substringAfter("filename=")
-                    .orEmpty()
-                    .removeSurrounding("\"")
+                    ?.removeSurrounding("\"")
+                    ?: url.substringAfterLast("/")
 
             val responseBody: ByteArray = httpResponse.body()
             outputFile.writeBytes(responseBody)
