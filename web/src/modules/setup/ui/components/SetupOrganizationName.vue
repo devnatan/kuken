@@ -5,7 +5,11 @@ import VForm from "@/modules/platform/ui/components/form/VForm.vue"
 import VInput from "@/modules/platform/ui/components/form/VInput.vue"
 import VLabel from "@/modules/platform/ui/components/form/VLabel.vue"
 
-const organizationName = defineModel("organizationName", { required: true, default: "" })
+const organizationName = defineModel("organizationName", {
+  type: String,
+  required: true,
+  default: ""
+})
 const emit = defineEmits(["done"])
 </script>
 

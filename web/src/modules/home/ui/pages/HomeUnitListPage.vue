@@ -60,7 +60,7 @@ import { useI18n } from "petite-vue-i18n"
 import { reactive } from "vue"
 import { ProgressiveImage } from "vue-progressive-image"
 
-let state = reactive({ units: [] as Unit[] })
+const state = reactive({ units: [] as Unit[] })
 const { t } = useI18n()
 </script>
 

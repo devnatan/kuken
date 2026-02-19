@@ -5,15 +5,15 @@ import { useInstanceStore } from "@/modules/instances/instances.store.ts"
 import InstanceFileList from "@/modules/instances/ui/components/files/browser/list/InstanceFileList.vue"
 import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 import VLayout from "@/modules/platform/ui/components/grid/VLayout.vue"
-import { useDropZone, useFileDialog } from "@vueuse/core"
-import { nextTick, ref, useTemplateRef } from "vue"
+import { useFileDialog } from "@vueuse/core"
+import { nextTick, ref } from "vue"
 
 const instanceFilesStore = useInstanceFilesStore()
 const filePath = instanceFilesStore.getCurrentFilePath
 const instance = useInstanceStore().getInstance
 
-const dropZoneRef = useTemplateRef("dropZone")
-const { isOverDropZone } = useDropZone(dropZoneRef, { onDrop: uploadFiles })
+// const dropZoneRef = useTemplateRef("dropZone")
+// const { isOverDropZone } = useDropZone(dropZoneRef, { onDrop: uploadFiles })
 const fileDialog = useFileDialog({})
 const refreshing = ref(false)
 

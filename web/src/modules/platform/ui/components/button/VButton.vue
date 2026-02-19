@@ -31,7 +31,7 @@ import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
 
 type Props = {
-  variant: "default" | "primary"
+  variant?: "default" | "primary"
   disabled?: boolean
   outlined?: true
   flat?: true

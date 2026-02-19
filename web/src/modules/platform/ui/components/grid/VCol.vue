@@ -4,5 +4,5 @@
   </div>
 </template>
 <script setup lang="ts">
-defineProps<{ size: Number }>()
+defineProps<{ size: number }>()
 </script>

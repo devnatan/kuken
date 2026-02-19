@@ -63,7 +63,7 @@ export function useConsoleWebSocket(options: UseConsoleWebSocketOptions) {
     })
   }
 
-  function unsubscribe(reason: String) {
+  function unsubscribe(reason: string) {
     console.log("useConsoleWebSocket: unsubscribe()", reason)
     unsubscribeLogsStart?.()
     unsubscribeLogsFrames?.()

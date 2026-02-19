@@ -28,19 +28,9 @@ const MAX_FRAMES = 200
 // COMPOSABLES
 // =================================================
 
-const {
-  frames,
-  oldestSeqId,
-  newestSeqId,
-  addFrame,
-  preprendFrames,
-  appendFrames,
-  setFrames,
-  trimToRecent,
-  findByPersistentId
-} = useConsoleFrames({ maxFrames: MAX_FRAMES })
+const { frames, addFrame, setFrames } = useConsoleFrames({ maxFrames: MAX_FRAMES })
 
-const { isRealtime, loadLogs, goToPrevious, goToNext, goToRealtime, goToDate } = useConsoleLoader({
+const { isRealtime } = useConsoleLoader({
   instanceId: props.instanceId,
   batchSize: LOAD_BATCH_SIZE
 })

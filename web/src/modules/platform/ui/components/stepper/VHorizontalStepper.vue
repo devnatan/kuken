@@ -22,7 +22,7 @@ const props = defineProps<{ currentStep: number }>()
 const slots = useSlots()
 
 // State
-const children: any[] = slots.default!()
+const children: unknown[] = slots.default!()
 const maxSteps = ref(children.length)
 const activeStep = ref(children[props.currentStep])
 const steps = reactive(children)

@@ -7,7 +7,7 @@ import VSelect from "@/modules/platform/ui/components/form/VSelect.vue"
 import { onMounted } from "vue"
 
 const props = defineProps<BlueprintBuildInputSelect>()
-const model = defineModel()
+const model = defineModel({ type: String })
 
 onMounted(() => {
   model.value = props.items[0]

@@ -23,7 +23,7 @@ const refTranslations = {
 }
 
 const htmlContent = computed(() => {
-  let result = []
+  const result = []
   for (const part of props.property.parts) {
     if (part.type === "literal") {
       if (part.value.trim().length > 0) {
@@ -104,7 +104,7 @@ const updateContent = (event: InputEvent) => {
   <div class="wrapper" contenteditable="true" @input="updateContent">
     <pre
       class="code"
-    ><BlueprintPropertyInterpolatedElement v-for="el in htmlContent" :html="el"/></pre>
+    ><BlueprintPropertyInterpolatedElement v-for="(el, idx) in htmlContent" :key="`el-${idx}`" :html="el"/></pre>
   </div>
 </template>
 

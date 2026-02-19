@@ -25,7 +25,7 @@ const startup = ref<InterpolatedBlueprintProperty>()
 
 const model = defineModel<{ [name: string]: string }>({ default: {} })
 
-function updateInput(name: string, value: any): void {
+function updateInput(name: string, value: unknown & {}): void {
   if (isUndefined(value)) return
   model.value[name] = value.toString()
 }

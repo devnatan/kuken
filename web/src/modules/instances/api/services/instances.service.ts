@@ -7,13 +7,13 @@ import websocketService from "@/modules/platform/api/services/websocket.service.
 import type { AxiosResponse } from "axios"
 
 export default {
-  async getInstance(instanceId: String): Promise<Instance> {
+  async getInstance(instanceId: string): Promise<Instance> {
     return httpService
       .get(`instances/${instanceId}`)
       .then((res: AxiosResponse) => res.data as Instance)
   },
 
-  async runInstanceCommand(instanceId: String, command: string): Promise<{ exitCode: number }> {
+  async runInstanceCommand(instanceId: string, command: string): Promise<{ exitCode: number }> {
     return httpService
       .post(`instances/${instanceId}/command`, { command })
       .then((res: AxiosResponse) => res.data)
@@ -33,7 +33,7 @@ export default {
     options: { afterSeqId?: number; beforeSeqId?: number; around?: number; batchSize: number }
   ): Promise<{ frames: Frame[]; hasMore: boolean }> {
     let unsubscribe: (() => void) | null = null
-    return new Promise(async (resolve, _) => {
+    return new Promise(async (resolve) => {
       unsubscribe = websocketService.listen(
         WebSocketOpCodes.InstanceLogsPacket,
         (payload: { frames: Frame[]; hasMore: boolean }) => {

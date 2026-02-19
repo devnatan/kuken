@@ -21,7 +21,7 @@ class HttpService {
     this.axios.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error: AxiosError) => {
-        const data: any = error.response?.data
+        const data = error.response?.data as { code?: string }
         if (isUndefined(data?.code)) {
           logService.error("Unhandled HTTP error", error)
           throw error

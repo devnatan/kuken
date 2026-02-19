@@ -4,12 +4,11 @@ import unitsService from "@/modules/units/api/services/units.service.ts"
 import { useUnitStore } from "@/modules/units/units.store.ts"
 import { isNull } from "@/utils"
 import { useHead } from "@unhead/vue"
-import { computed, onUnmounted } from "vue"
+import { onUnmounted } from "vue"
 
 defineProps<{ unitId: string }>()
 
 const unitStore = useUnitStore()
-const unit = computed(() => unitStore.unit)
 
 useHead({
   title: () => (!isNull(unitStore.unit) ? unitStore.getUnit.name : null)

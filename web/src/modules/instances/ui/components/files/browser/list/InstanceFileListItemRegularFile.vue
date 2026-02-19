@@ -50,7 +50,7 @@ onClickOutside(nameInput, () => {
   onFinishRenameFile()
 })
 
-const contextMenu = ref<{ onContextMenu: Function } | null>(null)
+const contextMenu = ref<{ onContextMenu: () => void } | null>(null)
 </script>
 
 <template>

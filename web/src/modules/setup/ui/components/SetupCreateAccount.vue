@@ -5,8 +5,8 @@ import VForm from "@/modules/platform/ui/components/form/VForm.vue"
 import VInput from "@/modules/platform/ui/components/form/VInput.vue"
 import VLabel from "@/modules/platform/ui/components/form/VLabel.vue"
 
-const email = defineModel("email", { required: true, default: "" })
-const password = defineModel("password", { required: true, default: "" })
+const email = defineModel("email", { type: String, required: true, default: "" })
+const password = defineModel("password", { type: String, required: true, default: "" })
 const emit = defineEmits(["done"])
 </script>
 

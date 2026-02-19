@@ -13,7 +13,7 @@ export type UseConsoleLoaderOptions = {
 }
 
 export function useConsoleLoader(options: UseConsoleLoaderOptions) {
-  const { instanceId, batchSize } = options
+  const { instanceId } = options
 
   const windowHours = ref(6)
   const windowStart = ref<number | null>(null) // null = tempo real

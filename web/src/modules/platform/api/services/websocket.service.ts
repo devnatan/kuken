@@ -7,7 +7,7 @@ import type { Logger } from "@/modules/platform/api/services/log.service"
 import logService from "@/modules/platform/api/services/log.service"
 import { isUndefined } from "@/utils"
 
-type WebSocketListener = (arg0: any) => void
+type WebSocketListener = (arg0: never) => void
 
 class WebSocketService {
   private readonly logger: Logger = logService.create("Gateway")
@@ -43,11 +43,11 @@ class WebSocketService {
       const listenersForOp = this.listeners.get(data.o)
       if (!listenersForOp) return
 
-      for (const listener of listenersForOp) listener(data.d)
+      for (const listener of listenersForOp) listener(data.d as never)
     }
   }
 
-  async send(code: WebSocketOp, payload: any): Promise<void> {
+  async send(code: WebSocketOp, payload: unknown): Promise<void> {
     if (isUndefined(this.ws) || this.ws.readyState !== WebSocket.OPEN) {
       this.logger.debug("Waiting connection be established to send message...")
       await this.awaitConnect()
@@ -78,7 +78,8 @@ class WebSocketService {
     this.logger.debug(`Added listener for op ${op}`)
 
     return () => {
-      this.listeners.get(op)?.splice(this.listeners.get(op)?.indexOf(listener)!, 1)
+      const idx = this.listeners.get(op)!.indexOf(listener)
+      this.listeners.get(op)?.splice(idx, 1)
       this.logger.debug(`Removed listener for op ${op}`)
     }
   }

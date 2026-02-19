@@ -6,7 +6,7 @@ import VLabel from "@/modules/platform/ui/components/form/VLabel.vue"
 import { onMounted } from "vue"
 
 const props = defineProps<BlueprintBuildInputPortNumber>()
-const model = defineModel()
+const model = defineModel({ type: Number })
 
 onMounted(() => {
   model.value = props.default

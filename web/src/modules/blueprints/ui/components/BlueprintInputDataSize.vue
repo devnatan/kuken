@@ -5,7 +5,7 @@ import VInput from "@/modules/platform/ui/components/form/VInput.vue"
 import VLabel from "@/modules/platform/ui/components/form/VLabel.vue"
 
 const props = defineProps<Partial<BlueprintBuildInput>>()
-const model = defineModel()
+const model = defineModel({ type: String })
 </script>
 
 <template>

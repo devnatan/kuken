@@ -24,6 +24,7 @@ export const AuthenticatedOnlyGuard: NavigationGuard = (
     })
     .catch((error: Error) => {
       logService.debug("Unable to verify local token", error)
-      isGoingToLogin ? next() : next({ name: AUTH_LOGIN_ROUTE })
+      if (isGoingToLogin) next()
+      else next({ name: AUTH_LOGIN_ROUTE })
     })
 }

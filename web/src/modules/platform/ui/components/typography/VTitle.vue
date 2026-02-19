@@ -4,8 +4,8 @@
   </h2>
 </template>
 <script lang="ts" setup>
-const { centered } = defineProps({
-  centered: { required: false }
+defineProps({
+  centered: { type: Boolean, required: false, default: false }
 })
 </script>
 <style lang="scss" scoped>

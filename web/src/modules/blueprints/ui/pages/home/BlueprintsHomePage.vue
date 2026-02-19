@@ -20,7 +20,7 @@ import { reactive, ref } from "vue"
 
 const { t } = useI18n()
 
-let state = reactive({ readyToUseBlueprints: [] as Blueprint[] })
+const state = reactive({ readyToUseBlueprints: [] as Blueprint[] })
 const importUrl = ref("")
 const importError = ref("")
 

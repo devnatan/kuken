@@ -23,7 +23,7 @@ const props = defineProps<{
   onSurface?: boolean
   autoFocus?: boolean
 }>()
-const model = defineModel()
+const model = defineModel<unknown>()
 
 function onInputChange(event: Event): void {
   emits("update:modelValue", (event.target as HTMLInputElement).value)

@@ -111,6 +111,7 @@ init()
               {{ step.title }}
             </template>
             <template #description>
+              <!-- eslint-disable-next-line vue/no-v-html -->
               <span v-html="step.description" />
             </template>
           </SetupStep>

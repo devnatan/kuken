@@ -80,11 +80,9 @@ import VButton from "@/modules/platform/ui/components/button/VButton.vue"
 import VCard from "@/modules/platform/ui/components/card/VCard.vue"
 import VCol from "@/modules/platform/ui/components/grid/VCol.vue"
 import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
-import hljsVuePlugin from "@highlightjs/vue-plugin"
 import { useHead } from "@unhead/vue"
 import { ref } from "vue"
 
-const higlight = hljsVuePlugin.component
 const props = defineProps<{ blueprintId: string }>()
 
 const resource = () => blueprintsService.getBlueprint(props.blueprintId)
