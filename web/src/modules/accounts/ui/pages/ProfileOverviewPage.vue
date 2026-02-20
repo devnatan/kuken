@@ -29,6 +29,16 @@ useHead({
     <VContainer>
       <VTitle>{{ t("profile.pageTitle") }}</VTitle>
       <VSection>
+        <template #title>Account</template>
+        <p>
+          <code>{{ account.id }}</code>
+          <br />
+          {{ account.email }}
+          <br />
+          {{ account.permissions }}
+        </p>
+      </VSection>
+      <VSection>
         <template #title>{{ t("profile.appearence.title") }}</template>
         <VLayout direction="horizontal" gap="sm">
           <VButton variant="primary" :disabled="colorMode === 'light'" @click="colorMode = 'light'">
@@ -41,9 +51,6 @@ useHead({
             {{ t("profile.appearence.theme.label.auto") }}
           </VButton>
         </VLayout>
-      </VSection>
-      <VSection>
-        <template #title>{{ t("profile.organization.title") }}</template>
       </VSection>
     </VContainer>
   </PageWrapper>
