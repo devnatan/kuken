@@ -1,29 +1,31 @@
 # Build stage
-FROM node:lts AS build-stage
-ENV NPM_CONFIG_LOGLEVEL info
+FROM node:24-alpine3.22 AS build-stage
+ENV NPM_CONFIG_LOGLEVEL=info
 LABEL MAINTAINER="Natan Vieira Do Nascimento <natanvnascimento@gmail.com>"
 
 WORKDIR /app
 COPY package*.json ./
 COPY pnpm-lock.yaml ./
-ENV NODE_OPTIONS "--max_old_space_size=4096"
+COPY vite.config.ts ./
+
+ENV NODE_OPTIONS="--max_old_space_size=4096"
 RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
-COPY . .
 RUN pnpm build
+COPY . .
 
 # Production stage
-FROM nginx:stable-alpine AS production-stage
+FROM nginx:1.29.5-alpine AS production-stage
 RUN mkdir /app
 COPY --from=build-stage /app/dist /app
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY entrypoint.sh entrypoint.sh
+COPY docker/entrypoint.sh entrypoint.sh
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
 # Git info. Must be set in --build-arg (see bin/build)
 ARG GIT_BRANCH
 ARG GIT_COMMIT
-ENV VITE_GIT_COMMIT ${GIT_COMMIT}
-ENV VITE_GIT_BRANCH ${GIT_BRANCH}
+ENV VITE_GIT_COMMIT=${GIT_COMMIT}
+ENV VITE_GIT_BRANCH=${GIT_BRANCH}
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://127.0.0.1/health || exit 1

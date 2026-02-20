@@ -40,6 +40,8 @@ export default defineConfig({
           if (id.includes("/node_modules/")) {
             return `vendor`
           }
+
+          return null
         }
       }
     }
