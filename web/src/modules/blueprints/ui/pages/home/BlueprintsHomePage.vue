@@ -14,6 +14,7 @@ import VLabel from "@/modules/platform/ui/components/form/VLabel.vue"
 import VCol from "@/modules/platform/ui/components/grid/VCol.vue"
 import VContainer from "@/modules/platform/ui/components/grid/VContainer.vue"
 import VLayout from "@/modules/platform/ui/components/grid/VLayout.vue"
+import VSection from "@/modules/platform/ui/components/typography/VSection.vue"
 import VTitle from "@/modules/platform/ui/components/typography/VTitle.vue"
 import { useI18n } from "petite-vue-i18n"
 import { reactive, ref } from "vue"
@@ -42,34 +43,38 @@ function performImport() {
       <VTitle>{{ t("blueprints.home.pageTitle") }}</VTitle>
       <VLayout gap="lg" direction="horizontal">
         <VCol :size="4">
-          <Resource
-            :resource="blueprintsService.listReadyToUseBlueprints"
-            @loaded="(blueprints: Blueprint[]) => (state.readyToUseBlueprints = blueprints)"
-          >
-            <div class="header">
-              <h4>{{ t("blueprints.home.library.title") }}</h4>
-              <span class="blueprintsCount" v-text="state.readyToUseBlueprints.length" />
-            </div>
-            <p style="color: var(--kt-content-neutral)">
+          <VSection>
+            <template #title>
+              <div class="header">
+                <h4>{{ t("blueprints.home.library.title") }}</h4>
+                <span class="blueprintsCount" v-text="state.readyToUseBlueprints.length" />
+              </div>
+            </template>
+            <template #description>
               {{ t("blueprints.home.library.subtitle") }}
-            </p>
-            <div class="blueprintList">
-              <router-link
-                v-for="blueprint in state.readyToUseBlueprints"
-                :key="blueprint.id"
-                :to="{ name: 'blueprints.details', params: { blueprintId: blueprint.id } }"
-                class="blueprint"
-              >
-                <div class="blueprintIcon">
-                  <img
-                    :alt="`${blueprint.id} icon`"
-                    :src="resolveBlueprintSource(blueprint.header.assets.icon)"
-                  />
-                </div>
-              </router-link>
-              <div class="importBlueprint">+</div>
-            </div>
-          </Resource>
+            </template>
+            <Resource
+              :resource="blueprintsService.listReadyToUseBlueprints"
+              @loaded="(blueprints: Blueprint[]) => (state.readyToUseBlueprints = blueprints)"
+            >
+              <div class="blueprintList">
+                <router-link
+                  v-for="blueprint in state.readyToUseBlueprints"
+                  :key="blueprint.id"
+                  :to="{ name: 'blueprints.details', params: { blueprintId: blueprint.id } }"
+                  class="blueprint"
+                >
+                  <div class="blueprintIcon">
+                    <img
+                      :alt="`${blueprint.id} icon`"
+                      :src="resolveBlueprintSource(blueprint.header.assets.icon)"
+                    />
+                  </div>
+                </router-link>
+                <div class="importBlueprint">+</div>
+              </div>
+            </Resource>
+          </VSection>
         </VCol>
         <VCol :size="8">
           <h4>Import from URL</h4>
